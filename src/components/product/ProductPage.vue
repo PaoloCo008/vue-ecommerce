@@ -11,7 +11,7 @@ const value = ref(1)
     <div class="product-grid">
       <!-- Carousel -->
       <div class="carousel">
-        <h1>SOME BIG ASS CAROUSEL</h1>
+        <h1>CAROUSEL</h1>
       </div>
 
       <!-- Body -->
