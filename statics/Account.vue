@@ -1,65 +1,10 @@
 <template>
   <div class="account-management">
     <el-container>
-      <!-- Sidebar -->
-      <el-aside width="240px" class="sidebar">
-        <div class="user-greeting">
-          <span>Hello, ...</span>
-          <el-tag type="success" size="small" class="verified-tag">
-            <el-icon><Check /></el-icon>
-            Verified Account
-          </el-tag>
-        </div>
-        
-        <el-menu
-          default-active="manage-account"
-          class="sidebar-menu"
-          @select="handleMenuSelect"
-        >
-          <el-menu-item index="manage-account" class="menu-title">
-            <span>Manage My Account</span>
-          </el-menu-item>
-          <el-menu-item index="my-profile" class="sub-menu">
-            <span>My Profile</span>
-          </el-menu-item>
-          <el-menu-item index="address-book" class="sub-menu">
-            <span>Address Book</span>
-          </el-menu-item>
-          <el-menu-item index="payment-options" class="sub-menu">
-            <span>My Payment Options</span>
-          </el-menu-item>
-          <el-menu-item index="lazada-wallet" class="sub-menu">
-            <span>Lazada Wallet</span>
-          </el-menu-item>
-          
-          <el-menu-item index="my-orders" class="menu-title">
-            <span>My Orders</span>
-          </el-menu-item>
-          <el-menu-item index="my-returns" class="sub-menu">
-            <span>My Returns</span>
-          </el-menu-item>
-          <el-menu-item index="my-cancellations" class="sub-menu">
-            <span>My Cancellations</span>
-          </el-menu-item>
-          
-          <el-menu-item index="my-reviews" class="menu-title">
-            <span>My Reviews</span>
-          </el-menu-item>
-          
-          <el-menu-item index="wishlist" class="menu-title">
-            <span>My Wishlist & Followed Stores</span>
-          </el-menu-item>
-          
-          <el-menu-item index="sell-on-lazada" class="menu-title">
-            <span>Sell On Lazada</span>
-          </el-menu-item>
-        </el-menu>
-      </el-aside>
-
       <!-- Main Content -->
       <el-main class="main-content">
         <h1 class="page-title">Manage My Account</h1>
-        
+
         <el-row :gutter="20">
           <!-- Personal Profile Card -->
           <el-col :span="12">
@@ -73,14 +18,6 @@
               <div class="profile-content">
                 <p class="user-name">Isabella Vega Aguinaldo</p>
                 <p class="user-email">be*********@yahoo.com</p>
-                <div class="preferences">
-                  <el-checkbox v-model="marketingSMS" disabled>
-                    Receive marketing SMS
-                  </el-checkbox>
-                  <el-checkbox v-model="marketingEmails" disabled>
-                    Receive marketing emails
-                  </el-checkbox>
-                </div>
               </div>
             </el-card>
           </el-col>
@@ -114,7 +51,7 @@
               <span>Recent Orders</span>
             </div>
           </template>
-          
+
           <el-table :data="recentOrders" style="width: 100%">
             <el-table-column prop="orderNumber" label="Order #" width="200" />
             <el-table-column prop="placedOn" label="Placed On" width="150" />
@@ -122,10 +59,10 @@
               <template #default="scope">
                 <div class="order-items">
                   <div class="item-images">
-                    <img 
-                      v-for="(item, index) in scope.row.items" 
+                    <img
+                      v-for="(item, index) in scope.row.items"
                       :key="index"
-                      :src="item.image" 
+                      :src="item.image"
                       :alt="item.name"
                       class="item-image"
                     />
@@ -156,12 +93,12 @@ import { Check } from '@element-plus/icons-vue'
 export default {
   name: 'AccountManagement',
   components: {
-    Check
+    Check,
   },
   setup() {
     const marketingSMS = ref(false)
     const marketingEmails = ref(false)
-    
+
     const recentOrders = ref([
       {
         orderNumber: '988874320377448',
@@ -170,30 +107,28 @@ export default {
           { image: '/api/placeholder/40/40', name: 'Product 1' },
           { image: '/api/placeholder/40/40', name: 'Product 2' },
           { image: '/api/placeholder/40/40', name: 'Product 3' },
-          { image: '/api/placeholder/40/40', name: 'Product 4' }
+          { image: '/api/placeholder/40/40', name: 'Product 4' },
         ],
         additionalItems: 2,
-        total: '₱199.50'
+        total: '₱199.50',
       },
       {
         orderNumber: '942742676177448',
         placedOn: '23/12/2024',
         items: [
           { image: '/api/placeholder/40/40', name: 'Product 1' },
-          { image: '/api/placeholder/40/40', name: 'Product 2' }
+          { image: '/api/placeholder/40/40', name: 'Product 2' },
         ],
         additionalItems: null,
-        total: '₱171.00'
+        total: '₱171.00',
       },
       {
         orderNumber: '933469465677448',
         placedOn: '07/12/2024',
-        items: [
-          { image: '/api/placeholder/40/40', name: 'Product 1' }
-        ],
+        items: [{ image: '/api/placeholder/40/40', name: 'Product 1' }],
         additionalItems: null,
-        total: '₱1,054.00'
-      }
+        total: '₱1,054.00',
+      },
     ])
 
     const handleMenuSelect = (index) => {
@@ -219,9 +154,9 @@ export default {
       handleMenuSelect,
       editProfile,
       editAddress,
-      manageOrder
+      manageOrder,
     }
-  }
+  },
 }
 </script>
 
@@ -274,7 +209,9 @@ export default {
   margin-bottom: 30px;
 }
 
-.profile-card, .address-card, .orders-card {
+.profile-card,
+.address-card,
+.orders-card {
   margin-bottom: 20px;
 }
 
@@ -324,7 +261,8 @@ export default {
   margin: 0 0 4px 0;
 }
 
-.address-line, .phone {
+.address-line,
+.phone {
   color: #666;
   margin: 0 0 4px 0;
 }

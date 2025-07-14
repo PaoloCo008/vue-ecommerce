@@ -125,7 +125,7 @@ const newAddressForm = reactive<NewAddressForm>({
 
 .form-button {
   --el-button-hover-text-color: inherit;
-
+  --el-button-hover-border-color: black;
   width: 175px;
   padding: 1.25rem 0;
   border: 0;

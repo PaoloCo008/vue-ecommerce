@@ -3,8 +3,8 @@ import NewAddressForm from './components/forms/NewAddressForm.vue'
 </script>
 
 <template>
-  <!-- <RouterView /> -->
-  <NewAddressForm />
+  <RouterView />
+  <!-- <NewAddressForm /> -->
 </template>
 
 <style scoped></style>
