@@ -40,6 +40,7 @@ import AddressTable from '../address/AddressTable.vue'
 .address-book {
   padding: 20px;
   background-color: #fff;
+  overflow-x: auto;
 }
 
 .address-book-header {

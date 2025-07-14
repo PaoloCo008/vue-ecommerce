@@ -4,8 +4,8 @@ import { ref } from 'vue'
 const addresses = ref([
   {
     id: 1,
-    fullName: 'Paolo Co',
-    address: '38 Silver Road',
+    fullName: 'Paolo Henry Oliva Co',
+    address: '38 Silver Road Barangay Pilar, Las Pinas City',
     postcode: 'Metro Manila - Las Pinas - Las Pinas City - Pilar',
     phoneNumber: '09178777471',
     isHome: true,
@@ -32,14 +32,21 @@ const addNewAddress = () => {
 </script>
 
 <template>
-  <el-table :data="addresses" style="width: 100%" class="custom-table">
-    <el-table-column prop="fullName" label="Full Name" width="145">
+  <el-table
+    :data="addresses"
+    style="width: 100%"
+    class="custom-table"
+    :row-style="{ height: '100x' }"
+    :cell-style="{ height: '100px' }"
+    :show-overflow-tooltip="true"
+  >
+    <el-table-column prop="fullName" label="Full Name" width="135">
       <template #default="scope">
         <div class="name-cell">{{ scope.row.fullName }}</div>
       </template>
     </el-table-column>
 
-    <el-table-column prop="address" label="Address" width="145">
+    <el-table-column prop="address" label="Address" width="185">
       <template #default="scope">
         <div class="address-cell">
           <el-tag v-if="scope.row.isHome" size="small" class="home-tag"> HOME </el-tag>
@@ -48,34 +55,34 @@ const addNewAddress = () => {
       </template>
     </el-table-column>
 
-    <el-table-column prop="postcode" label="Postcode" width="145">
+    <el-table-column prop="postcode" label="Postcode" width="185">
       <template #default="scope">
         <div class="postcode-cell">{{ scope.row.postcode }}</div>
       </template>
     </el-table-column>
 
-    <el-table-column prop="phoneNumber" label="Phone Number" width="145">
+    <el-table-column prop="phoneNumber" label="Phone Number" width="125">
       <template #default="scope">
         <div class="phone-cell">{{ scope.row.phoneNumber }}</div>
       </template>
     </el-table-column>
 
-    <el-table-column label="" max-width="145">
+    <el-table-column label="" width="180">
       <template #default="scope">
         <div class="status-cell">
           <div class="status-labels">
-            <span v-if="scope.row.isDefaultShipping" class="status-label">
+            <el-tag v-if="scope.row.isDefaultShipping" size="small">
               Default Shipping Address
-            </span>
-            <span v-if="scope.row.isDefaultBilling" class="status-label">
+            </el-tag>
+            <el-tag v-if="scope.row.isDefaultBilling" size="small">
               Default Billing Address
-            </span>
+            </el-tag>
           </div>
         </div>
       </template>
     </el-table-column>
 
-    <el-table-column label="" fixed="right" width="70">
+    <el-table-column label="" fixed="right" min-width="70">
       <template #default="scope">
         <el-button link type="primary" @click="editAddress(scope.row)" class="edit-button">
           EDIT
@@ -93,6 +100,12 @@ const addNewAddress = () => {
 .name-cell {
   font-weight: 500;
   color: #333;
+}
+
+.status-labels {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
 }
 
 .status-label {
