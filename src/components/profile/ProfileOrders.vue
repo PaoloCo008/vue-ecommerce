@@ -16,7 +16,6 @@ const searchQuery = ref('')
         <el-tab-pane label="To pay" name="to-pay"></el-tab-pane>
         <el-tab-pane label="To ship" name="to-ship"></el-tab-pane>
         <el-tab-pane label="To receive" name="to-receive"></el-tab-pane>
-        <el-tab-pane label="To review" name="to-review"></el-tab-pane>
       </el-tabs>
 
       <!-- Search Bar -->
@@ -61,8 +60,10 @@ const searchQuery = ref('')
                 <span class="free-returns">Free Returns</span>
               </div>
             </div>
-            <div class="product-price">₱35.00</div>
-            <div class="product-quantity">Qty: <span class="qty-number">6</span></div>
+            <div class="product-amount">
+              <div class="product-price">₱35.00</div>
+              <div class="product-quantity">Qty: <span class="qty-number">6</span></div>
+            </div>
           </div>
         </div>
 
@@ -93,8 +94,10 @@ const searchQuery = ref('')
                 <span class="free-returns">Free Returns</span>
               </div>
             </div>
-            <div class="product-price">₱69.00</div>
-            <div class="product-quantity">Qty: <span class="qty-number">2</span></div>
+            <div class="product-amount">
+              <div class="product-price">₱69.00</div>
+              <div class="product-quantity">Qty: <span class="qty-number">2</span></div>
+            </div>
           </div>
         </div>
 
@@ -121,8 +124,10 @@ const searchQuery = ref('')
                 <span class="free-returns">Free Returns</span>
               </div>
             </div>
-            <div class="product-price">₱1,180.00</div>
-            <div class="product-quantity">Qty: <span class="qty-number">1</span></div>
+            <div class="product-amount">
+              <div class="product-price">₱1,180.00</div>
+              <div class="product-quantity">Qty: <span class="qty-number">1</span></div>
+            </div>
           </div>
         </div>
       </div>
@@ -133,13 +138,11 @@ const searchQuery = ref('')
 <style scoped>
 .my-orders-container {
   max-width: 1200px;
-  margin: 0 auto;
 }
 
 .order-tabs {
   margin-bottom: 20px;
   border-bottom: 1px solid #6b778c;
-  padding: 0 20px;
 }
 
 .search-container {
@@ -221,7 +224,7 @@ const searchQuery = ref('')
 
 .product-details {
   flex: 1;
-  min-width: 0;
+  width: 100%;
 }
 
 .product-title {
@@ -272,6 +275,12 @@ const searchQuery = ref('')
   text-align: right;
 }
 
+.product-amount {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+}
+
 .qty-number {
   font-weight: 500;
   color: #333;
@@ -286,10 +295,10 @@ const searchQuery = ref('')
 }
 
 :deep(.el-tabs__item) {
-  padding: 16px 20px;
   font-size: 14px;
   color: #666;
   font-weight: 400;
+  padding: 0 0.75rem;
 }
 
 :deep(.el-tabs__item.is-active) {
@@ -330,7 +339,7 @@ const searchQuery = ref('')
   color: #999;
 }
 
-@media (max-width: 768px) {
+@media (min-width: 768px) {
   .order-item {
     flex-direction: column;
     gap: 12px;
@@ -348,6 +357,10 @@ const searchQuery = ref('')
   .product-quantity {
     text-align: center;
     margin-right: 0;
+  }
+
+  .product-amount {
+    flex-direction: column;
   }
 }
 </style>
