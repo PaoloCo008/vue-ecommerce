@@ -29,13 +29,13 @@
         </el-menu-item>
       </RouterLink>
 
-      <RouterLink to="/user/profile/:id/payment-options">
+      <RouterLink :to="{ name: 'paymentoptions', params: { id: 1 } }">
         <el-menu-item index="payment-options" class="sub-menu">
           <span>My Payment Options</span>
         </el-menu-item>
       </RouterLink>
 
-      <RouterLink to="/user/profile/:id/orders">
+      <RouterLink :to="{ name: 'orders', params: { id: 1 } }">
         <el-menu-item index="my-orders" class="menu-title">
           <span>My Orders</span>
         </el-menu-item>

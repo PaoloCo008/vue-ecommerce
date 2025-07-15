@@ -12,9 +12,7 @@ import { RouterLink } from 'vue-router'
           <template #header>
             <div class="card-header">
               <span class="header-title">Personal Profile</span>
-              <RouterLink :to="{ name: 'editprofile', params: { id: 1 } }" @click="editProfile"
-                >EDIT</RouterLink
-              >
+              <RouterLink :to="{ name: 'editprofile', params: { id: 1 } }">EDIT</RouterLink>
             </div>
           </template>
           <div class="profile-content">
@@ -38,9 +36,7 @@ import { RouterLink } from 'vue-router'
           <template #header>
             <div class="card-header">
               <span class="header-title">Address Book</span>
-              <RouterLink :to="{ name: 'editprofile', params: { id: 1 } }" @click="editProfile">
-                EDIT</RouterLink
-              >
+              <RouterLink :to="{ name: 'address', params: { id: 1 } }"> EDIT</RouterLink>
             </div>
           </template>
           <div class="address-container">

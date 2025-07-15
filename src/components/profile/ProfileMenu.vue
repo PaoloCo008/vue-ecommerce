@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import AppDrawer from '../AppDrawer.vue'
+import AppDrawer from '../app/AppDrawer.vue'
 import ProfileAside from './ProfileAside.vue'
 </script>
 
@@ -32,7 +32,7 @@ import ProfileAside from './ProfileAside.vue'
 .sub-nav {
   width: 100vw;
   position: fixed;
-  top: 110px;
+  top: 120px;
   z-index: 1;
   border-bottom: 1px solid rgba(0, 0, 0, 0.3);
   padding: 1rem;

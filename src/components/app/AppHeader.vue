@@ -1,15 +1,13 @@
 <script setup lang="ts">
-import AppDrawer from './AppDrawer.vue'
 import AppSearch from '@/components/app/AppSearch.vue'
+import AppDrawer from './AppDrawer.vue'
+import AppHeaderLinks from './AppHeaderLinks.vue'
 </script>
 
 <template>
   <el-header>
     <div class="header-links__wrapper">
-      <div class="header-links">
-        <RouterLink to="/">login</RouterLink>
-        <RouterLink to="/">signup</RouterLink>
-      </div>
+      <AppHeaderLinks />
     </div>
     <div class="header-content">
       <RouterLink to="/">
@@ -39,7 +37,7 @@ import AppSearch from '@/components/app/AppSearch.vue'
   </el-header>
 </template>
 
-<style>
+<style scoped>
 .el-header {
   display: flex;
   flex-direction: column;
@@ -58,17 +56,6 @@ import AppSearch from '@/components/app/AppSearch.vue'
   width: 100%;
   background-color: var(--color-background);
   padding: 0 2rem;
-}
-
-.header-links {
-  display: flex;
-  justify-content: flex-end;
-  width: 100%;
-  max-width: 1200px;
-  text-transform: uppercase;
-  font-size: 0.75rem;
-  gap: 2rem;
-  margin: 0 auto;
 }
 
 .header-content {

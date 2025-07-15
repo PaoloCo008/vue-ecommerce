@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { formatPrice } from '@/lib/helpers'
-import TextExpander from '../TextExpander.vue'
+import TextExpander from '@/components/TextExpander.vue'
 
 const value = ref(1)
 </script>

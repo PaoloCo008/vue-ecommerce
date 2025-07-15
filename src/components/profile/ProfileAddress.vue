@@ -1,8 +1,12 @@
 <script setup lang="ts">
 import ProfileContentLayout from '@/layouts/ProfileContentLayout.vue'
 
-import AddressCard from '../address/AddressCard.vue'
 import AddressTable from '../address/AddressTable.vue'
+
+import { useRouter } from 'vue-router'
+import AddressCard from '../address/AddressCard.vue'
+
+const router = useRouter()
 </script>
 
 <template>
@@ -22,13 +26,17 @@ import AddressTable from '../address/AddressTable.vue'
       </div>
 
       <!-- AddressCard -->
-      <AddressCard />
+      <AddressCard class="card" />
       <!-- Address Table -->
-      <AddressTable />
+      <AddressTable class="table" />
 
       <!-- Add New Address Button -->
       <div class="add-address-container">
-        <el-button type="primary" class="add-address-button" @click="addNewAddress">
+        <el-button
+          type="primary"
+          class="add-address-button"
+          @click="router.push({ name: 'addresscreate', params: { id: 1 } })"
+        >
           + ADD NEW ADDRESS
         </el-button>
       </div>
@@ -37,6 +45,10 @@ import AddressTable from '../address/AddressTable.vue'
 </template>
 
 <style scoped>
+.table {
+  display: none;
+}
+
 .address-book {
   padding: 20px;
   background-color: #fff;
@@ -138,6 +150,7 @@ import AddressTable from '../address/AddressTable.vue'
 .add-address-container {
   display: flex;
   justify-content: flex-end;
+  margin-top: 1rem;
 }
 
 .add-address-button {
@@ -196,6 +209,16 @@ import AddressTable from '../address/AddressTable.vue'
 
   .header-actions {
     flex-direction: row;
+  }
+}
+
+@media screen and (min-width: 875px) {
+  .card {
+    display: none;
+  }
+
+  .table {
+    display: block;
   }
 }
 </style>

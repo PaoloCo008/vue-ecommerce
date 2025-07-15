@@ -1,3 +1,23 @@
+<script setup lang="ts">
+import { LocationFilled, Phone } from '@element-plus/icons-vue'
+
+// Define props to receive address data
+const props = defineProps({
+  addressData: {
+    type: Object,
+    default: () => ({
+      fullName: 'Paolo Co',
+      address: '38 Silver Road',
+      postcode: 'Metro Manila - Las Pinas - Las Pinas City - Pilar',
+      phoneNumber: '09178777471',
+      isHome: true,
+      isDefaultShipping: true,
+      isDefaultBilling: false,
+    }),
+  },
+})
+</script>
+
 <template>
   <el-card class="address-card" shadow="hover">
     <template #header>
@@ -34,26 +54,6 @@
     </div>
   </el-card>
 </template>
-
-<script setup>
-import { LocationFilled, Phone } from '@element-plus/icons-vue'
-
-// Define props to receive address data
-const props = defineProps({
-  addressData: {
-    type: Object,
-    default: () => ({
-      fullName: 'Paolo Co',
-      address: '38 Silver Road',
-      postcode: 'Metro Manila - Las Pinas - Las Pinas City - Pilar',
-      phoneNumber: '09178777471',
-      isHome: true,
-      isDefaultShipping: true,
-      isDefaultBilling: false,
-    }),
-  },
-})
-</script>
 
 <style scoped>
 .address-card {
