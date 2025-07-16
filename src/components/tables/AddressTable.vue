@@ -1,5 +1,11 @@
 <script lang="ts" setup>
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
+import AppAddressTag from '../app/AppAddressTag.vue'
+import { useRouter } from 'vue-router'
+
+defineProps<{ selecting?: boolean }>()
+
+const router = useRouter()
 
 const addresses = ref([
   {
@@ -12,7 +18,23 @@ const addresses = ref([
     isDefaultShipping: true,
     isDefaultBilling: true,
   },
+  {
+    id: 2,
+    fullName: 'Paolo Henry Oliva Co',
+    address: '38 Silver Road Barangay Pilar, Las Pinas City',
+    postcode: 'Metro Manila - Las Pinas - Las Pinas City - Pilar',
+    phoneNumber: '09178777471',
+    isHome: true,
+    isDefaultShipping: true,
+    isDefaultBilling: true,
+  },
 ])
+
+const row = ref(null)
+
+watch(row, () => {
+  console.log(row.value)
+})
 
 const makeDefaultShipping = () => {
   console.log('Make default shipping address clicked')
@@ -49,7 +71,7 @@ const addNewAddress = () => {
     <el-table-column prop="address" label="Address" width="185">
       <template #default="scope">
         <div class="address-cell">
-          <el-tag v-if="scope.row.isHome" size="small" class="home-tag"> HOME </el-tag>
+          <AppAddressTag v-if="scope.row.isHome" label="home" />
           <span class="address-text">{{ scope.row.address }}</span>
         </div>
       </template>
@@ -84,7 +106,14 @@ const addNewAddress = () => {
 
     <el-table-column label="" fixed="right" min-width="70">
       <template #default="scope">
-        <el-button link type="primary" @click="editAddress(scope.row)" class="edit-button">
+        <el-radio v-if="selecting" v-model="row" class="opaque" name="row" :value="scope.row.id" />
+        <el-button
+          v-else
+          link
+          type="primary"
+          @click="router.push({ name: 'addressedit', params: { id: 1, addressId: 1 } })"
+          class="edit-button"
+        >
           EDIT
         </el-button>
       </template>

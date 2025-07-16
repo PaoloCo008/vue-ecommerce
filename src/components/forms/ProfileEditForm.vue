@@ -1,6 +1,9 @@
 <script lang="ts" setup>
 import ProfileContentLayout from '@/layouts/ProfileContentLayout.vue'
 import { ref } from 'vue'
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
 
 const form = ref({
   fullName: 'Paolo Co',
@@ -54,8 +57,8 @@ const saveChanges = () => {
           <el-input v-model="form.fullName" placeholder="Enter your full name" class="form-input" />
         </el-form-item>
 
-        <el-form-item>
-          <div class="item-label">
+        <el-form-item class="item-label">
+          <div>
             <span>Email Address</span>
             <el-button link type="primary" size="small" @click="changeEmail" class="change-link">
               | Change
@@ -63,10 +66,13 @@ const saveChanges = () => {
           </div>
 
           <p>pa***********@gmail.com</p>
+          <el-checkbox v-model="form.receiveMarketingEmails" class="marketing-checkbox">
+            Receive marketing emails
+          </el-checkbox>
         </el-form-item>
 
-        <el-form-item>
-          <div class="item-label">
+        <el-form-item class="item-label">
+          <div>
             <span>Mobile</span>
             <el-button link type="primary" size="small" @click="changeMobile" class="change-link">
               | Change
@@ -74,6 +80,9 @@ const saveChanges = () => {
           </div>
 
           <p>+63 091******71</p>
+          <el-checkbox v-model="form.receiveMarketingSMS" class="marketing-checkbox">
+            Receive marketing SMS
+          </el-checkbox>
         </el-form-item>
       </div>
 
@@ -110,8 +119,8 @@ const saveChanges = () => {
       </div>
 
       <!-- Save Button -->
-
       <el-button type="primary" class="save-button" @click="saveChanges"> SAVE CHANGES </el-button>
+      <el-button class="cancel-button cancel" @click="router.back()">cancel</el-button>
     </el-form>
   </ProfileContentLayout>
 </template>
@@ -123,6 +132,7 @@ const saveChanges = () => {
   padding: 1.5rem;
   background-color: #fff;
   max-width: 1200px;
+  gap: 1rem;
 }
 
 .form-input {
@@ -137,6 +147,7 @@ const saveChanges = () => {
 .item-label {
   display: flex;
   align-items: center;
+  flex-grow: 1;
 }
 
 .marketing-checkbox {
@@ -171,12 +182,29 @@ const saveChanges = () => {
   padding: 1.25rem 0;
   font-size: 14px;
   border-radius: unset;
-  margin-top: 20px;
 }
 
 .save-button:hover {
   background-color: #e55a2b;
   border-color: #e55a2b;
+}
+
+.cancel-button {
+  border-radius: unset;
+  width: 100%;
+  max-width: 300px;
+  background-color: #e0e0e0;
+  border-color: #e0e0e0;
+  color: #666;
+  padding: 1.25rem 0;
+  font-weight: 500;
+  text-transform: capitalize;
+  margin-left: 0;
+}
+
+.cancel-button:hover {
+  background-color: #d0d0d0;
+  border-color: #d0d0d0;
 }
 
 :deep(.el-form-item__label) {

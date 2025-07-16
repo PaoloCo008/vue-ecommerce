@@ -10,36 +10,26 @@
       </el-tag>
     </div>
 
-    <el-menu default-active="manage-account" class="sidebar-menu" @select="handleMenuSelect">
-      <RouterLink :to="{ name: 'profile', params: { id: 1 } }">
-        <el-menu-item index="manage-account" class="menu-title">
-          <span>Manage My Account</span>
-        </el-menu-item>
-      </RouterLink>
+    <el-menu default-active="manage-account" class="sidebar-menu" @select="handleMenuSelect" router>
+      <el-menu-item :index="{ name: 'profile', params: { id: 1 } }" class="menu-title">
+        <span>Manage My Account</span>
+      </el-menu-item>
 
-      <RouterLink :to="{ name: 'myprofile', params: { id: 1 } }">
-        <el-menu-item index="my-profile" class="sub-menu">
-          <span>My Profile</span>
-        </el-menu-item>
-      </RouterLink>
+      <el-menu-item :index="{ name: 'myprofile', params: { id: 1 } }" class="sub-menu">
+        <span>My Profile</span>
+      </el-menu-item>
 
-      <RouterLink :to="{ name: 'address', params: { id: 1 } }">
-        <el-menu-item index="address-book" class="sub-menu">
-          <span>Address Book</span>
-        </el-menu-item>
-      </RouterLink>
+      <el-menu-item :index="{ name: 'address', params: { id: 1 } }" class="sub-menu">
+        <span>Address Book</span>
+      </el-menu-item>
 
-      <RouterLink :to="{ name: 'paymentoptions', params: { id: 1 } }">
-        <el-menu-item index="payment-options" class="sub-menu">
-          <span>My Payment Options</span>
-        </el-menu-item>
-      </RouterLink>
+      <el-menu-item :index="{ name: 'paymentoptions', params: { id: 1 } }" class="sub-menu">
+        <span>My Payment Options</span>
+      </el-menu-item>
 
-      <RouterLink :to="{ name: 'orders', params: { id: 1 } }">
-        <el-menu-item index="my-orders" class="menu-title">
-          <span>My Orders</span>
-        </el-menu-item>
-      </RouterLink>
+      <el-menu-item :index="{ name: 'orders', params: { id: 1 } }" class="menu-title">
+        <span>My Orders</span>
+      </el-menu-item>
     </el-menu>
   </el-aside>
 </template>

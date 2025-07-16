@@ -1,9 +1,9 @@
-import AddressForm from '@/components/address/AddressForm.vue'
+import AddressForm from '@/components/forms/AddressActionForm.vue'
 import CartPage from '@/views/CartPage.vue'
 import ProductPage from '@/views/ProductPage.vue'
-import ProfileAddress from '@/components/profile/ProfileAddress.vue'
+import ProfileAddress from '@/views/AddressPage.vue'
 import ProfileCards from '@/components/profile/ProfileCards.vue'
-import ProfileEdit from '@/components/profile/ProfileEdit.vue'
+import ProfileEdit from '@/components/forms/ProfileEditForm.vue'
 import ProfileManage from '@/components/profile/ProfileManage.vue'
 import ProfileMy from '@/components/profile/ProfileMy.vue'
 import DefaultLayout from '@/layouts/DefaultLayout.vue'
@@ -12,6 +12,10 @@ import TheProfileView from '@/views/TheProfileView.vue'
 import { createRouter, createWebHistory } from 'vue-router'
 import AuthPage from '@/views/AuthPage.vue'
 import ProfileOrders from '@/components/profile/ProfileOrders.vue'
+import CheckoutPage from '@/views/CheckoutPage.vue'
+import OrderDetailsPage from '@/views/OrderDetailsPage.vue'
+import ProfileEditForm from '@/components/forms/ProfileEditForm.vue'
+import ChangeDefaultAddressPage from '@/views/ChangeDefaultAddressPage.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -36,6 +40,7 @@ const router = createRouter({
           component: CartPage,
         },
         { path: '/login-signup', name: 'loginsignup', component: AuthPage },
+        { path: '/checkout', name: 'checkout', component: CheckoutPage },
         {
           path: '',
           component: TheProfileView,
@@ -49,14 +54,23 @@ const router = createRouter({
                   redirect: { name: 'profile', params: { id: 1 } },
                   children: [
                     { path: ':id', name: 'profile', component: ProfileManage },
-                    { path: ':id/edit', name: 'editprofile', component: ProfileEdit },
+                    { path: ':id/edit', name: 'editprofile', component: ProfileEditForm },
                     { path: ':id/my', name: 'myprofile', component: ProfileMy },
                     {
                       path: ':id/payment-options',
                       name: 'paymentoptions',
                       component: ProfileCards,
                     },
-                    { path: ':id/orders', name: 'orders', component: ProfileOrders },
+                    {
+                      path: ':id/orders',
+                      name: 'orders',
+                      component: ProfileOrders,
+                    },
+                    {
+                      path: ':id/orders/:orderId',
+                      name: 'orderdetails',
+                      component: OrderDetailsPage,
+                    },
                   ],
                 },
               ],
@@ -66,7 +80,13 @@ const router = createRouter({
               redirect: { name: 'address', query: { id: 1 } },
               children: [
                 { path: ':id/book', name: 'address', component: ProfileAddress },
+                {
+                  path: ':id/book/edit/:type',
+                  name: 'addresstypeedit',
+                  component: ChangeDefaultAddressPage,
+                },
                 { path: ':id/create', name: 'addresscreate', component: AddressForm },
+                { path: ':id/edit/:addressId', name: 'addressedit', component: AddressForm },
               ],
             },
           ],

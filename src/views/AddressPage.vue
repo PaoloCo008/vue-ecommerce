@@ -1,10 +1,9 @@
 <script setup lang="ts">
+import AddressCard from '@/components/address/AddressCard.vue'
+import AddressTable from '@/components/tables/AddressTable.vue'
 import ProfileContentLayout from '@/layouts/ProfileContentLayout.vue'
 
-import AddressTable from '../address/AddressTable.vue'
-
 import { useRouter } from 'vue-router'
-import AddressCard from '../address/AddressCard.vue'
 
 const router = useRouter()
 </script>
@@ -15,11 +14,21 @@ const router = useRouter()
       <!-- Header -->
       <div class="address-book-header">
         <div class="header-actions">
-          <el-button link type="primary" @click="makeDefaultShipping" class="action-link">
+          <el-button
+            link
+            type="primary"
+            @click="router.push({ name: 'addresstypeedit', params: { id: 1, type: 'shipping' } })"
+            class="action-link"
+          >
             Make default shipping address
           </el-button>
           <span class="separator">|</span>
-          <el-button link type="primary" @click="makeDefaultBilling" class="action-link">
+          <el-button
+            link
+            type="primary"
+            @click="router.push({ name: 'addresstypeedit', params: { id: 1, type: 'billing' } })"
+            class="action-link"
+          >
             Make default billing address
           </el-button>
         </div>

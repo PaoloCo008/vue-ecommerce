@@ -1,20 +1,26 @@
 <script setup lang="ts">
 import { LocationFilled, Phone } from '@element-plus/icons-vue'
+import AppAddressTag from '../app/AppAddressTag.vue'
+import { ref, watch } from 'vue'
 
 // Define props to receive address data
-const props = defineProps({
-  addressData: {
-    type: Object,
-    default: () => ({
-      fullName: 'Paolo Co',
-      address: '38 Silver Road',
-      postcode: 'Metro Manila - Las Pinas - Las Pinas City - Pilar',
-      phoneNumber: '09178777471',
-      isHome: true,
-      isDefaultShipping: true,
-      isDefaultBilling: false,
-    }),
-  },
+const props = defineProps<{ addressData?: object; selecting?: boolean }>()
+
+const addressData = {
+  id: 1,
+  fullName: 'Paolo Co',
+  address: '38 Silver Road',
+  postcode: 'Metro Manila - Las Pinas - Las Pinas City - Pilar',
+  phoneNumber: '09178777471',
+  isHome: false,
+  isDefaultShipping: true,
+  isDefaultBilling: false,
+}
+
+const row = ref(null)
+
+watch(row, () => {
+  console.log(row.value)
 })
 </script>
 
@@ -22,8 +28,17 @@ const props = defineProps({
   <el-card class="address-card" shadow="hover">
     <template #header>
       <div class="card-header">
-        <span class="name">{{ addressData.fullName }}</span>
-        <el-tag v-if="addressData.isHome" type="success" size="small">HOME</el-tag>
+        <span class="name"
+          ><el-radio
+            v-if="selecting"
+            v-model="row"
+            class="opaque"
+            name="row"
+            :value="addressData.id"
+          />{{ addressData.fullName }}</span
+        >
+        <AppAddressTag v-if="addressData.isHome" label="home" />
+        <AppAddressTag v-else label="office" />
       </div>
     </template>
 

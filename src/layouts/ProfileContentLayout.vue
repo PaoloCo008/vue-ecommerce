@@ -26,8 +26,7 @@ defineProps<{ pageTitle: string }>()
 
 @media screen and (min-width: 750px) {
   .main-content {
-    padding: unset;
-    padding-right: 30px;
+    padding: 0 30px 30px 0;
   }
 }
 </style>

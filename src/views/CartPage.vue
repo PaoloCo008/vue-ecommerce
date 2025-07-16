@@ -2,16 +2,18 @@
 import { formatPrice } from '@/lib/helpers'
 import { Delete } from '@element-plus/icons-vue'
 import { ref } from 'vue'
+import { useRouter } from 'vue-router'
 
 const selected = ref(false)
 const count = ref(1)
+const router = useRouter()
 
 function handleNumberChange(e) {
   console.log(e)
 }
 
-function handleClick(e) {
-  console.log(e.target)
+function handleCheckout() {
+  router.push({ name: 'checkout' })
 }
 </script>
 
@@ -80,7 +82,9 @@ function handleClick(e) {
             <span>Subtotal</span><span class="price">{{ formatPrice(310) }}</span>
           </p>
 
-          <el-button class="checkout-button top-margin">Proceed to checkout(1)</el-button>
+          <el-button class="checkout-button top-margin" @click="handleCheckout"
+            >Proceed to checkout(1)</el-button
+          >
         </div>
       </div>
     </div>

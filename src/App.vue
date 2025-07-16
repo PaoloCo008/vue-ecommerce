@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import NewAddressForm from './components/forms/NewAddressForm.vue'
+import NewAddressForm from './components/forms/AddressForm.vue'
 </script>
 
 <template>

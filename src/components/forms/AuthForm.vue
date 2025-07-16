@@ -91,6 +91,17 @@ const handleSignUp = () => {
             show-password
           />
         </el-form-item>
+
+        <el-form-item v-if="signingUp" prop="password">
+          <el-input
+            v-model="loginForm.password"
+            type="password"
+            placeholder="Please confirm your password"
+            size="large"
+            class="action-input form-input"
+            show-password
+          />
+        </el-form-item>
       </div>
 
       <div v-if="!signingUp" class="forgot-password">
@@ -125,7 +136,6 @@ const handleSignUp = () => {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  height: 260px;
   gap: 0.5rem;
 }
 
@@ -160,19 +170,6 @@ const handleSignUp = () => {
   font-weight: 600;
   font-size: 16px;
   letter-spacing: 0.5px;
-  margin-top: auto;
-}
-
-.action-button {
-  width: 100%;
-  height: 48px;
-  background-color: #f97316;
-  border-color: #f97316;
-  border-radius: 8px;
-  font-weight: 600;
-  font-size: 16px;
-  letter-spacing: 0.5px;
-  margin-top: auto;
 }
 
 .login-button:hover {

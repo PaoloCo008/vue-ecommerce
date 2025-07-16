@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import ProfileContentLayout from '@/layouts/ProfileContentLayout.vue'
 import { RouterLink } from 'vue-router'
+import AddressProfileContent from '../address/AddressProfileContent.vue'
+import RecentOrdersTable from '../tables/RecentOrdersTable.vue'
 </script>
 
 <template>
@@ -40,24 +42,11 @@ import { RouterLink } from 'vue-router'
             </div>
           </template>
           <div class="address-container">
-            <div class="address-content">
-              <p class="address-label">DEFAULT SHIPPING ADDRESS</p>
-              <div class="address-details">
-                <p class="recipient-name">Isabella Aguinaldo</p>
-                <p class="address-line">26 Mabini St. Purok 2</p>
-                <p class="address-line">Bulacan - Malolos - Mojon</p>
-                <p class="phone">(+63) 09229115407</p>
-              </div>
-            </div>
-            <div class="address-content">
-              <p class="address-label">DEFAULT BILLING ADDRESS</p>
-              <div class="address-details">
-                <p class="recipient-name">Isabella Aguinaldo</p>
-                <p class="address-line">26 Mabini St. Purok 2</p>
-                <p class="address-line">Bulacan - Malolos - Mojon</p>
-                <p class="phone">(+63) 09229115407</p>
-              </div>
-            </div>
+            <!-- Default shipping address -->
+            <AddressProfileContent label="default shipping address" />
+
+            <!-- Default billing address -->
+            <AddressProfileContent label="default billing address" />
           </div>
         </el-card>
       </el-col>
@@ -71,34 +60,7 @@ import { RouterLink } from 'vue-router'
         </div>
       </template>
 
-      <el-table :data="recentOrders" style="width: 100%">
-        <el-table-column prop="orderNumber" label="Order #" width="200" />
-        <el-table-column prop="placedOn" label="Placed On" width="150" />
-        <el-table-column label="Items" width="300">
-          <template #default="scope">
-            <div class="order-items">
-              <div class="item-images">
-                <img
-                  v-for="(item, index) in scope.row.items"
-                  :key="index"
-                  :src="item.image"
-                  :alt="item.name"
-                  class="item-image"
-                />
-                <span v-if="scope.row.additionalItems" class="additional-items">
-                  + {{ scope.row.additionalItems }}
-                </span>
-              </div>
-            </div>
-          </template>
-        </el-table-column>
-        <el-table-column prop="total" label="Total" width="120" />
-        <el-table-column label="Action" width="100">
-          <template #default>
-            <el-button link type="primary" @click="manageOrder">MANAGE</el-button>
-          </template>
-        </el-table-column>
-      </el-table>
+      <RecentOrdersTable />
     </el-card>
   </ProfileContentLayout>
 </template>
@@ -157,59 +119,10 @@ a:active {
   gap: 8px;
 }
 
-.address-content {
-  padding: 10px 0;
-  width: clamp(150px, 100%, 200px);
-}
-
 .address-container {
   display: flex;
   gap: 2rem;
   flex-wrap: wrap;
-}
-
-.address-label {
-  font-size: 12px;
-  color: #999;
-  font-weight: 600;
-  margin: 0 0 10px 0;
-}
-
-.recipient-name {
-  font-weight: 600;
-  color: #333;
-  margin: 0 0 4px 0;
-}
-
-.address-line,
-.phone {
-  color: #666;
-  margin: 0 0 4px 0;
-}
-
-.order-items {
-  display: flex;
-  align-items: center;
-}
-
-.item-images {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.item-image {
-  width: 40px;
-  height: 40px;
-  border-radius: 4px;
-  object-fit: cover;
-  border: 1px solid #e0e0e0;
-}
-
-.additional-items {
-  color: #666;
-  font-size: 14px;
-  margin-left: 8px;
 }
 
 .orders-card {

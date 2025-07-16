@@ -32,8 +32,8 @@ import ProfileAside from './ProfileAside.vue'
 .sub-nav {
   width: 100vw;
   position: fixed;
-  top: 120px;
-  z-index: 1;
+  top: 115px;
+  z-index: 999;
   border-bottom: 1px solid rgba(0, 0, 0, 0.3);
   padding: 1rem;
   background-color: #eff0f5;

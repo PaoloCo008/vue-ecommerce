@@ -8,3 +8,11 @@ export function formatPrice(price: number) {
     currency: 'PHP',
   }).format(price)
 }
+
+export function hideEmail(email: string) {
+  const [username, serverDomain] = email.split('@')
+
+  const hiddenUsername = username.slice(0, 2) + username.slice(2).replaceAll(/./gm, '*')
+
+  return `${hiddenUsername}@${serverDomain}`
+}

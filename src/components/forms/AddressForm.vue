@@ -2,7 +2,9 @@
 import type { NewAddressForm } from '@/lib/types/forms'
 import type { FormInstance } from 'element-plus'
 import { reactive, ref } from 'vue'
+import { useRouter } from 'vue-router'
 
+const router = useRouter()
 const newAddressFormRef = ref<FormInstance>()
 const newAddressForm = reactive<NewAddressForm>({
   fullName: '',
@@ -75,8 +77,8 @@ const newAddressForm = reactive<NewAddressForm>({
       </el-form-item>
 
       <div class="form-buttons">
-        <el-button class="cancel-button form-button cancel">cancel</el-button>
-        <el-button class="save-button form-button save">save</el-button>
+        <el-button class="cancel-button form-button" @click="router.back()">cancel</el-button>
+        <el-button class="save-button form-button">save</el-button>
       </div>
     </div>
   </el-form>
@@ -87,7 +89,6 @@ const newAddressForm = reactive<NewAddressForm>({
   display: grid;
   grid-template-columns: 1fr;
   background-color: #fff;
-  padding: 1.5rem;
 
   gap: 1rem;
 }
@@ -182,7 +183,7 @@ const newAddressForm = reactive<NewAddressForm>({
   width: 100%;
 }
 
-@media screen and (min-width: 700px) {
+@media screen and (min-width: 575px) {
   .el-form {
     grid-template-columns: 1fr 1fr;
   }

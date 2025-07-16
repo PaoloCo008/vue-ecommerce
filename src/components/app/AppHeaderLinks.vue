@@ -4,6 +4,12 @@ import AppModal from './AppModal.vue'
 import AuthWrapper from '../auth/AuthWrapper.vue'
 
 const route = useRoute()
+
+const dialogStyle = {
+  width: '95vw',
+  maxWidth: '450px',
+  height: '380px',
+}
 </script>
 
 <template>
@@ -14,7 +20,7 @@ const route = useRoute()
     </template>
 
     <template v-else>
-      <AppModal>
+      <AppModal :dialog-style="dialogStyle">
         <template #trigger="props">
           <el-button @click="props.onTriggerClick" text>Login</el-button>
         </template>
@@ -22,7 +28,7 @@ const route = useRoute()
         <AuthWrapper />
       </AppModal>
 
-      <AppModal>
+      <AppModal :dialog-style="dialogStyle">
         <template #trigger="props">
           <el-button @click="props.onTriggerClick" text class="signup-button">Signup</el-button>
         </template>

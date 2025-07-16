@@ -1,3 +1,28 @@
+<script setup lang="ts">
+import ProfileContentLayout from '@/layouts/ProfileContentLayout.vue'
+import router from '@/router'
+import type { preProcessFile } from 'typescript'
+import { ref } from 'vue'
+
+const form = ref({
+  fullName: 'Paolo Co',
+  email: 'pa***********@gmail.com',
+  mobile: '+63 091******71',
+  birthday: '',
+  gender: '',
+  receiveMarketingEmails: false,
+  receiveMarketingSMS: false,
+})
+
+const changeEmail = () => {
+  console.log('Change email clicked')
+}
+
+const changeMobile = () => {
+  console.log('Change mobile clicked')
+}
+</script>
+
 <template>
   <ProfileContentLayout page-title="My Profile">
     <div class="profile">
@@ -13,6 +38,9 @@
             | Change
           </el-button>
           <p>pa***********@gmail.com</p>
+          <el-checkbox v-model="form.receiveMarketingEmails" class="marketing-checkbox">
+            Receive marketing emails
+          </el-checkbox>
         </div>
 
         <div>
@@ -21,6 +49,9 @@
             | Change
           </el-button>
           <p>+63 091******71</p>
+          <el-checkbox v-model="form.receiveMarketingSMS" class="marketing-checkbox">
+            Receive marketing SMS
+          </el-checkbox>
         </div>
       </div>
 
@@ -46,31 +77,6 @@
     </div>
   </ProfileContentLayout>
 </template>
-
-<script setup lang="ts">
-import ProfileContentLayout from '@/layouts/ProfileContentLayout.vue'
-import router from '@/router'
-import type { preProcessFile } from 'typescript'
-import { ref } from 'vue'
-
-const form = ref({
-  fullName: 'Paolo Co',
-  email: 'pa***********@gmail.com',
-  mobile: '+63 091******71',
-  birthday: '',
-  gender: '',
-  receiveMarketingEmails: false,
-  receiveMarketingSMS: false,
-})
-
-const changeEmail = () => {
-  console.log('Change email clicked')
-}
-
-const changeMobile = () => {
-  console.log('Change mobile clicked')
-}
-</script>
 
 <style scoped>
 .profile {
