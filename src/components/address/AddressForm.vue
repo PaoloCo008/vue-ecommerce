@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import type { NewAddressForm } from '@/lib/types/forms'
 import type { FormInstance } from 'element-plus'
-import { reactive, ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { computed, reactive, ref } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 
 const router = useRouter()
-const newAddressFormRef = ref<FormInstance>()
-const newAddressForm = reactive<NewAddressForm>({
+const route = useRoute()
+const addressFormRef = ref<FormInstance>()
+const addressForm = reactive<NewAddressForm>({
   fullName: '',
   address: '',
   mobileNumber: null,
@@ -16,29 +17,28 @@ const newAddressForm = reactive<NewAddressForm>({
   ward: '',
   deliveryLabel: null,
 })
+
+const isEditting = computed(() => route.params.addressId)
 </script>
 
 <template>
-  <el-form ref="newAddressFormRef" :model="newAddressForm" label-width="auto">
+  <el-form ref="addressFormRef" :model="addressForm" label-width="auto">
     <div>
       <el-form-item label="Full Name" prop="name" label-position="top">
-        <el-input v-model="newAddressForm.fullName" placeholder="First Last" />
+        <el-input v-model="addressForm.fullName" placeholder="First Last" />
       </el-form-item>
 
       <el-form-item label="Mobile Number" prop="name" label-position="top">
-        <el-input
-          v-model="newAddressForm.mobileNumber"
-          placeholder="Please enter your phone number"
-        />
+        <el-input v-model="addressForm.mobileNumber" placeholder="Please enter your phone number" />
       </el-form-item>
 
       <el-form-item label="Address" prop="name" label-position="top">
-        <el-input v-model="newAddressForm.address" placeholder="Please enter your address" />
+        <el-input v-model="addressForm.address" placeholder="Please enter your address" />
       </el-form-item>
 
       <el-form-item label="Floor/Unit Number" prop="name" label-position="top">
         <el-input
-          v-model="newAddressForm.unitNumber"
+          v-model="addressForm.unitNumber"
           placeholder="Please enter your floor/unit number"
         />
       </el-form-item>
@@ -46,15 +46,15 @@ const newAddressForm = reactive<NewAddressForm>({
 
     <div>
       <el-form-item label="Province" prop="name" label-position="top">
-        <el-input v-model="newAddressForm.province" placeholder="Please choose your province" />
+        <el-input v-model="addressForm.province" placeholder="Please choose your province" />
       </el-form-item>
 
       <el-form-item label="District" prop="name" label-position="top">
-        <el-input v-model="newAddressForm.district" placeholder="Please choose your district" />
+        <el-input v-model="addressForm.district" placeholder="Please choose your district" />
       </el-form-item>
 
       <el-form-item label="Ward" prop="name" label-position="top">
-        <el-input v-model="newAddressForm.ward" placeholder="Please choose your ward" />
+        <el-input v-model="addressForm.ward" placeholder="Please choose your ward" />
       </el-form-item>
 
       <el-form-item label="Select a label for effective delivery:" prop="name" label-position="top">
@@ -62,14 +62,14 @@ const newAddressForm = reactive<NewAddressForm>({
           <el-button class="office button-label"
             ><el-icon
               :style="[
-                newAddressForm.deliveryLabel === 'office' ? 'color: var(--color-tertiary)' : '',
+                addressForm.deliveryLabel === 'office' ? 'color: var(--color-tertiary)' : '',
               ]"
               ><Briefcase /></el-icon
             ><span> office </span>
           </el-button>
           <el-button class="home button-label"
             ><el-icon
-              :style="[newAddressForm.deliveryLabel === 'home' ? 'color: var(--color-main)' : '']"
+              :style="[addressForm.deliveryLabel === 'home' ? 'color: var(--color-main)' : '']"
               ><HomeFilled /></el-icon
             ><span> home </span>
           </el-button>
@@ -78,7 +78,8 @@ const newAddressForm = reactive<NewAddressForm>({
 
       <div class="form-buttons">
         <el-button class="cancel-button form-button" @click="router.back()">cancel</el-button>
-        <el-button class="save-button form-button">save</el-button>
+        <el-button class="save-button form-button">{{ isEditting ? 'Edit' : 'Save' }}</el-button>
+        <el-button text class="delete-button" v-if="isEditting">Delete</el-button>
       </div>
     </div>
   </el-form>
@@ -86,9 +87,11 @@ const newAddressForm = reactive<NewAddressForm>({
 
 <style scoped>
 .el-form {
+  position: relative;
   display: grid;
   grid-template-columns: 1fr;
   background-color: #fff;
+  padding: 1.5rem;
 
   gap: 1rem;
 }
@@ -162,6 +165,14 @@ const newAddressForm = reactive<NewAddressForm>({
   border-color: #e55a2b;
 }
 
+.delete-button {
+  position: absolute;
+  text-transform: uppercase;
+  font-size: 1rem;
+  top: -4rem;
+  right: 0;
+}
+
 .form-button {
   --el-button-hover-text-color: inherit;
   --el-button-hover-border-color: black;
@@ -183,7 +194,7 @@ const newAddressForm = reactive<NewAddressForm>({
   width: 100%;
 }
 
-@media screen and (min-width: 575px) {
+@media screen and (min-width: 700px) {
   .el-form {
     grid-template-columns: 1fr 1fr;
   }

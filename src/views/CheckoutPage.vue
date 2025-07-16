@@ -2,9 +2,11 @@
 import AppAddressTag from '@/components/app/AppAddressTag.vue'
 import AppDrawer from '@/components/app/AppDrawer.vue'
 import AppModal from '@/components/app/AppModal.vue'
-import AddressForm from '@/components/forms/AddressForm.vue'
+import AddressForm from '@/components/address/AddressForm.vue'
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+import AddressShippingSelect from '@/components/address/AddressShippingSelect.vue'
+import CardPaymentMethod from '@/components/cards/CardPaymentMethod.vue'
 
 const deliveryOption = ref('standard')
 const paymentMethod = ref('gcash')
@@ -52,7 +54,8 @@ const dialogStyle = {
 
                     <AddressForm />
                   </AppModal>
-                  <div></div>
+
+                  <AddressShippingSelect />
                 </div>
               </template>
             </AppDrawer>
@@ -122,6 +125,7 @@ const dialogStyle = {
                   >View all methods ></el-button
                 >
               </template>
+              <CardPaymentMethod />
             </AppDrawer>
           </div>
 
@@ -205,7 +209,6 @@ const dialogStyle = {
 
 <style scoped>
 .shipping {
-  background-color: red;
   width: 100%;
   height: 500px;
 }

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import AppDrawer from '../app/AppDrawer.vue'
-import CardAddForm from '../forms/CardAddForm.vue'
+import CardAddForm from './CardAddForm.vue'
 </script>
 
 <template>

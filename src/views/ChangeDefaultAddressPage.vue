@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import AddressCard from '@/components/address/AddressCard.vue'
-import AddressTable from '@/components/tables/AddressTable.vue'
+import AddressTable from '@/components/address/AddressTable.vue'
 import ProfileContentLayout from '@/layouts/ProfileContentLayout.vue'
 
 import { useRoute, useRouter } from 'vue-router'

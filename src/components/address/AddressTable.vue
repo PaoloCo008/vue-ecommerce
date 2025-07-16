@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { ref, watch } from 'vue'
-import AppAddressTag from '../app/AppAddressTag.vue'
 import { useRouter } from 'vue-router'
+import AppAddressTag from '../app/AppAddressTag.vue'
 
 defineProps<{ selecting?: boolean }>()
 

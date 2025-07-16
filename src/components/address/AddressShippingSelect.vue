@@ -1,0 +1,476 @@
+<template>
+  <div class="shipping-address-container">
+    <!-- Header -->
+    <div class="header">
+      <h2 class="title">Shipping Address</h2>
+      <el-button type="primary" text @click="handleAddNew"> Add new address </el-button>
+    </div>
+
+    <!-- Address List -->
+    <div class="address-list">
+      <div
+        v-for="address in addresses"
+        :key="address.id"
+        class="address-card"
+        :class="{ selected: address.id === selectedAddressId }"
+        @click="selectAddress(address.id)"
+      >
+        <!-- Check Icon -->
+        <div class="check-icon">
+          <el-icon :size="18" color="#17a2b8">
+            <Check />
+          </el-icon>
+        </div>
+
+        <!-- Address Content -->
+        <div class="address-content">
+          <!-- Contact Info -->
+          <div class="contact-info">
+            <span class="contact-name">{{ address.contactName }}</span>
+            <span class="phone">{{ address.phone }}</span>
+          </div>
+
+          <!-- Address Details -->
+          <div class="address-details">
+            <div class="address-line">
+              <el-tag v-if="address.isHome" type="danger" size="small" class="home-tag">
+                HOME
+              </el-tag>
+              <span class="street">{{ address.street }}</span>
+            </div>
+
+            <div class="location-info">
+              Postcode: {{ address.area }} • {{ address.city }} • {{ address.region }}
+            </div>
+          </div>
+
+          <!-- Status Tags -->
+          <div class="status-tags">
+            <el-tag v-if="address.isDefaultShipping" type="info" size="small" class="status-tag">
+              Default Shipping Address
+            </el-tag>
+            <el-tag v-if="address.isDefaultBilling" type="warning" size="small" class="status-tag">
+              Default Billing Address
+            </el-tag>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="action-buttons">
+      <el-button size="large" class="cancel-btn" @click="handleCancel"> Cancel </el-button>
+      <el-button type="primary" size="large" class="save-btn" @click="handleSave"> SAVE </el-button>
+    </div>
+  </div>
+</template>
+
+<script setup>
+import { ref, defineEmits } from 'vue'
+import { Check } from '@element-plus/icons-vue'
+
+// Emits
+const emit = defineEmits(['save', 'cancel', 'addNew'])
+
+// Reactive data
+const selectedAddressId = ref(1)
+
+// Sample data
+const addresses = ref([
+  {
+    id: 1,
+    contactName: 'Paolo Co',
+    phone: '09178777471',
+    street: '38 Silver Road',
+    area: 'Metro Manila',
+    city: 'Las Pinas',
+    region: 'Las Pinas City - Pilar',
+    isHome: true,
+    isDefaultShipping: true,
+    isDefaultBilling: true,
+  },
+])
+
+// Methods
+const selectAddress = (id) => {
+  selectedAddressId.value = id
+}
+
+const handleSave = () => {
+  const selected = addresses.value.find((addr) => addr.id === selectedAddressId.value)
+  emit('save', selected)
+}
+
+const handleCancel = () => {
+  emit('cancel')
+}
+
+const handleAddNew = () => {
+  emit('addNew')
+}
+</script>
+
+<style scoped>
+/* Mobile-First Base Styles */
+.shipping-address-container {
+  padding: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: #f5f7fa;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  background: white;
+  border-bottom: 1px solid #ebeef5;
+}
+
+.title {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0;
+  color: #303133;
+}
+
+.address-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px 16px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.address-card {
+  background: white;
+  border: 1px solid #e4e7ed;
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+  -webkit-tap-highlight-color: rgba(23, 162, 184, 0.1);
+}
+
+.address-card:active {
+  transform: scale(0.98);
+}
+
+.address-card:hover {
+  border-color: #17a2b8;
+  box-shadow: 0 4px 12px rgba(23, 162, 184, 0.1);
+}
+
+.address-card.selected {
+  border-color: #17a2b8;
+  background: #f8fdff;
+}
+
+.check-icon {
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.address-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.contact-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 10px;
+}
+
+.contact-name {
+  font-weight: 600;
+  color: #303133;
+  font-size: 14px;
+}
+
+.phone {
+  color: #606266;
+  font-size: 13px;
+}
+
+.address-details {
+  margin-bottom: 12px;
+}
+
+.address-line {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 6px;
+  flex-wrap: wrap;
+}
+
+.home-tag {
+  flex-shrink: 0;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  font-size: 10px;
+}
+
+.street {
+  color: #303133;
+  font-size: 13px;
+  line-height: 1.4;
+  flex: 1;
+}
+
+.location-info {
+  color: #909399;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.status-tags {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.status-tag {
+  font-size: 11px;
+  font-weight: 500;
+  align-self: flex-start;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 8px;
+  padding: 12px 16px;
+  background: white;
+  border-top: 1px solid #ebeef5;
+}
+
+.cancel-btn {
+  flex: 1;
+  height: 40px;
+  background: #f5f7fa;
+  border: 1px solid #dcdfe6;
+  color: #606266;
+  font-weight: 500;
+  font-size: 13px;
+}
+
+.cancel-btn:hover,
+.cancel-btn:focus {
+  background: #ecf5ff;
+  border-color: #b3d8ff;
+  color: #409eff;
+}
+
+.save-btn {
+  flex: 1;
+  height: 40px;
+  background: #17a2b8;
+  border-color: #17a2b8;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  font-size: 13px;
+}
+
+.save-btn:hover,
+.save-btn:focus {
+  background: #138496;
+  border-color: #138496;
+}
+
+/* Small Mobile (320px+) */
+@media (min-width: 320px) {
+  .address-card {
+    padding: 14px;
+    gap: 12px;
+  }
+
+  .contact-name {
+    font-size: 15px;
+  }
+
+  .phone {
+    font-size: 13px;
+  }
+
+  .street {
+    font-size: 13px;
+  }
+}
+
+/* Large Mobile (480px+) */
+@media (min-width: 480px) {
+  .header {
+    padding: 16px 20px;
+  }
+
+  .title {
+    font-size: 17px;
+  }
+
+  .address-list {
+    padding: 16px 20px;
+  }
+
+  .address-card {
+    padding: 16px;
+    margin-bottom: 14px;
+    gap: 14px;
+  }
+
+  .contact-info {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .contact-name {
+    font-size: 15px;
+  }
+
+  .phone {
+    font-size: 13px;
+    text-align: right;
+  }
+
+  .street {
+    font-size: 14px;
+  }
+
+  .location-info {
+    font-size: 12px;
+  }
+
+  .status-tags {
+    flex-direction: row;
+    gap: 6px;
+  }
+
+  .action-buttons {
+    padding: 16px 20px;
+    gap: 12px;
+  }
+
+  .cancel-btn,
+  .save-btn {
+    height: 44px;
+    font-size: 14px;
+  }
+}
+
+/* Tablet (768px+) */
+@media (min-width: 768px) {
+  .header {
+    padding: 18px 24px;
+  }
+
+  .title {
+    font-size: 18px;
+  }
+
+  .address-list {
+    padding: 20px 24px;
+  }
+
+  .address-card {
+    padding: 18px;
+    margin-bottom: 16px;
+    gap: 16px;
+  }
+
+  .check-icon {
+    margin-top: 2px;
+  }
+
+  .contact-info {
+    margin-bottom: 12px;
+    gap: 16px;
+  }
+
+  .contact-name {
+    font-size: 16px;
+  }
+
+  .phone {
+    font-size: 14px;
+  }
+
+  .address-line {
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+
+  .street {
+    font-size: 14px;
+  }
+
+  .location-info {
+    font-size: 13px;
+  }
+
+  .status-tags {
+    gap: 8px;
+  }
+
+  .status-tag {
+    font-size: 12px;
+  }
+
+  .action-buttons {
+    padding: 20px 24px;
+    gap: 16px;
+  }
+
+  .cancel-btn,
+  .save-btn {
+    height: 48px;
+    font-size: 15px;
+  }
+}
+
+/* Desktop (1024px+) */
+@media (min-width: 1024px) {
+  .header {
+    padding: 20px 24px;
+  }
+
+  .address-list {
+    padding: 24px;
+  }
+
+  .address-card {
+    padding: 20px;
+    margin-bottom: 18px;
+  }
+
+  .check-icon {
+    margin-top: 2px;
+  }
+
+  .contact-info {
+    margin-bottom: 14px;
+  }
+
+  .address-details {
+    margin-bottom: 16px;
+  }
+
+  .action-buttons {
+    padding: 24px;
+  }
+
+  .cancel-btn,
+  .save-btn {
+    height: 52px;
+    font-size: 16px;
+  }
+}
+</style>

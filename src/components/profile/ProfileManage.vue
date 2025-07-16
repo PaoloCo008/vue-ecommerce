@@ -2,7 +2,7 @@
 import ProfileContentLayout from '@/layouts/ProfileContentLayout.vue'
 import { RouterLink } from 'vue-router'
 import AddressProfileContent from '../address/AddressProfileContent.vue'
-import RecentOrdersTable from '../tables/RecentOrdersTable.vue'
+import RecentOrdersTable from '../orders/OrdersRecentTable.vue'
 </script>
 
 <template>

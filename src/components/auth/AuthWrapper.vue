@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import AuthForm from '../forms/AuthForm.vue'
+import AuthForm from './AuthForm.vue'
 
 const props = defineProps<{ signingUp?: boolean }>()
 
