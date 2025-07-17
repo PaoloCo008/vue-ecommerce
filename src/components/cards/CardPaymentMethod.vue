@@ -1,10 +1,31 @@
+<script setup lang="ts">
+import { ref, defineEmits } from 'vue'
+import { ArrowRight } from '@element-plus/icons-vue'
+
+// Emits
+const emit = defineEmits(['methodSelected'])
+
+// Reactive data
+const selectedMethod = ref('')
+
+// Methods
+const selectMethod = (method) => {
+  selectedMethod.value = method
+  emit('methodSelected', method)
+}
+</script>
+
 <template>
   <div class="payment-methods-container">
     <!-- Recommended Method -->
     <div class="section">
       <h3 class="section-title">Recommended method(s)</h3>
 
-      <div class="payment-method recommended" @click="selectMethod('cod')">
+      <div
+        class="payment-method"
+        :class="{ selected: selectedMethod === 'cod' }"
+        @click="selectMethod('cod')"
+      >
         <div class="method-icon">
           <div class="cod-icon">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
@@ -33,7 +54,11 @@
       <h3 class="section-title">Other Payment Methods</h3>
 
       <!-- GCash e-Wallet -->
-      <div class="payment-method" @click="selectMethod('gcash')">
+      <div
+        class="payment-method"
+        :class="{ selected: selectedMethod === 'gcash' }"
+        @click="selectMethod('gcash')"
+      >
         <div class="method-icon">
           <div class="gcash-icon">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
@@ -55,7 +80,6 @@
         <div class="method-content">
           <div class="method-header">
             <div class="method-name">GCash e-Wallet</div>
-            <div class="discount-badge">Get ₱20.00 discount</div>
           </div>
           <div class="method-description">GCash account required</div>
         </div>
@@ -66,7 +90,11 @@
       </div>
 
       <!-- Credit/Debit Card -->
-      <div class="payment-method" @click="selectMethod('card')">
+      <div
+        class="payment-method"
+        :class="{ selected: selectedMethod === 'card' }"
+        @click="selectMethod('card')"
+      >
         <div class="method-icon">
           <div class="card-icon">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
@@ -92,122 +120,14 @@
           </el-icon>
         </div>
       </div>
-
-      <!-- QR Ph -->
-      <div class="payment-method" @click="selectMethod('qr')">
-        <div class="method-icon">
-          <div class="qr-icon">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-              <rect x="3" y="3" width="7" height="7" rx="1" fill="#4A90E2" />
-              <rect x="14" y="3" width="7" height="7" rx="1" fill="#4A90E2" />
-              <rect x="3" y="14" width="7" height="7" rx="1" fill="#4A90E2" />
-              <rect x="14" y="14" width="7" height="7" rx="1" fill="#4A90E2" />
-            </svg>
-          </div>
-        </div>
-
-        <div class="method-content">
-          <div class="method-name">QR Ph</div>
-          <div class="method-description">Scan QR code & pay</div>
-        </div>
-
-        <div class="method-action">
-          <el-icon :size="16" color="#c0c4cc">
-            <ArrowRight />
-          </el-icon>
-        </div>
-      </div>
-
-      <!-- Lazada Wallet -->
-      <div class="payment-method" @click="selectMethod('lazada')">
-        <div class="method-icon">
-          <div class="lazada-icon">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-              <circle cx="12" cy="12" r="10" fill="#ff6600" />
-              <text
-                x="12"
-                y="16"
-                text-anchor="middle"
-                fill="white"
-                font-size="8"
-                font-weight="bold"
-              >
-                L
-              </text>
-            </svg>
-          </div>
-        </div>
-
-        <div class="method-content">
-          <div class="method-name">Lazada Wallet</div>
-          <div class="method-description">Lazada Wallet</div>
-        </div>
-
-        <div class="method-extras">
-          <div class="wallet-amount">₱0.00</div>
-          <el-radio v-model="selectedMethod" value="lazada" size="large" />
-        </div>
-      </div>
-
-      <!-- 0% Installment -->
-      <div class="payment-method disabled">
-        <div class="method-icon">
-          <div class="installment-icon">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-              <circle cx="12" cy="12" r="10" fill="#909399" />
-              <text
-                x="12"
-                y="16"
-                text-anchor="middle"
-                fill="white"
-                font-size="10"
-                font-weight="bold"
-              >
-                0%
-              </text>
-            </svg>
-          </div>
-        </div>
-
-        <div class="method-content">
-          <div class="method-name">0% Installment</div>
-          <div class="method-description">View payment disabled reason ></div>
-        </div>
-
-        <div class="method-action">
-          <el-icon :size="16" color="#c0c4cc">
-            <ArrowRight />
-          </el-icon>
-        </div>
-      </div>
     </div>
   </div>
 </template>
-
-<script setup>
-import { ref, defineEmits } from 'vue'
-import { ArrowRight } from '@element-plus/icons-vue'
-
-// Emits
-const emit = defineEmits(['methodSelected'])
-
-// Reactive data
-const selectedMethod = ref('')
-
-// Methods
-const selectMethod = (method) => {
-  if (method === 'gcash' || method === 'lazada') {
-    selectedMethod.value = method
-  }
-  emit('methodSelected', method)
-}
-</script>
 
 <style scoped>
 /* Mobile-First Base Styles */
 .payment-methods-container {
   padding: 0;
-  background: #f5f7fa;
 }
 
 .section {
@@ -245,9 +165,10 @@ const selectMethod = (method) => {
   box-shadow: 0 2px 8px rgba(64, 158, 255, 0.1);
 }
 
-.payment-method.recommended {
-  border-color: #17a2b8;
+.payment-method.selected {
+  border-color: #409eff;
   background: #f0f9ff;
+  box-shadow: 0 2px 8px rgba(64, 158, 255, 0.15);
 }
 
 .payment-method.disabled {
@@ -273,10 +194,7 @@ const selectMethod = (method) => {
 
 .cod-icon,
 .gcash-icon,
-.card-icon,
-.qr-icon,
-.lazada-icon,
-.installment-icon {
+.card-icon {
   width: 24px;
   height: 24px;
   display: flex;

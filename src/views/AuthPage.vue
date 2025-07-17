@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import AuthWrapper from '@/components/auth/AuthWrapper.vue'
+import AuthWrapper from '@/components/auth/AuthTransitionWrapper.vue'
 </script>
 
 <template>
@@ -13,7 +13,6 @@ import AuthWrapper from '@/components/auth/AuthWrapper.vue'
 <style scoped>
 .wrapper {
   width: 100vw;
-  height: 360px;
   background-color: #fff;
   padding: 3rem 1rem 1.25rem;
   transform: translateY(-30px);

@@ -96,6 +96,14 @@ a,
   padding: 1rem;
 }
 
+.el-dialog__header {
+  padding: 0;
+}
+
+.el-dialog__headerbtn {
+  z-index: 1;
+}
+
 /* @media screen and (min-width: 1250px) {
   #app {
     padding: 0;

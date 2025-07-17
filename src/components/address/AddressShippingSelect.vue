@@ -1,11 +1,99 @@
+<script setup lang="ts">
+import { ref, defineEmits } from 'vue'
+import { Check } from '@element-plus/icons-vue'
+import AppAddressTag from '../app/AppAddressTag.vue'
+
+// Emits
+const emit = defineEmits(['save', 'cancel', 'addNew'])
+
+// Reactive data
+const selectedAddressId = ref(1)
+
+// Sample data
+const addresses = ref([
+  {
+    id: 1,
+    contactName: 'Paolo Co',
+    phone: '09178777471',
+    street: '38 Silver Road',
+    area: 'Metro Manila',
+    city: 'Las Pinas',
+    region: 'Las Pinas City - Pilar',
+    isHome: true,
+    isDefaultShipping: true,
+    isDefaultBilling: true,
+  },
+  {
+    id: 2,
+    contactName: 'Paolo Co',
+    phone: '09178777471',
+    street: '38 Silver Road',
+    area: 'Metro Manila',
+    city: 'Las Pinas',
+    region: 'Las Pinas City - Pilar',
+    isHome: false,
+    isDefaultShipping: true,
+    isDefaultBilling: true,
+  },
+  {
+    id: 3,
+    contactName: 'Paolo Co',
+    phone: '09178777471',
+    street: '38 Silver Road',
+    area: 'Metro Manila',
+    city: 'Las Pinas',
+    region: 'Las Pinas City - Pilar',
+    isHome: false,
+    isDefaultShipping: true,
+    isDefaultBilling: true,
+  },
+  {
+    id: 4,
+    contactName: 'Paolo Co',
+    phone: '09178777471',
+    street: '38 Silver Road',
+    area: 'Metro Manila',
+    city: 'Las Pinas',
+    region: 'Las Pinas City - Pilar',
+    isHome: false,
+    isDefaultShipping: true,
+    isDefaultBilling: true,
+  },
+  {
+    id: 5,
+    contactName: 'Paolo Co',
+    phone: '09178777471',
+    street: '38 Silver Road',
+    area: 'Metro Manila',
+    city: 'Las Pinas',
+    region: 'Las Pinas City - Pilar',
+    isHome: false,
+    isDefaultShipping: true,
+    isDefaultBilling: true,
+  },
+])
+
+// Methods
+const selectAddress = (id) => {
+  selectedAddressId.value = id
+}
+
+const handleSave = () => {
+  const selected = addresses.value.find((addr) => addr.id === selectedAddressId.value)
+  emit('save', selected)
+}
+
+const handleCancel = () => {
+  emit('cancel')
+}
+
+const handleAddNew = () => {
+  emit('addNew')
+}
+</script>
+
 <template>
   <div class="shipping-address-container">
-    <!-- Header -->
-    <div class="header">
-      <h2 class="title">Shipping Address</h2>
-      <el-button type="primary" text @click="handleAddNew"> Add new address </el-button>
-    </div>
-
     <!-- Address List -->
     <div class="address-list">
       <div
@@ -15,27 +103,28 @@
         :class="{ selected: address.id === selectedAddressId }"
         @click="selectAddress(address.id)"
       >
-        <!-- Check Icon -->
-        <div class="check-icon">
-          <el-icon :size="18" color="#17a2b8">
-            <Check />
-          </el-icon>
-        </div>
-
         <!-- Address Content -->
         <div class="address-content">
           <!-- Contact Info -->
           <div class="contact-info">
-            <span class="contact-name">{{ address.contactName }}</span>
+            <div class="name-with-radio">
+              <span class="contact-name">{{ address.contactName }}</span>
+              <!-- Radio Check Icon -->
+              <div class="radio-check">
+                <div class="radio-circle" v-if="address.id !== selectedAddressId"></div>
+                <el-icon v-if="address.id === selectedAddressId" :size="18" color="#17a2b8">
+                  <Check />
+                </el-icon>
+              </div>
+            </div>
             <span class="phone">{{ address.phone }}</span>
           </div>
 
           <!-- Address Details -->
           <div class="address-details">
             <div class="address-line">
-              <el-tag v-if="address.isHome" type="danger" size="small" class="home-tag">
-                HOME
-              </el-tag>
+              <AppAddressTag v-if="address.isHome" label="home" />
+              <AppAddressTag v-else label="office" />
               <span class="street">{{ address.street }}</span>
             </div>
 
@@ -65,59 +154,13 @@
   </div>
 </template>
 
-<script setup>
-import { ref, defineEmits } from 'vue'
-import { Check } from '@element-plus/icons-vue'
-
-// Emits
-const emit = defineEmits(['save', 'cancel', 'addNew'])
-
-// Reactive data
-const selectedAddressId = ref(1)
-
-// Sample data
-const addresses = ref([
-  {
-    id: 1,
-    contactName: 'Paolo Co',
-    phone: '09178777471',
-    street: '38 Silver Road',
-    area: 'Metro Manila',
-    city: 'Las Pinas',
-    region: 'Las Pinas City - Pilar',
-    isHome: true,
-    isDefaultShipping: true,
-    isDefaultBilling: true,
-  },
-])
-
-// Methods
-const selectAddress = (id) => {
-  selectedAddressId.value = id
-}
-
-const handleSave = () => {
-  const selected = addresses.value.find((addr) => addr.id === selectedAddressId.value)
-  emit('save', selected)
-}
-
-const handleCancel = () => {
-  emit('cancel')
-}
-
-const handleAddNew = () => {
-  emit('addNew')
-}
-</script>
-
 <style scoped>
 /* Mobile-First Base Styles */
 .shipping-address-container {
   padding: 0;
-  height: 100%;
   display: flex;
+  height: 100%;
   flex-direction: column;
-  background: #f5f7fa;
 }
 
 .header {
@@ -138,8 +181,8 @@ const handleAddNew = () => {
 
 .address-list {
   flex: 1;
-  overflow-y: auto;
   padding: 12px 16px;
+  overflow-y: auto;
   -webkit-overflow-scrolling: touch;
 }
 
@@ -149,9 +192,6 @@ const handleAddNew = () => {
   border-radius: 8px;
   padding: 12px;
   margin-bottom: 12px;
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
   cursor: pointer;
   transition: all 0.2s ease;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
@@ -172,14 +212,38 @@ const handleAddNew = () => {
   background: #f8fdff;
 }
 
-.check-icon {
+/* Radio Check Styles */
+.radio-check {
   flex-shrink: 0;
-  margin-top: 1px;
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.radio-circle {
+  width: 18px;
+  height: 18px;
+  border: 2px solid #dcdfe6;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+  background: white;
+}
+
+.radio-circle:hover {
+  border-color: #17a2b8;
 }
 
 .address-content {
-  flex: 1;
-  min-width: 0;
+  width: 100%;
+}
+
+.name-with-radio {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
 }
 
 .contact-info {
@@ -328,8 +392,15 @@ const handleAddNew = () => {
   .contact-info {
     flex-direction: row;
     justify-content: space-between;
-    align-items: center;
+    align-items: flex-start;
     gap: 12px;
+  }
+
+  .name-with-radio {
+    flex-direction: row-reverse;
+    align-items: flex-start;
+    align-items: center;
+    gap: 4px;
   }
 
   .contact-name {
@@ -386,8 +457,14 @@ const handleAddNew = () => {
     gap: 16px;
   }
 
-  .check-icon {
-    margin-top: 2px;
+  .radio-check {
+    width: 20px;
+    height: 20px;
+  }
+
+  .radio-circle {
+    width: 20px;
+    height: 20px;
   }
 
   .contact-info {
@@ -451,8 +528,14 @@ const handleAddNew = () => {
     margin-bottom: 18px;
   }
 
-  .check-icon {
-    margin-top: 2px;
+  .radio-check {
+    width: 22px;
+    height: 22px;
+  }
+
+  .radio-circle {
+    width: 22px;
+    height: 22px;
   }
 
   .contact-info {

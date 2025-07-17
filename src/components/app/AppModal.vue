@@ -9,6 +9,8 @@ defineProps<{
     maxWidth?: string
     height?: string
   }
+
+  title?: string
 }>()
 
 function onTriggerClick() {
@@ -24,7 +26,7 @@ function onSubmit() {
   <slot name="trigger" :onTriggerClick></slot>
 
   <Teleport to="body">
-    <el-dialog v-model="modalVisible" align-center :onSubmit :style="dialogStyle">
+    <el-dialog destroy-on-close v-model="modalVisible" align-center :onSubmit :title="title">
       <slot></slot>
     </el-dialog>
   </Teleport>
@@ -32,14 +34,16 @@ function onSubmit() {
 
 <style>
 .el-dialog {
+  width: 90vw;
+  max-width: 500px;
   padding: 1.5rem;
   text-transform: none;
   overflow: hidden;
 }
 
-@media screen and (min-width: 575px) {
+/* @media screen and (min-width: 575px) {
   .el-dialog {
     padding: 2.25rem;
   }
-}
+} */
 </style>

@@ -2,6 +2,7 @@
 import { ref } from 'vue'
 import { formatPrice } from '@/lib/helpers'
 import TextExpander from '@/components/TextExpander.vue'
+import Carousel from '@/components/Carousel.vue'
 
 const value = ref(1)
 </script>
@@ -11,7 +12,7 @@ const value = ref(1)
     <div class="product-grid">
       <!-- Carousel -->
       <div class="carousel">
-        <h1>SOME BIG ASS CAROUSEL</h1>
+        <Carousel />
       </div>
 
       <!-- Body -->

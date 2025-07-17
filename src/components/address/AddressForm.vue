@@ -91,9 +91,8 @@ const isEditting = computed(() => route.params.addressId)
   display: grid;
   grid-template-columns: 1fr;
   background-color: #fff;
-  padding: 1.5rem;
-
   gap: 1rem;
+  width: 100%;
 }
 
 .el-form-item {
@@ -182,9 +181,14 @@ const isEditting = computed(() => route.params.addressId)
 }
 
 .form-buttons {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100vw;
+  background-color: white;
   display: flex;
-  flex-direction: column;
   gap: 0.5rem;
+  padding: 1rem;
 }
 
 .label-buttons {
@@ -206,6 +210,12 @@ const isEditting = computed(() => route.params.addressId)
 
   .label-buttons {
     flex-direction: row;
+  }
+
+  .form-buttons {
+    position: static;
+    width: 100%;
+    padding: 0;
   }
 }
 </style>

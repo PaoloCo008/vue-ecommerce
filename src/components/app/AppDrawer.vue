@@ -58,6 +58,12 @@ const drawerSize = computed(() => {
 
 <style scoped>
 h3 {
-  font-size: 1.125rem;
+  font-size: 1rem;
+}
+
+@media screen and (min-width: 450px) {
+  h3 {
+    font-size: 1.25rem;
+  }
 }
 </style>

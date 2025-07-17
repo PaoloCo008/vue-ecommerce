@@ -210,14 +210,14 @@ const dialogStyle = {
 <style scoped>
 .shipping {
   width: 100%;
-  height: 500px;
+  height: 100%;
 }
 
 .modal-trigger {
   position: absolute;
   font-size: 0.875rem;
-  top: 2rem;
-  right: 5rem;
+  top: 1.375rem;
+  right: 3.5rem;
 }
 
 .checkout-container {
@@ -580,6 +580,13 @@ const dialogStyle = {
 
   .view-all-btn {
     font-size: 0.875rem;
+  }
+}
+
+@media screen and (min-width: 450px) {
+  .modal-trigger {
+    top: 1.625rem;
+    right: 3.25rem;
   }
 }
 
