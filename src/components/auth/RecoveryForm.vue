@@ -3,6 +3,8 @@ import { ref, reactive } from 'vue'
 import { ElMessage } from 'element-plus'
 import ModalTemplate from '../ModalTemplate.vue'
 
+const emit = defineEmits<{ (e: 'confirm'): void; (e: 'back'): void }>()
+
 // Form reference
 const formRef = ref(null)
 
@@ -43,36 +45,31 @@ const rules = reactive({
 
 // Event handlers
 const handleBack = () => {
-  // Navigate back or emit event to parent
-  console.log('Back button clicked')
-  // Example: router.go(-1) or emit('back')
+  emit('back')
 }
 
 const handleConfirm = async () => {
-  if (!formRef.value) return
-
-  try {
-    // Validate form
-    await formRef.value.validate()
-
-    // Process the form data
-    console.log('Form submitted:', form.account)
-
-    // Show success message
-    ElMessage({
-      type: 'success',
-      message: 'Password reset instructions have been sent!',
-    })
-
-    // Here you would typically make an API call
-    // await resetPassword(form.account)
-  } catch (error) {
-    console.log('Validation failed:', error)
-    ElMessage({
-      type: 'error',
-      message: 'Please check your input and try again',
-    })
-  }
+  emit('confirm')
+  // if (!formRef.value) return
+  // try {
+  //   // Validate form
+  //   await formRef.value.validate()
+  //   // Process the form data
+  //   console.log('Form submitted:', form.account)
+  //   // Show success message
+  //   ElMessage({
+  //     type: 'success',
+  //     message: 'Password reset instructions have been sent!',
+  //   })
+  //   // Here you would typically make an API call
+  //   // await resetPassword(form.account)
+  // } catch (error) {
+  //   console.log('Validation failed:', error)
+  //   ElMessage({
+  //     type: 'error',
+  //     message: 'Please check your input and try again',
+  //   })
+  // }
 }
 
 // Expose methods if needed by parent component
@@ -84,7 +81,7 @@ defineExpose({
 </script>
 
 <template>
-  <ModalTemplate title="Forgot your password?">
+  <ModalTemplate title="Forgot your password?" :confirm="handleConfirm" :back="handleBack">
     <p class="description">Please enter the account that you want to reset the password.</p>
 
     <el-form
@@ -93,6 +90,7 @@ defineExpose({
       :rules="rules"
       label-position="top"
       class="forgot-password-form"
+      @submit.prevent="handleConfirm"
     >
       <el-form-item label="Email" prop="account">
         <el-input

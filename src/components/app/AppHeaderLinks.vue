@@ -15,8 +15,8 @@ const dialogStyle = {
 <template>
   <div class="header-links">
     <template v-if="route.path === '/login-signup'">
-      <RouterLink to="/login-signup">login</RouterLink>
-      <RouterLink to="/login-signup">signup</RouterLink>
+      <RouterLink :to="{ name: 'login' }">login</RouterLink>
+      <RouterLink :to="{ name: 'signup' }">signup</RouterLink>
     </template>
 
     <template v-else>

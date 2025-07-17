@@ -5,15 +5,19 @@ import ModalTemplate from '../ModalTemplate.vue'
 
 const dialogVisible = ref(true)
 
-const emit = defineEmits<{ (e: 'toAddress'): void; (e: 'toPhone'): void }>()
+const emit = defineEmits<{
+  (e: 'confirmSignUp'): void
+  (e: 'changeNumber'): void
+  (e: 'back'): void
+}>()
 
 function handleConfirm() {
-  emit('toAddress')
+  emit('confirmSignUp')
 }
 </script>
 
 <template>
-  <ModalTemplate title="Verify your identity" :on-confirm="handleConfirm">
+  <ModalTemplate title="Verify your identity" :confirm="handleConfirm" @back="$emit('back')">
     <p class="description">Please enter the OTP via SMS to continue</p>
 
     <div class="phone-info">

@@ -4,15 +4,15 @@ import ModalTemplate from '../ModalTemplate.vue'
 
 const phoneNumber = ref('')
 
-const emit = defineEmits<{ (e: 'toOtp'): void }>()
+const emit = defineEmits<{ (e: 'confirm'): void }>()
 
 function handlePhoneRegister() {
-  emit('toOtp')
+  emit('confirm')
 }
 </script>
 
 <template>
-  <ModalTemplate title="Enter your phone number" has-content-buttons>
+  <ModalTemplate title="Enter your phone number" has-content-buttons @confirm="handlePhoneRegister">
     <!-- Header with QR icon and tabs -->
 
     <!-- Phone number input form -->

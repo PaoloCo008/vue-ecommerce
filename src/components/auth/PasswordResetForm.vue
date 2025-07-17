@@ -13,7 +13,7 @@ const props = defineProps({
 })
 
 // Emits
-const emit = defineEmits(['update:modelValue', 'confirm', 'back', 'close'])
+const emit = defineEmits<{ (e: 'back'): void; (e: 'toLogin'): void }>()
 
 // Reactive data
 const dialogVisible = computed({
@@ -96,29 +96,34 @@ const toggleConfirm = () => {
 }
 
 const handleConfirm = async () => {
-  if (!formRef.value) return
+  emit('toLogin')
+  // if (!formRef.value) return
 
-  try {
-    await formRef.value.validate()
+  // try {
+  //   await formRef.value.validate()
 
-    emit('confirm', form.newPassword)
+  //   emit('confirm', form.newPassword)
 
-    ElMessage({
-      type: 'success',
-      message: 'Password has been reset successfully!',
-    })
-  } catch (error) {
-    console.log('Validation failed:', error)
-    ElMessage({
-      type: 'error',
-      message: 'Please check your password requirements',
-    })
-  }
+  //   ElMessage({
+  //     type: 'success',
+  //     message: 'Password has been reset successfully!',
+  //   })
+  // } catch (error) {
+  //   console.log('Validation failed:', error)
+  //   ElMessage({
+  //     type: 'error',
+  //     message: 'Please check your password requirements',
+  //   })
+  // }
 }
 </script>
 
 <template>
-  <ModalTemplate title="Reset your password">
+  <ModalTemplate
+    title="Reset your password"
+    :on-confirm="handleConfirm"
+    :on-back="() => emit('back')"
+  >
     <p class="description">Please enter your new password.</p>
 
     <el-form ref="formRef" :model="form" :rules="rules" label-position="top" class="password-form">

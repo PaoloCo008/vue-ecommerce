@@ -26,7 +26,7 @@ function onSubmit() {
   <slot name="trigger" :onTriggerClick></slot>
 
   <Teleport to="body">
-    <el-dialog destroy-on-close v-model="modalVisible" align-center :onSubmit :title="title">
+    <el-dialog destroy-on-close v-model="modalVisible" align-center :title="title">
       <slot></slot>
     </el-dialog>
   </Teleport>

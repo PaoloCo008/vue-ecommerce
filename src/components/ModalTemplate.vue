@@ -1,5 +1,10 @@
 <script setup lang="ts">
-defineProps<{ title: string; hasContentButtons?: boolean; onConfirm?: () => void }>()
+defineProps<{
+  title: string
+  hasContentButtons?: boolean
+  confirm?: () => void
+  back?: () => void
+}>()
 </script>
 
 <template>
@@ -14,8 +19,8 @@ defineProps<{ title: string; hasContentButtons?: boolean; onConfirm?: () => void
       </div>
 
       <div v-if="!hasContentButtons" class="buttons">
-        <el-button size="large" class="back-button"> Back </el-button>
-        <el-button type="primary" size="large" class="confirm-button" @click="onConfirm">
+        <el-button size="large" class="back-button" @click="back"> Back </el-button>
+        <el-button type="primary" size="large" class="confirm-button" @click="confirm">
           Confirm
         </el-button>
       </div>

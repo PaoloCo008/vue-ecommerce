@@ -39,7 +39,13 @@ const router = createRouter({
           name: 'cart',
           component: CartPage,
         },
-        { path: '/login-signup', name: 'loginsignup', component: AuthPage },
+        { path: '/login-signup', name: 'login', component: AuthPage, meta: { operation: 'logIn' } },
+        {
+          path: '/login-signup',
+          name: 'signup',
+          component: AuthPage,
+          meta: { operation: 'signUp' },
+        },
         { path: '/checkout', name: 'checkout', component: CheckoutPage },
         {
           path: '',
