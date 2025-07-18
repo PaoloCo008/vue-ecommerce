@@ -1,16 +1,18 @@
 <script setup lang="ts">
 import type { NewAddressForm } from '@/lib/types/forms'
-import type { FormInstance } from 'element-plus'
+import { ElMessage, type FormInstance } from 'element-plus'
 import { computed, reactive, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
 const router = useRouter()
 const route = useRoute()
+
+const loading = ref(false)
 const addressFormRef = ref<FormInstance>()
 const addressForm = reactive<NewAddressForm>({
   fullName: '',
-  address: '',
   mobileNumber: null,
+  address: '',
   unitNumber: '',
   province: '',
   district: '',
@@ -19,24 +21,64 @@ const addressForm = reactive<NewAddressForm>({
 })
 
 const isEditting = computed(() => route.params.addressId)
+
+const rules = {
+  fullName: [{ required: true, message: 'Please enter your email', trigger: 'blur' }],
+  address: [
+    { required: true, message: 'Please enter your password', trigger: 'blur' },
+    { min: 6, message: 'Password must be at least 6 characters', trigger: 'blur' },
+  ],
+  mobileNumber: [{ required: true, message: 'Please enter your email', trigger: 'blur' }],
+  unitNumber: [{ required: true, message: 'Please enter your email', trigger: 'blur' }],
+  province: [{ required: true, message: 'Please enter your email', trigger: 'blur' }],
+  district: [{ required: true, message: 'Please enter your email', trigger: 'blur' }],
+  ward: [{ required: true, message: 'Please enter your email', trigger: 'blur' }],
+  deliveryLabel: [{ required: true, message: 'Please enter your email', trigger: 'blur' }],
+}
+
+const handleRegister = async () => {
+  if (!addressFormRef.value) return
+
+  await addressFormRef.value.validate((valid) => {
+    if (valid) {
+      loading.value = true
+
+      // Simulate API call
+      setTimeout(() => {
+        loading.value = false
+        ElMessage.success('Login successful!')
+        console.log('Login data:', addressForm)
+        // Add your login logic here
+      }, 1500)
+    } else {
+      ElMessage.error('Please fill in all required fields correctly')
+    }
+  })
+}
 </script>
 
 <template>
-  <el-form ref="addressFormRef" :model="addressForm" label-width="auto">
+  <el-form
+    ref="addressFormRef"
+    :model="addressForm"
+    label-width="auto"
+    :rules
+    @submit.prevent="handleRegister"
+  >
     <div>
-      <el-form-item label="Full Name" prop="name" label-position="top">
+      <el-form-item label="Full Name" prop="fullName" label-position="top">
         <el-input v-model="addressForm.fullName" placeholder="First Last" />
       </el-form-item>
 
-      <el-form-item label="Mobile Number" prop="name" label-position="top">
+      <el-form-item label="Mobile Number" prop="mobileNumber" label-position="top">
         <el-input v-model="addressForm.mobileNumber" placeholder="Please enter your phone number" />
       </el-form-item>
 
-      <el-form-item label="Address" prop="name" label-position="top">
+      <el-form-item label="Address" prop="address" label-position="top">
         <el-input v-model="addressForm.address" placeholder="Please enter your address" />
       </el-form-item>
 
-      <el-form-item label="Floor/Unit Number" prop="name" label-position="top">
+      <el-form-item label="Floor/Unit Number" prop="unitNumber" label-position="top">
         <el-input
           v-model="addressForm.unitNumber"
           placeholder="Please enter your floor/unit number"
@@ -45,21 +87,25 @@ const isEditting = computed(() => route.params.addressId)
     </div>
 
     <div>
-      <el-form-item label="Province" prop="name" label-position="top">
+      <el-form-item label="Province" prop="province" label-position="top">
         <el-input v-model="addressForm.province" placeholder="Please choose your province" />
       </el-form-item>
 
-      <el-form-item label="District" prop="name" label-position="top">
+      <el-form-item label="District" prop="district" label-position="top">
         <el-input v-model="addressForm.district" placeholder="Please choose your district" />
       </el-form-item>
 
-      <el-form-item label="Ward" prop="name" label-position="top">
+      <el-form-item label="Ward" prop="ward" label-position="top">
         <el-input v-model="addressForm.ward" placeholder="Please choose your ward" />
       </el-form-item>
 
-      <el-form-item label="Select a label for effective delivery:" prop="name" label-position="top">
+      <el-form-item
+        label="Select a label for effective delivery:"
+        prop="deliveryLabel"
+        label-position="top"
+      >
         <div class="label-buttons">
-          <el-button class="office button-label"
+          <el-button class="office button-label" @click="addressForm.deliveryLabel = 'office'"
             ><el-icon
               :style="[
                 addressForm.deliveryLabel === 'office' ? 'color: var(--color-tertiary)' : '',
@@ -67,7 +113,7 @@ const isEditting = computed(() => route.params.addressId)
               ><Briefcase /></el-icon
             ><span> office </span>
           </el-button>
-          <el-button class="home button-label"
+          <el-button class="home button-label" @click="addressForm.deliveryLabel = 'home'"
             ><el-icon
               :style="[addressForm.deliveryLabel === 'home' ? 'color: var(--color-main)' : '']"
               ><HomeFilled /></el-icon
@@ -78,7 +124,11 @@ const isEditting = computed(() => route.params.addressId)
 
       <div class="form-buttons">
         <el-button class="cancel-button form-button" @click="router.back()">cancel</el-button>
-        <el-button class="save-button form-button">{{ isEditting ? 'Edit' : 'Save' }}</el-button>
+
+        <el-button class="save-button form-button" native-type="submit">{{
+          isEditting ? 'Edit' : 'Save'
+        }}</el-button>
+
         <el-button text class="delete-button" v-if="isEditting">Delete</el-button>
       </div>
     </div>
@@ -120,7 +170,7 @@ const isEditting = computed(() => route.params.addressId)
 }
 
 .office {
-  --el-button-border-color: var(--color-tertiary);
+  --el-button-border-color: var(--color-tertiary-opaque);
 }
 
 .home {

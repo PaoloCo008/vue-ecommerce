@@ -7,44 +7,45 @@ import AuthOTP from './AuthOTP.vue'
 import PhoneForm from './PhoneForm.vue'
 import AddressModal from '../address/AddressModal.vue'
 import type { AuthStages } from '@/lib/types/globals'
+import { useAuthStore } from '@/stores/AuthStore'
 
-const { operation } = defineProps<{ operation: AuthStages }>()
+const { operation } = defineProps<{ operation?: AuthStages }>()
 
 const state = ref<AuthStages>(operation)
+
+const authStore = useAuthStore()
+
+console.log(authStore.getMode)
 </script>
 
 <template>
   <TransitionGroup name="forms" tag="div" class="transition-wrapper">
     <!-- Sign In Form -->
-    <SignInForm
-      v-if="state === 'logIn'"
-      @to-login="state = 'signUp'"
-      @to-recovery="state = 'recover'"
-    />
+    <SignInForm v-if="authStore.isInMethodFlowPosition('login')" @to-recovery="state = 'recover'" />
 
     <!-- Sign Up Form -->
-    <SignUpForm
-      v-if="state === 'signUp'"
-      @to-sign-up="state = 'logIn'"
-      @to-phone="state = 'phone'"
-    />
+    <SignUpForm v-if="authStore.isInMethodFlowPosition('signup')" @to-phone="state = 'phone'" />
 
     <!-- Address Modal -->
-    <AddressModal v-if="state === 'address'" />
+    <AddressModal v-if="authStore.isInMethodFlowPosition('address')" />
 
     <!-- Phone Form -->
-    <PhoneForm v-if="state === 'phone'" @confirm="state = 'otp'" />
+    <PhoneForm v-if="authStore.isInMethodFlowPosition('phone')" @confirm="state = 'otp'" />
 
     <!-- OTP Form -->
     <AuthOTP
-      v-if="state === 'otp'"
+      v-if="authStore.isInMethodFlowPosition('otp')"
       @confirm-sign-up="state = 'address'"
       @change-number="state = 'phone'"
-      @back="state = 'logIn'"
+      @back="state = 'login'"
     />
 
     <!-- Recovery Form -->
-    <RecoveryForm v-if="state === 'recover'" @back="state = 'logIn'" @confirm="state = 'otp'" />
+    <RecoveryForm
+      v-if="authStore.isInMethodFlowPosition('recover')"
+      @back="state = 'login'"
+      @confirm="state = 'otp'"
+    />
   </TransitionGroup>
 </template>
 
@@ -54,7 +55,6 @@ const state = ref<AuthStages>(operation)
   width: 100%;
   background-color: #fff;
   margin: 0 auto;
-  height: 500px;
 }
 
 .forms-enter-active,

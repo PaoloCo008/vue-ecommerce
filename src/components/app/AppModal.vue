@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { ref } from 'vue'
+import { provide, ref } from 'vue'
 
 const modalVisible = ref(false)
 
@@ -20,6 +20,8 @@ function onTriggerClick() {
 function onSubmit() {
   modalVisible.value = false
 }
+
+provide('closeModal', onSubmit)
 </script>
 
 <template>
@@ -27,7 +29,7 @@ function onSubmit() {
 
   <Teleport to="body">
     <el-dialog destroy-on-close v-model="modalVisible" align-center :title="title">
-      <slot></slot>
+      <slot name="default" :onSubmit></slot>
     </el-dialog>
   </Teleport>
 </template>

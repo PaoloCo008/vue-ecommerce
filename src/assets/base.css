@@ -34,7 +34,8 @@
   --color-main-opaque: rgba(245, 113, 36, 0.6);
   --color-main-transparent: rgba(245, 112, 36, 0.05);
   --color-secondary: #ffb916;
-  --color-tertiary: #a3d7e1;
+  --color-tertiary: #1cb5d4;
+  --color-tertiary-opaque: #a3d7e1;
   --color-focus: #e16116;
   --color-border: var(--vt-c-divider-light-2);
   --color-border-hover: var(--vt-c-divider-light-1);

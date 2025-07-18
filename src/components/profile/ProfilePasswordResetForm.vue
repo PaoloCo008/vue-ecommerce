@@ -1,8 +1,7 @@
 <script setup lang="ts">
 import { ref, reactive, computed } from 'vue'
-import { Close, View, Hide } from '@element-plus/icons-vue'
-import { ElMessage } from 'element-plus'
-import ModalTemplate from '../ModalTemplate.vue'
+import { View, Hide } from '@element-plus/icons-vue'
+import ProfileContentLayout from '@/layouts/ProfileContentLayout.vue'
 
 // Props
 const props = defineProps({
@@ -119,75 +118,84 @@ const handleConfirm = async () => {
 </script>
 
 <template>
-  <ModalTemplate
-    title="Reset your password"
-    :on-confirm="handleConfirm"
-    :on-back="() => emit('back')"
-  >
-    <p class="description">Please enter your new password.</p>
+  <ProfileContentLayout page-title="Reset password">
+    <div class="form-wrapper">
+      <p class="description">Please enter your new password.</p>
 
-    <el-form ref="formRef" :model="form" :rules="rules" label-position="top" class="password-form">
-      <el-form-item label="New Password" prop="newPassword">
-        <el-input
-          v-model="form.newPassword"
-          :type="showPassword ? 'text' : 'password'"
-          placeholder="Enter new password"
-          size="large"
-          class="password-input"
-        >
-          <template #suffix>
-            <el-button
-              @click="togglePassword"
-              :icon="showPassword ? View : Hide"
-              link
-              class="password-toggle"
-            />
-          </template>
-        </el-input>
-      </el-form-item>
+      <el-form
+        ref="formRef"
+        :model="form"
+        :rules="rules"
+        label-position="top"
+        class="password-form"
+      >
+        <el-form-item label="New Password" prop="newPassword">
+          <el-input
+            v-model="form.newPassword"
+            :type="showPassword ? 'text' : 'password'"
+            placeholder="Enter new password"
+            size="large"
+            class="password-input"
+          >
+            <template #suffix>
+              <el-button
+                @click="togglePassword"
+                :icon="showPassword ? View : Hide"
+                link
+                class="password-toggle"
+              />
+            </template>
+          </el-input>
+        </el-form-item>
 
-      <el-form-item label="Password Confirm" prop="newPassword">
-        <el-input
-          v-model="form.passwordConfirm"
-          :type="showConfirm ? 'text' : 'password'"
-          placeholder="Confirm your password"
-          size="large"
-          class="password-input"
-        >
-          <template #suffix>
-            <el-button
-              @click="toggleConfirm"
-              :icon="showConfirm ? View : Hide"
-              link
-              class="password-toggle"
-            />
-          </template>
-        </el-input>
-      </el-form-item>
-    </el-form>
+        <el-form-item label="Password Confirm" prop="newPassword">
+          <el-input
+            v-model="form.passwordConfirm"
+            :type="showConfirm ? 'text' : 'password'"
+            placeholder="Confirm your password"
+            size="large"
+            class="password-input"
+          >
+            <template #suffix>
+              <el-button
+                @click="toggleConfirm"
+                :icon="showConfirm ? View : Hide"
+                link
+                class="password-toggle"
+              />
+            </template>
+          </el-input>
+        </el-form-item>
 
-    <div class="password-requirements">
-      <ul class="requirements-list">
-        <li class="requirement-item">The length of Password should be 8 - 20 characters.</li>
-        <li class="requirement-item">
-          Password should contain alphabets, numbers and special characters
-        </li>
-        <li class="requirement-item">Password can only include ~!@#$%^&*<> symbols</li>
-      </ul>
+        <div class="password-requirements">
+          <ul class="requirements-list">
+            <li class="requirement-item">The length of Password should be 8 - 20 characters.</li>
+            <li class="requirement-item">
+              Password should contain alphabets, numbers and special characters
+            </li>
+            <li class="requirement-item">Password can only include ~!@#$%^&*<> symbols</li>
+          </ul>
+        </div>
+
+        <el-button type="primary" size="large" class="confirm-button" native-type="submit">
+          Reset Password
+        </el-button>
+      </el-form>
     </div>
-  </ModalTemplate>
+  </ProfileContentLayout>
 </template>
 
 <style scoped>
+.form-wrapper {
+  background-color: #fff;
+  padding: 1.5rem;
+}
+
 .description {
   font-size: 0.875rem;
   color: #666666;
   margin-bottom: 20px;
   line-height: 1.4;
-}
-
-.password-form {
-  margin-bottom: 20px;
 }
 
 .password-input {
@@ -237,6 +245,19 @@ const handleConfirm = async () => {
 
 .requirement-item:last-child {
   margin-bottom: 0;
+}
+
+.confirm-button {
+  padding: 0.75rem 1.5rem;
+  background: #ff6b35;
+  border-color: #ff6b35;
+  border-radius: 6px;
+  margin: 0;
+}
+
+.confirm-button:hover {
+  background: #ff5722;
+  border-color: #ff5722;
 }
 
 :deep(.el-form-item__label) {

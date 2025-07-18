@@ -2,16 +2,35 @@
 import { ref, reactive } from 'vue'
 import { ElMessage } from 'element-plus'
 import ModalTemplate from '../ModalTemplate.vue'
+import { useAuthStore } from '@/stores/AuthStore'
+import { useUserStore } from '@/stores/UserStore'
 
 const emit = defineEmits<{ (e: 'confirm'): void; (e: 'back'): void }>()
 
+const authStore = useAuthStore()
+const userStore = useUserStore()
+
 // Form reference
-const formRef = ref(null)
+const recoveryFormRef = ref(null)
 
 // Form data
-const form = reactive({
-  account: '',
+const recoveryForm = reactive({
+  account: 'maria.santos@email.com',
 })
+
+function validateEmail(rule: any, value: any, callback: any) {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
+  if (value === '') {
+    callback(new Error('Please enter a email you want to recover'))
+  } else if (!emailRegex.test(value)) {
+    callback(new Error('Please provide a valid email'))
+  } else if (value !== userStore.getUserByEmail(recoveryForm.account)?.email) {
+    callback(new Error('No user found with that email'))
+  } else {
+    callback()
+  }
+}
 
 // Form validation rules
 const rules = reactive({
@@ -22,71 +41,51 @@ const rules = reactive({
       trigger: 'blur',
     },
     {
-      validator: (rule, value, callback) => {
-        if (!value) {
-          callback()
-          return
-        }
-
-        // Email regex
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-        // Phone regex (basic pattern for various formats)
-
-        if (emailRegex.test(value)) {
-          callback()
-        } else {
-          callback(new Error('Please enter a valid email'))
-        }
-      },
+      validator: validateEmail,
       trigger: 'blur',
     },
   ],
 })
 
 // Event handlers
-const handleBack = () => {
-  emit('back')
-}
 
 const handleConfirm = async () => {
-  emit('confirm')
-  // if (!formRef.value) return
-  // try {
-  //   // Validate form
-  //   await formRef.value.validate()
-  //   // Process the form data
-  //   console.log('Form submitted:', form.account)
-  //   // Show success message
-  //   ElMessage({
-  //     type: 'success',
-  //     message: 'Password reset instructions have been sent!',
-  //   })
-  //   // Here you would typically make an API call
-  //   // await resetPassword(form.account)
-  // } catch (error) {
-  //   console.log('Validation failed:', error)
-  //   ElMessage({
-  //     type: 'error',
-  //     message: 'Please check your input and try again',
-  //   })
-  // }
+  if (!recoveryFormRef.value) return
+  try {
+    // Validate form
+    await recoveryFormRef.value.validate()
+    // Process the form data
+    console.log('Form submitted:', recoveryForm.account)
+    // Show success message
+    authStore.goToRecoveryOTP({ email: recoveryForm.account })
+  } catch (error) {
+    console.log('Validation failed:', error)
+    ElMessage({
+      type: 'error',
+      message: 'Please check your input and try again',
+    })
+  }
 }
 
 // Expose methods if needed by parent component
 defineExpose({
   resetForm: () => {
-    formRef.value?.resetFields()
+    recoveryFormRef.value?.resetFields()
   },
 })
 </script>
 
 <template>
-  <ModalTemplate title="Forgot your password?" :confirm="handleConfirm" :back="handleBack">
+  <ModalTemplate
+    title="Forgot your password?"
+    :confirm="handleConfirm"
+    :back="() => authStore.goBack('login')"
+  >
     <p class="description">Please enter the account that you want to reset the password.</p>
 
     <el-form
-      ref="formRef"
-      :model="form"
+      ref="recoveryFormRef"
+      :model="recoveryForm"
       :rules="rules"
       label-position="top"
       class="forgot-password-form"
@@ -94,7 +93,7 @@ defineExpose({
     >
       <el-form-item label="Email" prop="account">
         <el-input
-          v-model="form.account"
+          v-model.trim="recoveryForm.account"
           placeholder="Please enter your Email"
           size="large"
           class="input-field"

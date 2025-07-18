@@ -30,7 +30,10 @@ import AppHeaderLinks from './AppHeaderLinks.vue'
           </template>
         </AppDrawer>
         <RouterLink :to="{ name: 'cart' }">
-          <el-icon size="35px" color="#2b357e"> <ShoppingCart /> </el-icon>
+          <el-icon size="35px" color="#2b357e">
+            <ShoppingCart />
+            <div class="circle"></div>
+          </el-icon>
         </RouterLink>
       </div>
     </div>
@@ -38,6 +41,16 @@ import AppHeaderLinks from './AppHeaderLinks.vue'
 </template>
 
 <style scoped>
+.circle {
+  width: 20px;
+  height: 20px;
+  background-color: red;
+  position: absolute;
+  border-radius: 100%;
+  top: -2px;
+  right: -5px;
+}
+
 .el-header {
   display: flex;
   flex-direction: column;

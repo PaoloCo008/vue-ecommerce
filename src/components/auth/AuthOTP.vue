@@ -1,9 +1,18 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import { Close } from '@element-plus/icons-vue'
+import { computed, inject, ref } from 'vue'
 import ModalTemplate from '../ModalTemplate.vue'
+import { useAuthStore } from '@/stores/AuthStore'
+import { useUserStore } from '@/stores/UserStore'
+import { ElMessage } from 'element-plus'
+import { useRouter } from 'vue-router'
 
-const dialogVisible = ref(true)
+const authStore = useAuthStore()
+const userStore = useUserStore()
+const router = useRouter()
+
+const forPhone = computed(() => authStore.getMode === 'signup')
+
+const onConfirm = inject('closeModal')
 
 const emit = defineEmits<{
   (e: 'confirmSignUp'): void
@@ -12,20 +21,42 @@ const emit = defineEmits<{
 }>()
 
 function handleConfirm() {
-  emit('confirmSignUp')
+  const mode = authStore.getMode
+
+  if (mode === 'signup') {
+    authStore.incrementStep()
+  } else if (mode === 'login') {
+    authStore.authorize()
+    onConfirm()
+    ElMessage.success('Login successful')
+  } else {
+    onConfirm()
+    router.push({ name: 'passwordReset', params: { id: 1 } })
+  }
 }
 </script>
 
 <template>
-  <ModalTemplate title="Verify your identity" :confirm="handleConfirm" @back="$emit('back')">
-    <p class="description">Please enter the OTP via SMS to continue</p>
+  <ModalTemplate title="Verify your identity" :confirm="handleConfirm" @back="">
+    <p class="description">
+      {{
+        forPhone
+          ? 'Please enter the OTP via SMS to continue'
+          : `Please enter the OTP via ${userStore.getUserById(authStore.user as string)?.email} to continue`
+      }}
+    </p>
 
-    <div class="phone-info">
-      <span class="phone-label">Phone Number</span>
-      <div class="phone-number__wrapper">
-        <span class="phone-number">09178777471</span>
-        <el-button type="primary" link class="change-number-btn" @click="$emit('toPhone')">
-          Change number
+    <div class="info">
+      <span class="label">{{ forPhone ? 'Phone Number:' : 'Email Address:' }}</span>
+
+      <div class="info-state__wrapper">
+        <span class="info-state">{{
+          forPhone
+            ? authStore.getFormDataByProperty('signup', 'mobileNumber')
+            : authStore.getFormDataByProperty('login', 'email')
+        }}</span>
+        <el-button type="primary" link class="change-number-btn" @click="authStore.decrementStep()">
+          {{ forPhone ? 'Change number' : 'Change email' }}
         </el-button>
       </div>
     </div>
@@ -86,25 +117,25 @@ function handleConfirm() {
   line-height: 1.4;
 }
 
-.phone-info {
+.info {
   display: flex;
   margin-bottom: 24px;
   gap: 8px;
   flex-wrap: wrap;
 }
 
-.phone-label {
+.label {
   font-size: 14px;
   color: #999999;
 }
 
-.phone-number__wrapper {
+.info-state__wrapper {
   display: flex;
   align-items: center;
   gap: 0.5rem;
 }
 
-.phone-number {
+.info-state {
   font-size: 14px;
   color: #333333;
   font-weight: 500;

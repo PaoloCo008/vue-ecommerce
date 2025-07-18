@@ -16,6 +16,7 @@ import CheckoutPage from '@/views/CheckoutPage.vue'
 import OrderDetailsPage from '@/views/OrderDetailsPage.vue'
 import ProfileEditForm from '@/components/profile/ProfileEditForm.vue'
 import ChangeDefaultAddressPage from '@/views/ChangeDefaultAddressPage.vue'
+import ProfilePasswordResetForm from '@/components/profile/ProfilePasswordResetForm.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -39,12 +40,12 @@ const router = createRouter({
           name: 'cart',
           component: CartPage,
         },
-        { path: '/login-signup', name: 'login', component: AuthPage, meta: { operation: 'logIn' } },
+        { path: '/login-signup', name: 'login', component: AuthPage, meta: { operation: 'login' } },
         {
           path: '/login-signup',
           name: 'signup',
           component: AuthPage,
-          meta: { operation: 'signUp' },
+          meta: { operation: 'signup' },
         },
         { path: '/checkout', name: 'checkout', component: CheckoutPage },
         {
@@ -76,6 +77,11 @@ const router = createRouter({
                       path: ':id/orders/:orderId',
                       name: 'orderdetails',
                       component: OrderDetailsPage,
+                    },
+                    {
+                      path: ':id/passwordReset',
+                      name: 'passwordReset',
+                      component: ProfilePasswordResetForm,
                     },
                   ],
                 },

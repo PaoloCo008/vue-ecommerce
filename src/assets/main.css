@@ -14,6 +14,7 @@ a,
   transition: 0.4s;
   padding: 3px;
 }
+
 /* 
 .el-checkbox {
   --el-checkbox-checked-bg-color: var(--color-main);
@@ -111,7 +112,7 @@ a,
 } */
 
 @media (hover: hover) {
-  a:hover {
+  /* a:hover {
     background-color: hsla(160, 100%, 37%, 0.2);
-  }
+  } */
 }

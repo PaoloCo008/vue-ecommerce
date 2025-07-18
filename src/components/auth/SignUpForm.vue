@@ -2,8 +2,11 @@
 import { ref, reactive } from 'vue'
 import { ElMessage } from 'element-plus'
 import ModalTemplate from '../ModalTemplate.vue'
+import { useAuthStore } from '@/stores/AuthStore'
 
-const emit = defineEmits<{ (e: 'toSignUp'): void; (e: 'toPhone'): void }>()
+const emit = defineEmits<{ (e: 'toPhone'): void }>()
+
+const authStore = useAuthStore()
 
 // Form reference
 const signUpFormRef = ref()
@@ -13,10 +16,20 @@ const loading = ref(false)
 
 // Form data
 const signUpForm = reactive({
-  email: '',
-  password: '',
-  passwordConfirm: '',
+  email: 'email',
+  password: 'password',
+  passwordConfirm: 'password',
 })
+
+function validatePasswordConfirm(rule: any, value: any, callback: any) {
+  if (value === '') {
+    callback(new Error('Please re-enter your new password'))
+  } else if (value !== signUpForm.password) {
+    callback(new Error("Password don't match"))
+  } else {
+    callback()
+  }
+}
 
 // Form validation rules
 const rules = {
@@ -25,38 +38,26 @@ const rules = {
     { required: true, message: 'Please enter your password', trigger: 'blur' },
     { min: 6, message: 'Password must be at least 6 characters', trigger: 'blur' },
   ],
+  passwordConfirm: [{ validator: validatePasswordConfirm, trigger: 'blur' }],
 }
 
 // Handle signUp
 const handlesignUp = async () => {
-  emit('toPhone')
-  // if (!signUpFormRef.value) return
-  // await signUpFormRef.value.validate((valid) => {
-  //   if (valid) {
-  //     loading.value = true
-  //     // Simulate API call
-  //     setTimeout(() => {
-  //       loading.value = false
-  //       ElMessage.success('signUp successful!')
-  //       console.log('signUp data:', signUpForm)
-  //       // Add your signUp logic here
-  //     }, 1500)
-  //   } else {
-  //     ElMessage.error('Please fill in all required fields correctly')
-  //   }
-  // })
-}
+  if (!signUpFormRef.value) return
+  await signUpFormRef.value.validate((valid) => {
+    if (valid) {
+      loading.value = true
+      // Simulate API call
+      setTimeout(() => {
+        loading.value = false
+        ElMessage.success('signUp successful!')
 
-// Handle forgot password
-const handleForgotPassword = () => {
-  ElMessage.info('Forgot password clicked')
-  // Add your forgot password logic here
-}
-
-// Handle sign up
-const handleSignUp = () => {
-  ElMessage.info('Sign up clicked')
-  // Add your sign up logic here
+        authStore.signup({ email: signUpForm.email, password: signUpForm.password })
+      }, 1500)
+    } else {
+      ElMessage.error('Please fill in all required fields correctly')
+    }
+  })
 }
 </script>
 
@@ -109,7 +110,7 @@ const handleSignUp = () => {
             size="large"
             class="action-button"
             :loading="loading"
-            @click="handlesignUp"
+            native-type="submit"
           >
             SIGN UP
           </el-button>
@@ -117,7 +118,9 @@ const handleSignUp = () => {
 
         <div class="signup-link">
           Already have an account?
-          <el-button text type="primary" @click="$emit('toSignUp')"> Log in now </el-button>
+          <el-button text type="primary" @click="authStore.setAuthMode('login')">
+            Log in now
+          </el-button>
         </div>
       </div>
     </el-form>

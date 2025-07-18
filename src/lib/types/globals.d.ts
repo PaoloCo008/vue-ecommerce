@@ -10,21 +10,24 @@ export interface Address {
   deliveryLabel: AddressLabels
 }
 
-export type AddressLabels = 'home' | 'office'
+export type AddressLabel = 'home' | 'office'
 
 export interface User {
   _id: string
   fullName: string
   email: string
-  mobile: string
-  birthday?: Date
-  gender?: Gender
+  password: string
+  mobileNumber: string
+  birthday: Date | null
+  gender: Gender | null
   defaultBillingAddress: Address['_id'] | null
   defaultShippingAddress: Address['_id'] | null
   addresses: Address['_id'][]
   paymentMethods: PaymentMethod[]
-  cart: Cart['_id']
+  cart: Cart['_id'] | null
   orders: Order['_id'][]
+  receiveMarketingEmails: boolean
+  receiveMarketingSMS: boolean
 }
 
 export interface Cart {
@@ -92,11 +95,4 @@ export type PaymentMethod = CreditCard | MobileWallet
 
 export type Gender = 'male' | 'female' | 'other'
 
-export type AuthStages =
-  | 'signUp'
-  | 'logIn'
-  | 'address'
-  | 'phone'
-  | 'passwordReset'
-  | 'otp'
-  | 'recover'
+export type AuthStages = 'signup' | 'login' | 'address' | 'phone' | 'otp' | 'recover'

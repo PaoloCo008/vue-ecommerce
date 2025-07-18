@@ -2,6 +2,10 @@
 import { useRoute } from 'vue-router'
 import AppModal from './AppModal.vue'
 import AuthWrapper from '../auth/AuthTransitionWrapper.vue'
+import { useAuthStore } from '@/stores/AuthStore'
+import type { AuthMode } from '@/lib/types/stores'
+import { useUserStore } from '@/stores/UserStore'
+import { LogOut, Package2, Smile } from 'lucide-vue-next'
 
 const route = useRoute()
 
@@ -9,6 +13,18 @@ const dialogStyle = {
   width: '95vw',
   maxWidth: '450px',
   height: '400px',
+}
+
+const authStore = useAuthStore()
+const userStore = useUserStore()
+
+function handleClick(openFn: () => void, authMode: AuthMode) {
+  openFn()
+  authStore.setAuthMode(authMode)
+}
+
+function handleLogout() {
+  authStore.logout()
 }
 </script>
 
@@ -19,10 +35,40 @@ const dialogStyle = {
       <RouterLink :to="{ name: 'signup' }">signup</RouterLink>
     </template>
 
+    <template v-if="authStore.isAuthenticated">
+      <el-dropdown>
+        <span class="el-dropdown-link">
+          {{ `${userStore.getUserById(authStore.user as string)?.fullName}'s account` }}
+          <el-icon class="el-icon--right">
+            <arrow-down />
+          </el-icon>
+        </span>
+        <template #dropdown>
+          <el-dropdown-menu>
+            <el-dropdown-item>
+              <RouterLink :to="{ name: 'profile', params: { id: authStore.user } }"
+                ><Smile :size="16" />Manage my profile
+              </RouterLink>
+            </el-dropdown-item>
+            <el-dropdown-item>
+              <RouterLink :to="{ name: 'orders', params: { id: authStore.user } }"
+                ><Package2 :size="16" />My Orders</RouterLink
+              >
+            </el-dropdown-item>
+            <el-dropdown-item>
+              <el-button class="logout-button" link @click="handleLogout"
+                ><LogOut :size="16" /><span class="logout-text"> Logout </span></el-button
+              >
+            </el-dropdown-item>
+          </el-dropdown-menu>
+        </template>
+      </el-dropdown>
+    </template>
+
     <template v-else>
       <AppModal :dialog-style="dialogStyle">
         <template #trigger="props">
-          <el-button @click="props.onTriggerClick" text>Login</el-button>
+          <el-button @click="handleClick(props.onTriggerClick, 'login')" text>Login</el-button>
         </template>
 
         <AuthWrapper operation="logIn" />
@@ -30,7 +76,9 @@ const dialogStyle = {
 
       <AppModal :dialog-style="dialogStyle">
         <template #trigger="props">
-          <el-button @click="props.onTriggerClick" text class="signup-button">Signup</el-button>
+          <el-button @click="handleClick(props.onTriggerClick, 'signup')" text class="signup-button"
+            >Signup</el-button
+          >
         </template>
 
         <AuthWrapper operation="signUp" />
@@ -41,6 +89,103 @@ const dialogStyle = {
 
 <style scoped>
 a {
+  display: flex;
+  align-items: center;
+  height: 32px;
+  gap: 5px;
+}
+
+.header-links {
+  display: flex;
+  justify-content: flex-end;
+  width: 100%;
+  max-width: 1200px;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  gap: 2rem;
+  margin: 0 auto;
+}
+
+.header-links .el-button {
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  color: #00bd7e;
+  padding: 3px;
+  border-radius: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  height: 32px;
+}
+
+.header-links .el-button:hover {
+  background-color: #bfe6dd;
+}
+
+.signup-button {
+  margin: 0;
+}
+
+.el-button {
+  --el-button-active-color: #00bd7e;
+}
+
+.logout-button {
+  color: #00bd7e;
+}
+
+.logout-text {
+  margin-left: 5px;
+  font-weight: 500;
+}
+
+/* Element Plus Dropdown Trigger Styling */
+.header-links .el-dropdown {
+  height: 32px;
+}
+
+.header-links .el-dropdown .el-dropdown-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 32px;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  color: #00bd7e;
+  padding: 3px;
+  border-radius: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  text-decoration: none;
+}
+
+.header-links .el-dropdown .el-dropdown-link:hover {
+  background-color: #bfe6dd;
+}
+
+/* Element Plus Dropdown Menu Styling */
+.custom-dropdown-menu .el-dropdown-menu__item {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  font-weight: 500;
+  color: #333;
+  padding: 8px 12px;
+}
+
+.custom-dropdown-menu .el-dropdown-menu__item:hover {
+  background-color: #bfe6dd;
+  color: #00bd7e;
+}
+
+/* Remove default Element Plus dropdown arrow */
+.header-links .el-dropdown .el-icon {
+  display: none;
+}
+
+/* a {
   display: flex;
   align-items: center;
   height: 32px;
@@ -72,5 +217,5 @@ a {
 
 .signup-button {
   margin: 0;
-}
+} */
 </style>

@@ -1,19 +1,25 @@
 <script setup lang="ts">
 import AuthWrapper from '@/components/auth/AuthTransitionWrapper.vue'
-import type { AuthStages } from '@/lib/types/globals'
+
+import type { AuthMode } from '@/lib/types/stores'
+import { useAuthStore } from '@/stores/AuthStore'
+import { watchEffect } from 'vue'
 import { useRoute } from 'vue-router'
 
 const route = useRoute()
+const authStore = useAuthStore()
+
 console.log(route.meta.operation)
+
+watchEffect(() => {
+  authStore.setAuthMode(route.meta.operation as AuthMode)
+})
 </script>
 
 <template>
   <Teleport to="body">
     <div class="wrapper">
-      <AuthWrapper
-        :operation="$route.meta.operation as AuthStages"
-        :key="route.meta.operation as AuthStages"
-      />
+      <AuthWrapper :key="route.meta.operation as AuthMode" />
     </div>
   </Teleport>
 </template>

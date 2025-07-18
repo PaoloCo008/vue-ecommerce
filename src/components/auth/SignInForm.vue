@@ -1,10 +1,14 @@
 <script setup lang="ts">
 import { ref, reactive } from 'vue'
 import { ElMessage } from 'element-plus'
-import { RouterLink } from 'vue-router'
 import ModalTemplate from '../ModalTemplate.vue'
+import { useAuthStore } from '@/stores/AuthStore'
+import { useUserStore } from '@/stores/UserStore'
 
-defineEmits<{ (e: 'toLogin'): void; (e: 'toRecovery'): void }>()
+defineEmits<{ (e: 'toRecovery'): void }>()
+
+const authStore = useAuthStore()
+const userStore = useUserStore()
 
 // Form reference
 const loginFormRef = ref()
@@ -14,16 +18,41 @@ const loading = ref(false)
 
 // Form data
 const loginForm = reactive({
-  email: '',
-  password: '',
+  email: 'maria.santos@email.com',
+  password: 'hashedPassword123!',
 })
+
+function validatePassword(rule: any, value: any, callback: any) {
+  console.log(userStore.getUserByEmail(loginForm.email))
+  if (value === '') {
+    callback(new Error('Username is required'))
+  } else if (value !== userStore.getUserByEmail(loginForm.email)?.password) {
+    callback(new Error('Please provide a valid username.'))
+  } else {
+    callback()
+  }
+}
+
+function validateEmail(rule: any, value: any, callback: any) {
+  if (value === '') {
+    callback(new Error('Password is required'))
+  } else if (value !== userStore.getUserByEmail(loginForm.email)?.email) {
+    callback(new Error('Please provide a valid password.'))
+  } else {
+    callback()
+  }
+}
 
 // Form validation rules
 const rules = {
-  email: [{ required: true, message: 'Please enter your email', trigger: 'blur' }],
+  email: [
+    { required: true, message: 'Please enter your email', trigger: 'blur' },
+    { validator: validateEmail },
+  ],
   password: [
     { required: true, message: 'Please enter your password', trigger: 'blur' },
     { min: 6, message: 'Password must be at least 6 characters', trigger: 'blur' },
+    { validator: validatePassword },
   ],
 }
 
@@ -38,8 +67,11 @@ const handleLogin = async () => {
       // Simulate API call
       setTimeout(() => {
         loading.value = false
-        ElMessage.success('Login successful!')
-        console.log('Login data:', loginForm)
+        authStore.login({
+          userId: userStore.getUserByEmail(loginForm.email)!._id,
+          email: loginForm.email,
+          password: loginForm.password,
+        })
         // Add your login logic here
       }, 1500)
     } else {
@@ -92,7 +124,9 @@ const handleSignUp = () => {
         </el-form-item>
 
         <div class="forgot-password">
-          <el-button text type="primary" @click="$emit('toRecovery')"> Forgot password? </el-button>
+          <el-button text type="primary" @click="authStore.goToRecovery()">
+            Forgot password?
+          </el-button>
         </div>
       </div>
 
@@ -110,7 +144,9 @@ const handleSignUp = () => {
         </el-form-item>
         <div class="signup-link">
           Don't have an account?
-          <el-button text type="primary" @click="$emit('toLogin')"> Sign up </el-button>
+          <el-button text type="primary" @click="authStore.setAuthMode('signup')">
+            Sign up
+          </el-button>
         </div>
       </div>
     </el-form>

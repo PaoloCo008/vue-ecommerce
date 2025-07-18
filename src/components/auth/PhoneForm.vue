@@ -1,37 +1,73 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { reactive, ref } from 'vue'
 import ModalTemplate from '../ModalTemplate.vue'
+import { ElMessage } from 'element-plus'
+import { useAuthStore } from '@/stores/AuthStore'
 
-const phoneNumber = ref('')
+const authStore = useAuthStore()
 
-const emit = defineEmits<{ (e: 'confirm'): void }>()
+const phoneFormRef = ref()
+const phoneForm = reactive({
+  mobileNumber: '091823414819',
+})
 
-function handlePhoneRegister() {
-  emit('confirm')
+const rules = {
+  mobileNumber: [
+    { required: true, message: 'Please enter your phone number', trigger: 'blur' },
+    { pattern: /^09\d{9}$/, message: 'Please enter a valid phone number', trigger: 'blur' },
+  ],
+}
+
+const loading = ref(false)
+
+const handleRegister = async () => {
+  if (!phoneFormRef.value) return
+  await phoneFormRef.value.validate((valid) => {
+    if (valid) {
+      loading.value = true
+      // Simulate API call
+      setTimeout(() => {
+        loading.value = false
+        ElMessage.success('signUp successful!')
+
+        authStore.registerPhone({ mobileNumber: phoneForm.mobileNumber })
+      }, 1500)
+    } else {
+      ElMessage.error('Please fill in all required fields correctly')
+    }
+  })
 }
 </script>
 
 <template>
-  <ModalTemplate title="Enter your phone number" has-content-buttons @confirm="handlePhoneRegister">
+  <ModalTemplate title="Register a  phone number" has-content-buttons>
     <!-- Header with QR icon and tabs -->
 
     <!-- Phone number input form -->
-    <div class="form-section">
-      <div class="input-container">
-        <div class="country-prefix">PH+63</div>
-        <input
-          v-model="phoneNumber"
-          type="text"
-          placeholder="Please enter your phone number"
-          class="phone-input"
-        />
-      </div>
+    <el-form
+      ref="phoneFormRef"
+      :model="phoneFormRef"
+      :rules="rules"
+      class="signUp-form"
+      @submit.prevent="handleRegister"
+    >
+      <div class="form-section">
+        <div class="input-container">
+          <div class="country-prefix">PH+63</div>
+          <input
+            v-model="phoneForm.mobileNumber"
+            type="text"
+            placeholder="Please enter your phone number"
+            class="phone-input"
+          />
+        </div>
 
-      <button class="send-button" @click="handlePhoneRegister">
-        <el-icon><Iphone /></el-icon>
-        Register phone number
-      </button>
-    </div>
+        <el-button class="send-button" :loading="loading" native-type="submit">
+          <el-icon><Iphone /></el-icon>
+          Register phone number
+        </el-button>
+      </div>
+    </el-form>
   </ModalTemplate>
 </template>
 
