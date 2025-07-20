@@ -1,72 +1,67 @@
 <script lang="ts" setup>
 import ProfileContentLayout from '@/layouts/ProfileContentLayout.vue'
-import { ref } from 'vue'
+
+import { useAuthStore } from '@/stores/AuthStore'
+import { useUserStore } from '@/stores/UserStore'
+import { subYears } from 'date-fns'
+import { ElMessage } from 'element-plus'
+import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
+const userStore = useUserStore()
+const authStore = useAuthStore()
 
-const form = ref({
-  fullName: 'Paolo Co',
-  email: 'pa***********@gmail.com',
-  mobile: '+63 091******71',
-  birthMonth: '',
-  birthDay: '',
-  birthYear: '',
-  gender: '',
-  receiveMarketingEmails: false,
-  receiveMarketingSMS: false,
+const user = userStore.getUserById(authStore.user as string)
+
+const editProfileForm = ref({
+  fullName: user!.fullName,
+  birthday: user!.birthday,
+  gender: user!.gender,
+  receiveMarketingEmails: user!.receiveMarketingEmails,
+  receiveMarketingSMS: user!.receiveMarketingSMS,
 })
 
-const months = ref([
-  { value: 'january', label: 'January' },
-  { value: 'february', label: 'February' },
-  { value: 'march', label: 'March' },
-  { value: 'april', label: 'April' },
-  { value: 'may', label: 'May' },
-  { value: 'june', label: 'June' },
-  { value: 'july', label: 'July' },
-  { value: 'august', label: 'August' },
-  { value: 'september', label: 'September' },
-  { value: 'october', label: 'October' },
-  { value: 'november', label: 'November' },
-  { value: 'december', label: 'December' },
-])
-
-const days = ref(Array.from({ length: 31 }, (_, i) => i + 1))
-
-const years = ref(Array.from({ length: 100 }, (_, i) => 2024 - i))
-
-const changeEmail = () => {
-  console.log('Change email clicked')
-}
-
-const changeMobile = () => {
-  console.log('Change mobile clicked')
-}
+const lastDate = computed(() => subYears(new Date(), 100))
 
 const saveChanges = () => {
-  console.log('Save changes clicked', form.value)
+  userStore.editUser(user!._id, {
+    fullName: editProfileForm.value.fullName,
+    birthday: editProfileForm.value.birthday,
+    gender: editProfileForm.value.gender,
+    receiveMarketingEmails: editProfileForm.value.receiveMarketingEmails,
+    receiveMarketingSMS: editProfileForm.value.receiveMarketingSMS,
+  })
+
+  router.push({ name: 'myprofile', params: { id: user!._id } })
+  ElMessage.success('Profile updated successfully!')
 }
 </script>
 
 <template>
   <ProfileContentLayout page-title="Edit Profile">
-    <el-form :model="form" label-position="top" class="profile-form-container">
+    <el-form
+      :model="editProfileForm"
+      label-position="top"
+      class="profile-form-container"
+      @submit.prevent="saveChanges"
+    >
       <div class="form-group">
         <el-form-item label="Full Name" class="flex-grow">
-          <el-input v-model="form.fullName" placeholder="Enter your full name" class="form-input" />
+          <el-input
+            v-model="editProfileForm.fullName"
+            placeholder="Enter your full name"
+            class="form-input"
+          />
         </el-form-item>
 
         <el-form-item class="item-label">
           <div>
             <span>Email Address</span>
-            <el-button link type="primary" size="small" @click="changeEmail" class="change-link">
-              | Change
-            </el-button>
           </div>
 
           <p>pa***********@gmail.com</p>
-          <el-checkbox v-model="form.receiveMarketingEmails" class="marketing-checkbox">
+          <el-checkbox v-model="editProfileForm.receiveMarketingEmails" class="marketing-checkbox">
             Receive marketing emails
           </el-checkbox>
         </el-form-item>
@@ -74,13 +69,10 @@ const saveChanges = () => {
         <el-form-item class="item-label">
           <div>
             <span>Mobile</span>
-            <el-button link type="primary" size="small" @click="changeMobile" class="change-link">
-              | Change
-            </el-button>
           </div>
 
           <p>+63 091******71</p>
-          <el-checkbox v-model="form.receiveMarketingSMS" class="marketing-checkbox">
+          <el-checkbox v-model="editProfileForm.receiveMarketingSMS" class="marketing-checkbox">
             Receive marketing SMS
           </el-checkbox>
         </el-form-item>
@@ -89,38 +81,30 @@ const saveChanges = () => {
       <div class="form-group">
         <el-form-item label="Birthday" class="flex-grow">
           <div class="birthday-selects">
-            <el-select v-model="form.birthMonth" placeholder="Month" class="birthday-select">
-              <el-option
-                v-for="month in months"
-                :key="month.value"
-                :label="month.label"
-                :value="month.value"
-              />
-            </el-select>
-
-            <el-select v-model="form.birthDay" placeholder="Day" class="birthday-select">
-              <el-option v-for="day in days" :key="day" :label="day" :value="day" />
-            </el-select>
-
-            <el-select v-model="form.birthYear" placeholder="Year" class="birthday-select">
-              <el-option v-for="year in years" :key="year" :label="year" :value="year" />
-            </el-select>
+            <el-date-picker
+              v-model="editProfileForm.birthday"
+              placeholder="Please select your birthday"
+              class="birthday-select"
+              :editable="false"
+              :disabled-date="(date: Date) => date > new Date() || date < lastDate"
+            />
           </div>
         </el-form-item>
 
-        <el-form-item label="Gender" class="flex-grow">
-          <el-select v-model="form.gender" placeholder="Select" class="form-input">
+        <el-form-item label="Gender" class="flex-grow gender-select">
+          <el-select v-model="editProfileForm.gender" placeholder="Select" class="form-input">
             <el-option label="Male" value="male" />
             <el-option label="Female" value="female" />
             <el-option label="Other" value="other" />
-            <el-option label="Prefer not to say" value="prefer_not_to_say" />
           </el-select>
         </el-form-item>
       </div>
 
       <!-- Save Button -->
-      <el-button type="primary" class="save-button" @click="saveChanges"> SAVE CHANGES </el-button>
-      <el-button class="cancel-button cancel" @click="router.back()">cancel</el-button>
+      <el-button type="primary" class="save-button" native-type="submit"> SAVE CHANGES </el-button>
+      <el-button class="cancel-button cancel" @click="router.push({ name: 'myprofile' })"
+        >cancel</el-button
+      >
     </el-form>
   </ProfileContentLayout>
 </template>
@@ -170,6 +154,14 @@ const saveChanges = () => {
 
 .birthday-select {
   flex: 1;
+}
+
+.gender-select {
+  flex-grow: 2;
+}
+
+:deep(.el-input__prefix) {
+  display: none;
 }
 
 .save-button {

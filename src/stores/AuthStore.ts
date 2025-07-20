@@ -1,12 +1,12 @@
 import useLocalStorage from '@/composables/useLocalStorage'
 import type { GoToRecoveryOTP, Login, RegisterPhone, Signup } from '@/lib/types/actions'
-import type { AuthStages, User } from '@/lib/types/globals'
+import type { AddressLabel, AuthStages, User } from '@/lib/types/globals'
 import type { AuthMode, AuthStore } from '@/lib/types/stores'
 
 import { defineStore } from 'pinia'
 import { useUserStore } from './UserStore'
 import type { NewAddressForm } from '@/lib/types/forms'
-import { useAddressStore } from './AddressStore'
+import { useCartStore } from './CartStore'
 
 const loginInitialState = {
   email: '',
@@ -127,14 +127,19 @@ export const useAuthStore = defineStore('auth', {
     },
 
     login({ userId, email, password }: Login) {
+      const cartStore = useCartStore()
+
       this.user = userId
       this.loginData.email = email
       this.loginData.password = password
+
+      cartStore.mergeGuestCartToUserCart(this.user)
       this.incrementStep()
     },
 
-    registerUser(formAddressData: NewAddressForm, withAddress?: boolean) {
+    registerUser(formAddressData?: NewAddressForm) {
       const userStore = useUserStore()
+      const cartStore = useCartStore()
 
       const newUser: User = {
         ...this.signupData,
@@ -142,21 +147,35 @@ export const useAuthStore = defineStore('auth', {
         fullName: '',
         birthday: null,
         gender: null,
-        defaultBillingAddress: null,
-        defaultShippingAddress: null,
         addresses: [],
         paymentMethods: [],
-        cart: null,
-        orders: [],
         receiveMarketingEmails: false,
         receiveMarketingSMS: false,
       }
 
-      if (withAddress) {
-        const addressStore = useAddressStore()
+      if (formAddressData) {
+        const newAddress = {
+          _id: crypto.randomUUID(),
+          fullName: formAddressData.fullName,
+          mobileNumber: formAddressData.mobileNumber,
+          address: formAddressData.address,
+          unitNumber: formAddressData.unitNumber,
+          province: formAddressData.province,
+          district: formAddressData.district,
+          ward: formAddressData.ward,
+          deliveryLabel: formAddressData.deliveryLabel as AddressLabel,
+          isDefaultBilling: true,
+          isDefaultShipping: true,
+        }
 
-        addressStore.createAddress({ ...formAddressData })
+        newUser.addresses.push(newAddress)
+        newUser.fullName = formAddressData.fullName
       }
+
+      userStore.createUser(newUser)
+      cartStore.createCart(newUser._id)
+      this.authorize()
+      this.user = newUser._id
     },
 
     goToRecovery() {

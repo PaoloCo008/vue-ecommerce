@@ -1,11 +1,18 @@
 <script setup lang="ts">
-import AddressCard from '@/components/address/AddressCard.vue'
+import AddressCards from '@/components/address/AddressCards.vue'
 import AddressTable from '@/components/address/AddressTable.vue'
 import ProfileContentLayout from '@/layouts/ProfileContentLayout.vue'
+import { useAuthStore } from '@/stores/AuthStore'
+import { useUserStore } from '@/stores/UserStore'
 
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
+
+const userStore = useUserStore()
+const authStore = useAuthStore()
+
+const addresses = userStore.getUserAddressesById(authStore.user as string)
 </script>
 
 <template>
@@ -17,7 +24,7 @@ const router = useRouter()
           <el-button
             link
             type="primary"
-            @click="router.push({ name: 'addresstypeedit', params: { id: 1, type: 'shipping' } })"
+            @click="router.push({ name: 'addresstypeedit', params: { type: 'shipping' } })"
             class="action-link"
           >
             Make default shipping address
@@ -26,7 +33,7 @@ const router = useRouter()
           <el-button
             link
             type="primary"
-            @click="router.push({ name: 'addresstypeedit', params: { id: 1, type: 'billing' } })"
+            @click="router.push({ name: 'addresstypeedit', params: { type: 'billing' } })"
             class="action-link"
           >
             Make default billing address
@@ -35,16 +42,16 @@ const router = useRouter()
       </div>
 
       <!-- AddressCard -->
-      <AddressCard class="card" />
+      <AddressCards class="card" :addresses />
       <!-- Address Table -->
-      <AddressTable class="table" />
+      <AddressTable class="table" :addresses />
 
       <!-- Add New Address Button -->
       <div class="add-address-container">
         <el-button
           type="primary"
           class="add-address-button"
-          @click="router.push({ name: 'addresscreate', params: { id: 1 } })"
+          @click="router.push({ name: 'addresscreate' })"
         >
           + ADD NEW ADDRESS
         </el-button>

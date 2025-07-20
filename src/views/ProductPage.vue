@@ -3,56 +3,104 @@ import { ref } from 'vue'
 import { formatPrice } from '@/lib/helpers'
 import TextExpander from '@/components/TextExpander.vue'
 import Carousel from '@/components/Carousel.vue'
+import { useProductStore } from '@/stores/ProductStore'
+import type { AuthMode } from '@/lib/types/stores'
+import { useAuthStore } from '@/stores/AuthStore'
+import AppModal from '@/components/app/AppModal.vue'
+import AuthTransitionWrapper from '@/components/auth/AuthTransitionWrapper.vue'
+import { useRouter } from 'vue-router'
+import { useCartStore } from '@/stores/CartStore'
 
-const value = ref(1)
+const dialogStyle = {
+  width: '95vw',
+  maxWidth: '450px',
+  height: '400px',
+}
+
+const quantity = ref(1)
+
+const productStore = useProductStore()
+const cartStore = useCartStore()
+const authStore = useAuthStore()
+const router = useRouter()
+
+const product = productStore.getProductById(history.state.productId)
+
+function handleBuyClick(openFn: () => void, authMode: AuthMode) {
+  if (authStore.isAuthenticated) {
+    router.push({ name: 'checkout' })
+  } else {
+    openFn()
+    authStore.setAuthMode(authMode)
+  }
+}
+
+function handleAddClick() {
+  cartStore.addToCart({
+    productId: history.state.productId,
+    quantity: quantity.value,
+  })
+}
 </script>
 
 <template>
-  <div class="wrapper">
-    <div class="product-grid">
-      <!-- Carousel -->
-      <div class="carousel">
-        <Carousel />
-      </div>
-
-      <!-- Body -->
-      <div class="product-body">
-        <div class="product-title">
-          <TextExpander
-            text="Lorem ipsum dolor sit, amet consectetur adipisicing elit. Ea veritatis nesciunt id alias mollitia. Totam dicta nobis in nesciunt veritatis ipsam eum est? Saepe fugiat culpa quam, sunt totam nam."
-            :max-chars="60"
-            :breakpoint="765"
-            :font-size="18"
-          />
-        </div>
-        <p class="product-price">{{ formatPrice(100) }}</p>
-        <div>
-          <span>Quantity</span>
-          <el-input-number v-model="value" :min="1" :max="10" @change="handleChange" />
+  <div class="product-page">
+    <div class="product-main">
+      <div class="product-grid">
+        <!-- Carousel -->
+        <div class="carousel">
+          <Carousel />
         </div>
 
-        <div class="product-buttons">
-          <el-button class="product-body__button button--secondary">Buy Now</el-button>
-          <el-button class="product-body__button button--primary">Add to Cart</el-button>
+        <!-- Body -->
+        <div class="product-body">
+          <div class="product-title">
+            <TextExpander :text="product.name" :max-chars="60" :breakpoint="765" :font-size="18" />
+          </div>
+          <p class="product-price">{{ formatPrice(product?.price) }}</p>
+          <div>
+            <span>Quantity</span>
+            <el-input-number v-model="quantity" :min="1" />
+          </div>
+
+          <div class="product-buttons">
+            <AppModal :dialog-style="dialogStyle">
+              <template #trigger="props">
+                <el-button
+                  class="product-body__button button--secondary"
+                  @click="handleBuyClick(props.onTriggerClick, 'login')"
+                  >Buy Now</el-button
+                >
+              </template>
+
+              <AuthTransitionWrapper />
+            </AppModal>
+
+            <el-button class="product-body__button button--primary" @click="handleAddClick"
+              >Add to Cart</el-button
+            >
+          </div>
         </div>
       </div>
     </div>
-  </div>
 
-  <!-- description -->
-  <div class="product-description">
-    <p class="description-header">Product details of [[Title]] does this work on anything</p>
+    <!-- description -->
+    <div class="product-description">
+      <p class="description-header">Product details of {{ product.name }}</p>
 
-    <div class="description-body">
-      Lorem, ipsum dolor sit amet consectetur adipisicing elit. Officia quis voluptates magni
-      exercitationem libero, illum sunt qui ab animi repudiandae totam deserunt quae temporibus
-      laudantium quidem accusantium. Velit, recusandae molestias.
+      <div class="description-body">
+        {{ product.description }}
+      </div>
     </div>
   </div>
 </template>
 
 <style scoped>
-.wrapper {
+.product-page {
+  margin-bottom: 1rem;
+}
+
+.product-main {
   background-color: #fff;
   border-radius: 1rem;
 }
@@ -70,7 +118,6 @@ const value = ref(1)
 /* Carousel */
 .carousel {
   grid-area: carousel;
-  background-color: green;
 }
 
 /* Body */
@@ -151,6 +198,7 @@ const value = ref(1)
   }
 
   .product-grid {
+    padding: 1rem;
     grid-template-columns: 1.5fr 1.25fr;
     grid-template-areas:
       'carousel body'

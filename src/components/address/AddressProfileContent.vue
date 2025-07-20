@@ -1,14 +1,26 @@
 <script lang="ts" setup>
-defineProps<{ label: string }>()
+import { buildAddressLine } from '@/lib/helpers'
+import type { Address } from '@/lib/types/globals'
+
+defineProps<{ label: string; address: Address }>()
 </script>
 
 <template>
   <div class="address-content">
     <p class="address-label">{{ label }}</p>
     <div>
-      <p class="recipient-name">Isabella Aguinaldo</p>
-      <p class="address-line">26 Mabini St. Purok 2</p>
-      <p class="address-line">Bulacan - Malolos - Mojon</p>
+      <p class="recipient-name">{{ address.fullName }}</p>
+      <p class="address-line">{{ address.address }}</p>
+      <p class="address-line" v-if="address.unitNumber">{{ address.unitNumber }}</p>
+      <p class="address-line">
+        {{
+          buildAddressLine({
+            province: address.province,
+            district: address.district,
+            ward: address.ward,
+          })
+        }}
+      </p>
       <p class="phone">(+63) 09229115407</p>
     </div>
   </div>
@@ -17,7 +29,7 @@ defineProps<{ label: string }>()
 <style>
 .address-content {
   padding: 10px 0;
-  width: clamp(150px, 100%, 200px);
+  width: clamp(150px, 100%, 350px);
 }
 
 .address-label {

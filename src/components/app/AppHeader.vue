@@ -2,6 +2,20 @@
 import AppSearch from '@/components/app/AppSearch.vue'
 import AppDrawer from './AppDrawer.vue'
 import AppHeaderLinks from './AppHeaderLinks.vue'
+import { useCartStore } from '@/stores/CartStore'
+import { useAuthStore } from '@/stores/AuthStore'
+import { computed } from 'vue'
+
+const cartStore = useCartStore()
+const authStore = useAuthStore()
+
+const itemsInCart = computed(() => {
+  if (authStore.isAuthenticated) {
+    return cartStore.getCartLength(authStore.user as string)
+  } else {
+    return cartStore.getGuestCartLength
+  }
+})
 </script>
 
 <template>
@@ -32,7 +46,9 @@ import AppHeaderLinks from './AppHeaderLinks.vue'
         <RouterLink :to="{ name: 'cart' }">
           <el-icon size="35px" color="#2b357e">
             <ShoppingCart />
-            <div class="circle"></div>
+            <div class="circle" v-if="itemsInCart">
+              <span class="circle-text">{{ itemsInCart }}</span>
+            </div>
           </el-icon>
         </RouterLink>
       </div>
@@ -42,13 +58,22 @@ import AppHeaderLinks from './AppHeaderLinks.vue'
 
 <style scoped>
 .circle {
-  width: 20px;
-  height: 20px;
-  background-color: red;
+  width: 22px;
+  height: 22px;
+  background-color: var(--color-main);
   position: absolute;
   border-radius: 100%;
-  top: -2px;
-  right: -5px;
+  top: -5px;
+  right: -8px;
+  color: #fff;
+  font-size: 0.75rem;
+}
+
+.circle-text {
+  position: absolute;
+  top: -6px;
+  text-align: center;
+  width: 100%;
 }
 
 .el-header {

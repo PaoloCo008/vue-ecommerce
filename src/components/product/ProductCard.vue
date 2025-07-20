@@ -1,23 +1,45 @@
 <script lang="ts" setup>
+import type { Product } from '@/lib/types/globals'
 import { formatPrice, truncate } from '../../lib/helpers'
+import { useProductStore } from '@/stores/ProductStore'
+import { useRouter } from 'vue-router'
+
+const props = defineProps<{ product: Product }>()
+
+const productStore = useProductStore()
+const router = useRouter()
+
+const productPrimaryImage = productStore.getProductPrimaryImageById(props.product._id)
+
+function handleProductClick() {
+  router.push({
+    name: 'product',
+    params: { slug: props.product.slug },
+    state: { productId: props.product._id },
+  })
+}
 </script>
 <template>
-  <RouterLink :to="{ name: 'product', params: { slug: 'some-name' } }">
+  <div class="product-card" @click="handleProductClick">
     <el-card>
-      <img src="/Product+Showcase-1.jpg" alt="" />
+      <img :src="productPrimaryImage" :alt="product.name" />
       <div class="card-body">
         <p class="card-title">
-          {{ truncate('SomeAWDADWAWDAWDtextSome textSome textSome textSome textaawd', 35) }}
+          {{ truncate(product.name, 35) }}
         </p>
-        <p class="card-price">{{ formatPrice(19.116) }}</p>
+        <p class="card-price">{{ formatPrice(product.price) }}</p>
       </div>
     </el-card>
-  </RouterLink>
+  </div>
 </template>
 
 <style scoped>
+.product-card {
+  cursor: pointer;
+}
+
 .el-card {
-  max-width: 190px;
+  width: 190px;
   height: 275px;
   border: none;
 }
@@ -37,6 +59,8 @@ a:focus-within {
 
 img {
   width: 100%;
+  height: 190px;
+  object-fit: cover;
   display: block;
 }
 

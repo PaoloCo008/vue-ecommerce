@@ -1,7 +1,7 @@
 export interface NewAddressForm {
   fullName: string
   address: string
-  mobileNumber: number | null
+  mobileNumber: string
   unitNumber?: string
   province: string
   district: string

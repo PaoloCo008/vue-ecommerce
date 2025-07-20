@@ -47,58 +47,65 @@ const router = createRouter({
           component: AuthPage,
           meta: { operation: 'signup' },
         },
-        { path: '/checkout', name: 'checkout', component: CheckoutPage },
+        {
+          path: '/checkout',
+          name: 'checkout',
+          component: CheckoutPage,
+          meta: { operation: 'create' },
+        },
         {
           path: '',
           component: TheProfileView,
           children: [
             {
-              path: '/user',
-              redirect: { name: 'profile', params: { id: 1 } },
+              path: '/user/profile',
               children: [
+                { path: '', name: 'profile', component: ProfileManage },
+                { path: 'edit', name: 'editprofile', component: ProfileEditForm },
+                { path: 'my', name: 'myprofile', component: ProfileMy },
                 {
-                  path: 'profile',
-                  redirect: { name: 'profile', params: { id: 1 } },
-                  children: [
-                    { path: ':id', name: 'profile', component: ProfileManage },
-                    { path: ':id/edit', name: 'editprofile', component: ProfileEditForm },
-                    { path: ':id/my', name: 'myprofile', component: ProfileMy },
-                    {
-                      path: ':id/payment-options',
-                      name: 'paymentoptions',
-                      component: ProfileCards,
-                    },
-                    {
-                      path: ':id/orders',
-                      name: 'orders',
-                      component: ProfileOrders,
-                    },
-                    {
-                      path: ':id/orders/:orderId',
-                      name: 'orderdetails',
-                      component: OrderDetailsPage,
-                    },
-                    {
-                      path: ':id/passwordReset',
-                      name: 'passwordReset',
-                      component: ProfilePasswordResetForm,
-                    },
-                  ],
+                  path: 'payment-options',
+                  name: 'paymentoptions',
+                  component: ProfileCards,
+                },
+                {
+                  path: 'orders',
+                  name: 'orders',
+                  component: ProfileOrders,
+                },
+                {
+                  path: 'orders/:orderId',
+                  name: 'orderdetails',
+                  component: OrderDetailsPage,
+                },
+                {
+                  path: 'passwordReset',
+                  name: 'passwordReset',
+                  component: ProfilePasswordResetForm,
                 },
               ],
             },
             {
               path: '/address',
-              redirect: { name: 'address', query: { id: 1 } },
               children: [
-                { path: ':id/book', name: 'address', component: ProfileAddress },
+                { path: 'book', name: 'address', component: ProfileAddress },
                 {
-                  path: ':id/book/edit/:type',
+                  path: 'book/edit/:type',
                   name: 'addresstypeedit',
                   component: ChangeDefaultAddressPage,
                 },
-                { path: ':id/create', name: 'addresscreate', component: AddressForm },
-                { path: ':id/edit/:addressId', name: 'addressedit', component: AddressForm },
+                {
+                  path: 'create',
+                  name: 'addresscreate',
+                  component: AddressForm,
+                  meta: { operation: 'create' },
+                },
+                {
+                  path: 'edit/:id',
+                  name: 'addressedit',
+                  component: AddressForm,
+                  meta: { operation: 'edit' },
+                },
               ],
             },
           ],

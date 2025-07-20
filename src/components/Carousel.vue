@@ -1,56 +1,4 @@
-<template>
-  <div class="product-carousel">
-    <!-- Main Image Display -->
-    <div class="main-image-container">
-      <img
-        :src="displayImages[currentIndex].src"
-        :alt="displayImages[currentIndex].alt"
-        class="main-image"
-      />
-
-      <!-- Navigation Arrows -->
-      <button
-        class="nav-arrow nav-arrow--left"
-        @click="previousImage"
-        :disabled="!loop && currentIndex === 0"
-      >
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
-        </svg>
-      </button>
-
-      <button
-        class="nav-arrow nav-arrow--right"
-        @click="nextImage"
-        :disabled="!loop && currentIndex === displayImages.length - 1"
-      >
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" />
-        </svg>
-      </button>
-
-      <!-- Image Title Overlay -->
-      <div class="image-overlay" v-if="displayImages[currentIndex].alt">
-        <p class="image-title">{{ displayImages[currentIndex].alt }}</p>
-      </div>
-    </div>
-
-    <!-- Thumbnail Strip -->
-    <div class="thumbnail-strip">
-      <button
-        v-for="(image, index) in displayImages"
-        :key="index"
-        class="thumbnail-button"
-        :class="{ 'thumbnail-button--active': index === currentIndex }"
-        @click="goToImage(index)"
-      >
-        <img :src="image.thumb" :alt="`Thumbnail ${index + 1}`" class="thumbnail-image" />
-      </button>
-    </div>
-  </div>
-</template>
-
-<script setup>
+<script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 
 // Sample images for testing
@@ -186,6 +134,58 @@ defineExpose({
 })
 </script>
 
+<template>
+  <div class="product-carousel">
+    <!-- Main Image Display -->
+    <div class="main-image-container">
+      <img
+        :src="displayImages[currentIndex].src"
+        :alt="displayImages[currentIndex].alt"
+        class="main-image"
+      />
+
+      <!-- Navigation Arrows -->
+      <button
+        class="nav-arrow nav-arrow--left"
+        @click="previousImage"
+        :disabled="!loop && currentIndex === 0"
+      >
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
+        </svg>
+      </button>
+
+      <button
+        class="nav-arrow nav-arrow--right"
+        @click="nextImage"
+        :disabled="!loop && currentIndex === displayImages.length - 1"
+      >
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" />
+        </svg>
+      </button>
+
+      <!-- Image Title Overlay -->
+      <div class="image-overlay" v-if="displayImages[currentIndex].alt">
+        <p class="image-title">{{ displayImages[currentIndex].alt }}</p>
+      </div>
+    </div>
+
+    <!-- Thumbnail Strip -->
+    <div class="thumbnail-strip">
+      <button
+        v-for="(image, index) in displayImages"
+        :key="index"
+        class="thumbnail-button"
+        :class="{ 'thumbnail-button--active': index === currentIndex }"
+        @click="goToImage(index)"
+      >
+        <img :src="image.thumb" :alt="`Thumbnail ${index + 1}`" class="thumbnail-image" />
+      </button>
+    </div>
+  </div>
+</template>
+
 <style scoped>
 .product-carousel {
   width: 100%;
@@ -202,7 +202,7 @@ defineExpose({
 .main-image-container {
   position: relative;
   flex: 1;
-  min-height: 150px;
+  min-height: 420px;
   background: #f5f5f5;
   display: flex;
   align-items: center;
@@ -323,7 +323,7 @@ defineExpose({
   }
 
   .main-image-container {
-    min-height: 200px;
+    min-height: 420px;
   }
 
   .nav-arrow {
@@ -365,7 +365,7 @@ defineExpose({
   }
 
   .main-image-container {
-    min-height: 240px;
+    min-height: 420px;
   }
 
   .nav-arrow {
@@ -426,7 +426,7 @@ defineExpose({
   }
 
   .main-image-container {
-    min-height: 130px;
+    min-height: 420px;
   }
 
   .nav-arrow {

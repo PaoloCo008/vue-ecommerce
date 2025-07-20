@@ -11,23 +11,23 @@
     </div>
 
     <el-menu default-active="manage-account" class="sidebar-menu" @select="handleMenuSelect" router>
-      <el-menu-item :index="{ name: 'profile', params: { id: 1 } }" class="menu-title">
+      <el-menu-item :index="{ name: 'profile' }" class="menu-title">
         <span>Manage My Account</span>
       </el-menu-item>
 
-      <el-menu-item :index="{ name: 'myprofile', params: { id: 1 } }" class="sub-menu">
+      <el-menu-item :index="{ name: 'myprofile' }" class="sub-menu">
         <span>My Profile</span>
       </el-menu-item>
 
-      <el-menu-item :index="{ name: 'address', params: { id: 1 } }" class="sub-menu">
+      <el-menu-item :index="{ name: 'address' }" class="sub-menu">
         <span>Address Book</span>
       </el-menu-item>
 
-      <el-menu-item :index="{ name: 'paymentoptions', params: { id: 1 } }" class="sub-menu">
+      <el-menu-item :index="{ name: 'paymentoptions' }" class="sub-menu">
         <span>My Payment Options</span>
       </el-menu-item>
 
-      <el-menu-item :index="{ name: 'orders', params: { id: 1 } }" class="menu-title">
+      <el-menu-item :index="{ name: 'orders' }" class="menu-title">
         <span>My Orders</span>
       </el-menu-item>
     </el-menu>

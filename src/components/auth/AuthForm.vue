@@ -48,18 +48,6 @@ const handleLogin = async () => {
     }
   })
 }
-
-// Handle forgot password
-const handleForgotPassword = () => {
-  ElMessage.info('Forgot password clicked')
-  // Add your forgot password logic here
-}
-
-// Handle sign up
-const handleSignUp = () => {
-  ElMessage.info('Sign up clicked')
-  // Add your sign up logic here
-}
 </script>
 
 <template>

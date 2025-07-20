@@ -26,6 +26,6 @@ defineProps<{ label: 'home' | 'office' }>()
 .office {
   background-color: unset;
   border-color: var(--color-tertiary);
-  box-shadow: 0 0 5px 1px var(--color-tertiary);
+  box-shadow: 0 0 5px 1px var(--color-tertiary-opaque);
 }
 </style>

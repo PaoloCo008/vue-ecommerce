@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import { useRoute } from 'vue-router'
 import AppModal from './AppModal.vue'
-import AuthWrapper from '../auth/AuthTransitionWrapper.vue'
+import AuthTransitionWrapper from '../auth/AuthTransitionWrapper.vue'
 import { useAuthStore } from '@/stores/AuthStore'
 import type { AuthMode } from '@/lib/types/stores'
 import { useUserStore } from '@/stores/UserStore'
 import { LogOut, Package2, Smile } from 'lucide-vue-next'
+import { computed } from 'vue'
 
 const route = useRoute()
 
@@ -17,6 +18,12 @@ const dialogStyle = {
 
 const authStore = useAuthStore()
 const userStore = useUserStore()
+
+const dropdownText = computed(() => {
+  const user = userStore.getUserById(authStore.user as string)
+
+  return user?.fullName ? `${user.fullName}'s account` : 'My Account'
+})
 
 function handleClick(openFn: () => void, authMode: AuthMode) {
   openFn()
@@ -38,7 +45,7 @@ function handleLogout() {
     <template v-if="authStore.isAuthenticated">
       <el-dropdown>
         <span class="el-dropdown-link">
-          {{ `${userStore.getUserById(authStore.user as string)?.fullName}'s account` }}
+          {{ dropdownText }}
           <el-icon class="el-icon--right">
             <arrow-down />
           </el-icon>
@@ -46,14 +53,12 @@ function handleLogout() {
         <template #dropdown>
           <el-dropdown-menu>
             <el-dropdown-item>
-              <RouterLink :to="{ name: 'profile', params: { id: authStore.user } }"
+              <RouterLink :to="{ name: 'profile' }"
                 ><Smile :size="16" />Manage my profile
               </RouterLink>
             </el-dropdown-item>
             <el-dropdown-item>
-              <RouterLink :to="{ name: 'orders', params: { id: authStore.user } }"
-                ><Package2 :size="16" />My Orders</RouterLink
-              >
+              <RouterLink :to="{ name: 'orders' }"><Package2 :size="16" />My Orders</RouterLink>
             </el-dropdown-item>
             <el-dropdown-item>
               <el-button class="logout-button" link @click="handleLogout"
@@ -71,7 +76,7 @@ function handleLogout() {
           <el-button @click="handleClick(props.onTriggerClick, 'login')" text>Login</el-button>
         </template>
 
-        <AuthWrapper operation="logIn" />
+        <AuthTransitionWrapper operation="logIn" />
       </AppModal>
 
       <AppModal :dialog-style="dialogStyle">
@@ -81,7 +86,7 @@ function handleLogout() {
           >
         </template>
 
-        <AuthWrapper operation="signUp" />
+        <AuthTransitionWrapper operation="signUp" />
       </AppModal>
     </template>
   </div>

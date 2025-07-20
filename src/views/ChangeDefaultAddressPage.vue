@@ -1,29 +1,47 @@
 <script setup lang="ts">
-import AddressCard from '@/components/address/AddressCard.vue'
+import AddressCards from '@/components/address/AddressCards.vue'
 import AddressTable from '@/components/address/AddressTable.vue'
 import ProfileContentLayout from '@/layouts/ProfileContentLayout.vue'
+import type { AddressType } from '@/lib/types/globals'
+import { useAuthStore } from '@/stores/AuthStore'
+import { useUserStore } from '@/stores/UserStore'
+import { ref } from 'vue'
 
 import { useRoute, useRouter } from 'vue-router'
 
 const router = useRouter()
 const route = useRoute()
+
+const userStore = useUserStore()
+const authStore = useAuthStore()
+
+const addresses = userStore.getUserAddressesById(authStore.user as string) || []
+
+const defaultType = route.params.type as AddressType
+
+const row = ref(
+  defaultType === 'shipping'
+    ? userStore.getUserDefaultShippingAddressById(authStore.user as string)?._id
+    : userStore.getUserDefaultBillingAddressById(authStore.user as string)?._id,
+)
+
+function handleUpdateDefaultAddress() {
+  userStore.updateDefaultAddress(authStore.user as string, row.value as string, defaultType)
+  router.push({ name: 'address' })
+}
 </script>
 
 <template>
   <ProfileContentLayout :page-title="`Make default ${route.params.type} address`">
     <div class="address-book">
       <!-- AddressCard -->
-      <AddressCard class="card" selecting />
+      <AddressCards class="card" selecting :addresses v-model="row" />
       <!-- Address Table -->
-      <AddressTable class="table" selecting />
+      <AddressTable class="table" selecting :addresses v-model="row" />
 
       <div class="edit-address-container">
         <el-button class="cancel-button cancel" @click="router.back()">cancel</el-button>
-        <el-button
-          type="primary"
-          class="edit-address-button"
-          @click="router.push({ name: 'addresscreate', params: { id: 1 } })"
-        >
+        <el-button type="primary" class="edit-address-button" @click="handleUpdateDefaultAddress">
           SAVE
         </el-button>
       </div>

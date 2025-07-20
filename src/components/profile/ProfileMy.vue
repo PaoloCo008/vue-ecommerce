@@ -1,26 +1,16 @@
 <script setup lang="ts">
 import ProfileContentLayout from '@/layouts/ProfileContentLayout.vue'
+import { capitalize, hideEmail } from '@/lib/helpers'
+
 import router from '@/router'
-import type { preProcessFile } from 'typescript'
-import { ref } from 'vue'
+import { useAuthStore } from '@/stores/AuthStore'
+import { useUserStore } from '@/stores/UserStore'
+import { format } from 'date-fns'
 
-const form = ref({
-  fullName: 'Paolo Co',
-  email: 'pa***********@gmail.com',
-  mobile: '+63 091******71',
-  birthday: '',
-  gender: '',
-  receiveMarketingEmails: false,
-  receiveMarketingSMS: false,
-})
+const authStore = useAuthStore()
+const userStore = useUserStore()
 
-const changeEmail = () => {
-  console.log('Change email clicked')
-}
-
-const changeMobile = () => {
-  console.log('Change mobile clicked')
-}
+const user = userStore.getUserById(authStore.user as string)
 </script>
 
 <template>
@@ -29,7 +19,7 @@ const changeMobile = () => {
       <div class="profile-group">
         <div>
           <span class="group-item__header">Full Name</span>
-          <p>Paolo Co</p>
+          <p>{{ user!.fullName || 'Please enter your full name' }}</p>
         </div>
 
         <div>
@@ -37,8 +27,8 @@ const changeMobile = () => {
           <el-button link type="primary" size="small" @click="changeEmail" class="change-link">
             | Change
           </el-button>
-          <p>pa***********@gmail.com</p>
-          <el-checkbox v-model="form.receiveMarketingEmails" class="marketing-checkbox">
+          <p>{{ hideEmail(user!.email) }}</p>
+          <el-checkbox disabled v-model="user!.receiveMarketingEmails" class="marketing-checkbox">
             Receive marketing emails
           </el-checkbox>
         </div>
@@ -48,8 +38,8 @@ const changeMobile = () => {
           <el-button link type="primary" size="small" @click="changeEmail" class="change-link">
             | Change
           </el-button>
-          <p>+63 091******71</p>
-          <el-checkbox v-model="form.receiveMarketingSMS" class="marketing-checkbox">
+          <p>+63 {{ user!.mobileNumber || 'Please enter your mobile number' }}</p>
+          <el-checkbox disabled v-model="user!.receiveMarketingSMS" class="marketing-checkbox">
             Receive marketing SMS
           </el-checkbox>
         </div>
@@ -59,19 +49,17 @@ const changeMobile = () => {
         <div>
           <span class="group-item__header">Birthday</span>
 
-          <p>Please enter your birthday</p>
+          <p>{{ format(user!.birthday as Date, 'yyyy-dd-MM') || 'Please enter your birthday' }}</p>
         </div>
 
         <div>
           <span class="group-item__header">Gender</span>
 
-          <p>Please enter your gender</p>
+          <p>{{ capitalize(user!.gender as string) || 'Please enter your gender' }}</p>
         </div>
       </div>
 
-      <el-button
-        class="edit-button"
-        @click="router.push({ name: 'editprofile', params: { id: 1 } })"
+      <el-button class="edit-button" @click="router.push({ name: 'editprofile' })"
         >EDIT PROFILE</el-button
       >
     </div>

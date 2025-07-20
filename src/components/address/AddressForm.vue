@@ -1,38 +1,45 @@
 <script setup lang="ts">
+import { buildAddressLine } from '@/lib/helpers'
 import type { NewAddressForm } from '@/lib/types/forms'
-import { ElMessage, type FormInstance } from 'element-plus'
-import { computed, reactive, ref } from 'vue'
+import { useAuthStore } from '@/stores/AuthStore'
+import { useUserStore } from '@/stores/UserStore'
+import { ElMessage, ElMessageBox, type FormInstance } from 'element-plus'
+import { computed, h, reactive, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
 const router = useRouter()
 const route = useRoute()
+const authStore = useAuthStore()
+const userStore = useUserStore()
+
+const isEditting = computed(() => route.meta.operation === 'edit')
+const isCreating = computed(() => route.meta.operation === 'create')
+
+const address = userStore.getUserAddressByAddressId(
+  authStore.user as string,
+  route.params.id as string,
+)
 
 const loading = ref(false)
 const addressFormRef = ref<FormInstance>()
 const addressForm = reactive<NewAddressForm>({
-  fullName: '',
-  mobileNumber: null,
-  address: '',
-  unitNumber: '',
-  province: '',
-  district: '',
-  ward: '',
-  deliveryLabel: null,
+  fullName: address?.fullName || '',
+  mobileNumber: address?.mobileNumber || '',
+  address: address?.address || '',
+  unitNumber: address?.unitNumber || '',
+  province: address?.province || '',
+  district: address?.district || '',
+  ward: address?.ward || '',
+  deliveryLabel: address?.deliveryLabel || null,
 })
 
-const isEditting = computed(() => route.params.addressId)
-
 const rules = {
-  fullName: [{ required: true, message: 'Please enter your email', trigger: 'blur' }],
-  address: [
-    { required: true, message: 'Please enter your password', trigger: 'blur' },
-    { min: 6, message: 'Password must be at least 6 characters', trigger: 'blur' },
-  ],
-  mobileNumber: [{ required: true, message: 'Please enter your email', trigger: 'blur' }],
-  unitNumber: [{ required: true, message: 'Please enter your email', trigger: 'blur' }],
-  province: [{ required: true, message: 'Please enter your email', trigger: 'blur' }],
-  district: [{ required: true, message: 'Please enter your email', trigger: 'blur' }],
-  ward: [{ required: true, message: 'Please enter your email', trigger: 'blur' }],
+  fullName: [{ required: true, message: 'Please enter your full name', trigger: 'blur' }],
+  address: [{ required: true, message: 'Please enter your address', trigger: 'blur' }],
+  mobileNumber: [{ required: true, message: 'Please enter your mobile number', trigger: 'blur' }],
+  province: [{ required: true, message: 'Please enter your province', trigger: 'blur' }],
+  district: [{ required: true, message: 'Please enter your district', trigger: 'blur' }],
+  ward: [{ required: true, message: 'Please enter your ward', trigger: 'blur' }],
   deliveryLabel: [{ required: true, message: 'Please enter your email', trigger: 'blur' }],
 }
 
@@ -47,12 +54,77 @@ const handleRegister = async () => {
       setTimeout(() => {
         loading.value = false
         ElMessage.success('Login successful!')
-        console.log('Login data:', addressForm)
+
+        if (isEditting.value) {
+          // Update existing address logic
+          userStore.updateUserAddressById(
+            authStore.user as string,
+            route.params.id as string,
+            addressForm,
+          )
+          router.push({ name: 'address' })
+        } else if (isCreating.value) {
+          userStore.addAddressToUser(authStore.user as string, addressForm)
+          router.push({ name: 'address' })
+        } else {
+          authStore.registerUser(addressForm)
+        }
         // Add your login logic here
       }, 1500)
     } else {
       ElMessage.error('Please fill in all required fields correctly')
     }
+  })
+}
+// <p class="address-text">{{ address.unitNumber }}{{ address.address }}</p>
+//             <p class="postcode">
+//               {{
+//                 buildAddressLine({
+//                   province: address.province,
+//                   district: address.district,
+//                   ward: address.ward,
+//                 })
+//               }}
+//             </p>
+// <p class="phone-text">{{ address.mobileNumber }}</p>
+
+function handleDelete() {
+  ElMessageBox({
+    title: 'Are you sure you want to delete this address?',
+    message: h('div', { style: { marginBottom: '1rem' } }, [
+      h('p', { style: { fontWeight: 'bold', fontSize: '1rem' } }, `${address!.fullName}`),
+      h('p', null, `${address?.unitNumber} ${address!.address}`),
+      h(
+        'p',
+        null,
+        `${buildAddressLine({
+          province: address!.province,
+          district: address!.district,
+          ward: address!.ward,
+        })}`,
+      ),
+      h('p', null, `${address!.mobileNumber}`),
+    ]),
+    showCancelButton: true,
+    confirmButtonText: 'Delete',
+    beforeClose: (action, instance, done) => {
+      if (action === 'confirm') {
+        instance.confirmButtonLoading = true
+        instance.confirmButtonText = 'Loading...'
+        setTimeout(() => {
+          done()
+          setTimeout(() => {
+            instance.confirmButtonLoading = false
+          }, 300)
+          userStore.deleteUserAddressById(authStore.user as string, route.params.id as string)
+          router.push({ name: 'address' })
+        }, 3000)
+      } else {
+        done()
+      }
+    },
+  }).catch(() => {
+    ElMessage.info('Delete action cancelled')
   })
 }
 </script>
@@ -129,13 +201,21 @@ const handleRegister = async () => {
           isEditting ? 'Edit' : 'Save'
         }}</el-button>
 
-        <el-button text class="delete-button" v-if="isEditting">Delete</el-button>
+        <el-button text class="delete-button" v-if="isEditting" @click="handleDelete"
+          >Delete</el-button
+        >
       </div>
     </div>
   </el-form>
 </template>
 
 <style scoped>
+.message-address__name {
+  font-weight: bold;
+  font-size: 1.2rem;
+  margin-bottom: 0.5rem;
+}
+
 .el-form {
   position: relative;
   display: grid;

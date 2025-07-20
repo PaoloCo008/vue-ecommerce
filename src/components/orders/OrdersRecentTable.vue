@@ -112,10 +112,7 @@ const recentOrders = [
     <el-table-column prop="total" label="Total" width="120" />
     <el-table-column label="Action" width="100">
       <template #default>
-        <el-button
-          link
-          type="primary"
-          @click="router.push({ name: 'orderdetails', params: { id: 1, orderId: 1 } })"
+        <el-button link type="primary" @click="router.push({ name: 'orderdetails' })"
           >MANAGE</el-button
         >
       </template>

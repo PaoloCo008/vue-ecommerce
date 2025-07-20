@@ -16,3 +16,17 @@ export function hideEmail(email: string) {
 
   return `${hiddenUsername}@${serverDomain}`
 }
+
+export function capitalize(text: string) {
+  return text.charAt(0).toUpperCase() + text.slice(1)
+}
+
+export function buildAddressLine(address: {
+  province: string
+  district: string
+  ward: string
+}): string {
+  const { province, district, ward } = address
+
+  return `${capitalize(province)} - ${capitalize(district)} - ${capitalize(ward)}`
+}

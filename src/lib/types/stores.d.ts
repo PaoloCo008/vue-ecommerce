@@ -1,5 +1,3 @@
-import type { AddressLabel } from './globals'
-
 export type AuthMode = 'login' | 'signup' | 'recovery'
 
 export interface AuthStore {

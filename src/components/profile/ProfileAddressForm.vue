@@ -7,7 +7,7 @@ import AddressForm from '../address/AddressForm.vue'
 
 const route = useRoute()
 
-const isEditting = computed(() => route.params.addressId)
+const isEditting = computed(() => route.meta.operation === 'edit')
 </script>
 
 <template>

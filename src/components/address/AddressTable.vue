@@ -1,56 +1,14 @@
 <script lang="ts" setup>
-import { ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import AppAddressTag from '../app/AppAddressTag.vue'
+import { buildAddressLine } from '@/lib/helpers'
+import type { Address } from '@/lib/types/globals'
 
-defineProps<{ selecting?: boolean }>()
+defineProps<{ addresses: Address[]; selecting?: boolean }>()
 
 const router = useRouter()
 
-const addresses = ref([
-  {
-    id: 1,
-    fullName: 'Paolo Henry Oliva Co',
-    address: '38 Silver Road Barangay Pilar, Las Pinas City',
-    postcode: 'Metro Manila - Las Pinas - Las Pinas City - Pilar',
-    phoneNumber: '09178777471',
-    isHome: true,
-    isDefaultShipping: true,
-    isDefaultBilling: true,
-  },
-  {
-    id: 2,
-    fullName: 'Paolo Henry Oliva Co',
-    address: '38 Silver Road Barangay Pilar, Las Pinas City',
-    postcode: 'Metro Manila - Las Pinas - Las Pinas City - Pilar',
-    phoneNumber: '09178777471',
-    isHome: true,
-    isDefaultShipping: true,
-    isDefaultBilling: true,
-  },
-])
-
-const row = ref(null)
-
-watch(row, () => {
-  console.log(row.value)
-})
-
-const makeDefaultShipping = () => {
-  console.log('Make default shipping address clicked')
-}
-
-const makeDefaultBilling = () => {
-  console.log('Make default billing address clicked')
-}
-
-const editAddress = (address) => {
-  console.log('Edit address clicked:', address)
-}
-
-const addNewAddress = () => {
-  console.log('Add new address clicked')
-}
+const selectedAddressId = defineModel()
 </script>
 
 <template>
@@ -71,21 +29,30 @@ const addNewAddress = () => {
     <el-table-column prop="address" label="Address" width="185">
       <template #default="scope">
         <div class="address-cell">
-          <AppAddressTag v-if="scope.row.isHome" label="home" />
-          <span class="address-text">{{ scope.row.address }}</span>
+          <AppAddressTag v-if="scope.row.deliveryLabel === 'home'" label="home" />
+          <AppAddressTag v-else label="office" />
+          <span class="address-text">{{ scope.row.unitNumber }} {{ scope.row.address }}</span>
         </div>
       </template>
     </el-table-column>
 
-    <el-table-column prop="postcode" label="Postcode" width="185">
+    <el-table-column label="Postcode" width="185">
       <template #default="scope">
-        <div class="postcode-cell">{{ scope.row.postcode }}</div>
+        <div class="postcode-cell">
+          {{
+            buildAddressLine({
+              province: scope.row.province,
+              district: scope.row.district,
+              ward: scope.row.ward,
+            })
+          }}
+        </div>
       </template>
     </el-table-column>
 
-    <el-table-column prop="phoneNumber" label="Phone Number" width="125">
+    <el-table-column prop="mobileNumber" label="Phone Number" width="125">
       <template #default="scope">
-        <div class="phone-cell">{{ scope.row.phoneNumber }}</div>
+        <div class="phone-cell">{{ scope.row.mobileNumber }}</div>
       </template>
     </el-table-column>
 
@@ -106,12 +73,17 @@ const addNewAddress = () => {
 
     <el-table-column label="" fixed="right" min-width="70">
       <template #default="scope">
-        <el-radio v-if="selecting" v-model="row" class="opaque" name="row" :value="scope.row.id" />
+        <el-radio
+          v-if="selecting"
+          v-model="selectedAddressId"
+          class="opaque"
+          :value="scope.row._id"
+        />
         <el-button
           v-else
           link
           type="primary"
-          @click="router.push({ name: 'addressedit', params: { id: 1, addressId: 1 } })"
+          @click="router.push({ name: 'addressedit', params: { id: scope.row._id } })"
           class="edit-button"
         >
           EDIT
@@ -143,7 +115,7 @@ const addNewAddress = () => {
 
 .address-cell {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: flex-start;
   gap: 8px;
 }

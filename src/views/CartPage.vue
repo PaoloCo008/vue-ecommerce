@@ -1,16 +1,37 @@
 <script lang="ts" setup>
+import CartItem from '@/components/cart/cartItem.vue'
 import { formatPrice } from '@/lib/helpers'
+import { useAuthStore } from '@/stores/AuthStore'
+import { useCartStore } from '@/stores/CartStore'
 import { Delete } from '@element-plus/icons-vue'
-import { ref } from 'vue'
+import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 
-const selected = ref(false)
-const count = ref(1)
 const router = useRouter()
+const cartStore = useCartStore()
+const authStore = useAuthStore()
 
-function handleNumberChange(e) {
-  console.log(e)
-}
+const cart = cartStore.getCartByUserId(authStore.user as string)
+
+const itemsIds = computed(() => cart?.items.map((item) => item.productId) || [])
+
+const isAllSelected = computed({
+  get: () => cartStore.areAllItemsSelected(itemsIds.value),
+  set: (value) => {
+    if (value) {
+      cartStore.selectAllItems(itemsIds.value)
+    } else {
+      cartStore.clearSelections()
+    }
+  },
+})
+
+// Indeterminate state for Select All
+const isIndeterminate = computed(() => {
+  const selectedCount = cartStore.getSelectedItemsCount
+  const totalCount = cartStore.getCartLength(authStore.user as string)
+  return selectedCount > 0 && selectedCount < totalCount
+})
 
 function handleCheckout() {
   router.push({ name: 'checkout' })
@@ -22,13 +43,18 @@ function handleCheckout() {
     <div class="cart-grid">
       <!-- Controls -->
       <div class="cart-controls">
-        <el-checkbox class="opaque" label="Select All (1)" value="Value 1 " />
+        <el-checkbox
+          class="opaque"
+          label="Select All (1)"
+          v-model="isAllSelected"
+          :indeterminate="isIndeterminate"
+        />
         <el-button class="opaque" type="" :icon="Delete" text> delete </el-button>
       </div>
 
       <!-- Products -->
       <div class="cart-products">
-        <div :class="{ 'product-item': true, selected }" @click.self="selected = !selected">
+        <!-- <div :class="{ 'product-item': true, selected }" @click.self="selected = !selected">
           <div class="flex-align-center">
             <el-checkbox
               class="item-checkbox opaque"
@@ -59,7 +85,9 @@ function handleCheckout() {
               @click.self="handleNumberChange"
             />
           </div>
-        </div>
+        </div> -->
+
+        <CartItem v-for="item in cart?.items" :key="item.productId" :item />
       </div>
 
       <!-- Summary -->
@@ -161,6 +189,7 @@ function handleCheckout() {
 
 .product-image {
   width: clamp(110px, 20vw, 120px);
+  height: 120px;
 }
 
 /* Summary */
