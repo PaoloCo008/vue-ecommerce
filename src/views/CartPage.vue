@@ -3,23 +3,32 @@ import CartItem from '@/components/cart/cartItem.vue'
 import { formatPrice } from '@/lib/helpers'
 import { useAuthStore } from '@/stores/AuthStore'
 import { useCartStore } from '@/stores/CartStore'
+import { useUserStore } from '@/stores/UserStore'
 import { Delete } from '@element-plus/icons-vue'
 import { computed } from 'vue'
-import { useRouter } from 'vue-router'
+import { buildAddressLine } from '../lib/helpers'
+import { DEFAULT_SHIPPING_FEE } from '@/lib/constants'
+import { useOrderStore } from '@/stores/OrderStore'
 
-const router = useRouter()
 const cartStore = useCartStore()
 const authStore = useAuthStore()
+const userStore = useUserStore()
+const orderStore = useOrderStore()
+
+orderStore.cleanupExpiredPendingOrdersForTesting(120)
 
 const cart = cartStore.getCartByUserId(authStore.user as string)
 
-const itemsIds = computed(() => cart?.items.map((item) => item.productId) || [])
+const items = computed(() => cart?.items || [])
+
+
+const address = userStore.getUserDefaultBillingAddressById(authStore.user as string)
 
 const isAllSelected = computed({
-  get: () => cartStore.areAllItemsSelected(itemsIds.value),
+  get: () => cartStore.areAllItemsSelected(items.value),
   set: (value) => {
     if (value) {
-      cartStore.selectAllItems(itemsIds.value)
+      cartStore.selectAllItems(items.value)
     } else {
       cartStore.clearSelections()
     }
@@ -33,8 +42,10 @@ const isIndeterminate = computed(() => {
   return selectedCount > 0 && selectedCount < totalCount
 })
 
+const hasItemsInSelected = computed(() => !!cartStore.getSelectedItemsCount)
+
 function handleCheckout() {
-  router.push({ name: 'checkout' })
+  cartStore.proceedToCheckout(address?._id as string)
 }
 </script>
 
@@ -45,11 +56,11 @@ function handleCheckout() {
       <div class="cart-controls">
         <el-checkbox
           class="opaque"
-          label="Select All (1)"
+          :label="`Select All (${cartStore.getSelectedItemsCount})`"
           v-model="isAllSelected"
           :indeterminate="isIndeterminate"
         />
-        <el-button class="opaque" type="" :icon="Delete" text> delete </el-button>
+        <el-button class="opaque" type="" :icon="Delete" text @click="cartStore.removeSelectedItemsFromUserCart(authStore.user as string)"> delete </el-button>
       </div>
 
       <!-- Products -->
@@ -87,7 +98,10 @@ function handleCheckout() {
           </div>
         </div> -->
 
-        <CartItem v-for="item in cart?.items" :key="item.productId" :item />
+        <template v-if="items.length">
+          <CartItem v-for="item in cart?.items" :key="item.productId" :item />
+        </template>
+        <el-empty v-else description="No items in cart" />
       </div>
 
       <!-- Summary -->
@@ -95,23 +109,35 @@ function handleCheckout() {
         <div>
           <span class="opaque">Location</span>
           <p class="summary-location">
-            <el-icon class="opaque"><Location /></el-icon> Some Location
-          </p>
+            <div v-if="address" >
+
+              <el-icon class="opaque"><Location /></el-icon>
+              {{
+                buildAddressLine({
+                  province: address!.province,
+                  district: address!.district,
+                  ward: address!.ward,
+                })
+              }}
+              </div>
+              <span v-else>No address</span>
+            </p>
         </div>
         <div class="summary-order top-margin">
           <h3>Order Summary</h3>
           <p class="flex-between">
-            <span class="opaque">Subtotal (# item(s))</span><span>{{ formatPrice(278) }}</span>
+            <span class="opaque">Subtotal ({{ cartStore.getSelectedItemsCount }} item(s))</span
+            ><span>{{ formatPrice(cartStore.getSelectedCartSubtotal) }}</span>
           </p>
           <p class="flex-between">
-            <span class="opaque">Shipping Fee</span><span>{{ formatPrice(40) }}</span>
+            <span class="opaque">Shipping Fee</span><span>{{ hasItemsInSelected ? formatPrice(DEFAULT_SHIPPING_FEE) : formatPrice(0) }}</span>
           </p>
           <p class="flex-between top-margin">
-            <span>Subtotal</span><span class="price">{{ formatPrice(310) }}</span>
+            <span>Subtotal</span><span class="price">{{ hasItemsInSelected ? formatPrice(cartStore.getCheckoutSubtotal) : formatPrice(0) }}</span>
           </p>
 
           <el-button class="checkout-button top-margin" @click="handleCheckout"
-            >Proceed to checkout(1)</el-button
+            >Proceed to checkout({{ cartStore.getSelectedItemsCount }})</el-button
           >
         </div>
       </div>

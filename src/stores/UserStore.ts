@@ -21,12 +21,12 @@ export const useUserStore = defineStore('user', {
       const user = state.users.find((user) => user._id === id)
       return user ? user.addresses : []
     },
-    getUserDefaultBillingAddressById: (state) => (id: string) => {
-      const user = state.users.find((user) => user._id === id)
+    getUserDefaultBillingAddressById: (state) => (userId: string) => {
+      const user = state.users.find((user) => user._id === userId)
       return user ? user.addresses.find((address) => address.isDefaultBilling) : null
     },
-    getUserDefaultShippingAddressById: (state) => (id: string) => {
-      const user = state.users.find((user) => user._id === id)
+    getUserDefaultShippingAddressById: (state) => (userId: string) => {
+      const user = state.users.find((user) => user._id === userId)
       return user ? user.addresses.find((address) => address.isDefaultShipping) : null
     },
   },

@@ -1,77 +1,93 @@
 <script setup lang="ts">
-import { ref, defineEmits } from 'vue'
+import { ref, defineEmits, computed } from 'vue'
 import { Check } from '@element-plus/icons-vue'
 import AppAddressTag from '../app/AppAddressTag.vue'
+import type { Address } from '@/lib/types/globals'
+import { useUserStore } from '@/stores/UserStore'
+import { useAuthStore } from '@/stores/AuthStore'
+
+const props = defineProps<{ addresses: Address[] }>()
+
+const userStore = useUserStore()
+const authStore = useAuthStore()
+
+const defaultShippingAddress = userStore.getUserDefaultShippingAddressById(authStore.user as string)
 
 // Emits
 const emit = defineEmits(['save', 'cancel', 'addNew'])
 
 // Reactive data
-const selectedAddressId = ref(1)
+const selectedAddressId = ref(defaultShippingAddress!._id)
+
+const selectedAddress = computed(() => {
+  return userStore.getUserAddressByAddressId(authStore.user as string, selectedAddressId.value)
+})
+
+console.log(selectedAddress.value)
 
 // Sample data
-const addresses = ref([
-  {
-    id: 1,
-    contactName: 'Paolo Co',
-    phone: '09178777471',
-    street: '38 Silver Road',
-    area: 'Metro Manila',
-    city: 'Las Pinas',
-    region: 'Las Pinas City - Pilar',
-    isHome: true,
-    isDefaultShipping: true,
-    isDefaultBilling: true,
-  },
-  {
-    id: 2,
-    contactName: 'Paolo Co',
-    phone: '09178777471',
-    street: '38 Silver Road',
-    area: 'Metro Manila',
-    city: 'Las Pinas',
-    region: 'Las Pinas City - Pilar',
-    isHome: false,
-    isDefaultShipping: true,
-    isDefaultBilling: true,
-  },
-  {
-    id: 3,
-    contactName: 'Paolo Co',
-    phone: '09178777471',
-    street: '38 Silver Road',
-    area: 'Metro Manila',
-    city: 'Las Pinas',
-    region: 'Las Pinas City - Pilar',
-    isHome: false,
-    isDefaultShipping: true,
-    isDefaultBilling: true,
-  },
-  {
-    id: 4,
-    contactName: 'Paolo Co',
-    phone: '09178777471',
-    street: '38 Silver Road',
-    area: 'Metro Manila',
-    city: 'Las Pinas',
-    region: 'Las Pinas City - Pilar',
-    isHome: false,
-    isDefaultShipping: true,
-    isDefaultBilling: true,
-  },
-  {
-    id: 5,
-    contactName: 'Paolo Co',
-    phone: '09178777471',
-    street: '38 Silver Road',
-    area: 'Metro Manila',
-    city: 'Las Pinas',
-    region: 'Las Pinas City - Pilar',
-    isHome: false,
-    isDefaultShipping: true,
-    isDefaultBilling: true,
-  },
-])
+// const addresses = ref([
+//   {
+//     id: 1,
+//     contactName: 'Paolo Co',
+//     phone: '09178777471',
+//     street: '38 Silver Road',
+//     area: 'Metro Manila',
+//     city: 'Las Pinas',
+//     region: 'Las Pinas City - Pilar',
+//     isHome: true,
+//     isDefaultShipping: true,
+//     isDefaultBilling: true,
+//   },
+//   {
+//     id: 2,
+//     contactName: 'Paolo Co',
+//     phone: '09178777471',
+//     street: '38 Silver Road',
+//     area: 'Metro Manila',
+//     city: 'Las Pinas',
+//     region: 'Las Pinas City - Pilar',
+//     isHome: false,
+//     isDefaultShipping: true,
+//     isDefaultBilling: true,
+//   },
+//   {
+//     id: 3,
+//     contactName: 'Paolo Co',
+//     phone: '09178777471',
+//     street: '38 Silver Road',
+//     area: 'Metro Manila',
+//     city: 'Las Pinas',
+//     region: 'Las Pinas City - Pilar',
+//     isHome: false,
+//     isDefaultShipping: true,
+//     isDefaultBilling: true,
+//   },
+//   {
+//     id: 4,
+//     contactName: 'Paolo Co',
+//     phone: '09178777471',
+//     street: '38 Silver Road',
+//     area: 'Metro Manila',
+//     city: 'Las Pinas',
+//     region: 'Las Pinas City - Pilar',
+//     isHome: false,
+//     isDefaultShipping: true,
+//     isDefaultBilling: true,
+//   },
+//   {
+//     id: 5,
+//     contactName: 'Paolo Co',
+//     phone: '09178777471',
+//     street: '38 Silver Road',
+//     area: 'Metro Manila',
+//     city: 'Las Pinas',
+//     region: 'Las Pinas City - Pilar',
+//     isHome: false,
+//     isDefaultShipping: true,
+//     isDefaultBilling: true,
+//   },
+// ])
 
 // Methods
 const selectAddress = (id) => {
@@ -79,8 +95,7 @@ const selectAddress = (id) => {
 }
 
 const handleSave = () => {
-  const selected = addresses.value.find((addr) => addr.id === selectedAddressId.value)
-  emit('save', selected)
+  emit('save', selectedAddressId.value)
 }
 
 const handleCancel = () => {
@@ -98,38 +113,38 @@ const handleAddNew = () => {
     <div class="address-list">
       <div
         v-for="address in addresses"
-        :key="address.id"
+        :key="address._id"
         class="address-card"
-        :class="{ selected: address.id === selectedAddressId }"
-        @click="selectAddress(address.id)"
+        :class="{ selected: address._id === selectedAddressId }"
+        @click="selectAddress(address._id)"
       >
         <!-- Address Content -->
         <div class="address-content">
           <!-- Contact Info -->
           <div class="contact-info">
             <div class="name-with-radio">
-              <span class="contact-name">{{ address.contactName }}</span>
+              <span class="contact-name">{{ address.fullName }}</span>
               <!-- Radio Check Icon -->
               <div class="radio-check">
-                <div class="radio-circle" v-if="address.id !== selectedAddressId"></div>
-                <el-icon v-if="address.id === selectedAddressId" :size="18" color="#17a2b8">
+                <div class="radio-circle" v-if="address._id !== selectedAddressId"></div>
+                <el-icon v-if="address._id === selectedAddressId" :size="18" color="#17a2b8">
                   <Check />
                 </el-icon>
               </div>
             </div>
-            <span class="phone">{{ address.phone }}</span>
+            <span class="phone">{{ address.mobileNumber }}</span>
           </div>
 
           <!-- Address Details -->
           <div class="address-details">
             <div class="address-line">
-              <AppAddressTag v-if="address.isHome" label="home" />
+              <AppAddressTag v-if="address.deliveryLabel === 'home'" label="home" />
               <AppAddressTag v-else label="office" />
-              <span class="street">{{ address.street }}</span>
+              <span class="street">{{ address.unitNumber }} {{ address.address }}</span>
             </div>
 
             <div class="location-info">
-              Postcode: {{ address.area }} • {{ address.city }} • {{ address.region }}
+              Postcode: {{ address.province }} • {{ address.district }} • {{ address.ward }}
             </div>
           </div>
 

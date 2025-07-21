@@ -3,10 +3,38 @@ import AppAddressTag from '@/components/app/AppAddressTag.vue'
 import AppDrawer from '@/components/app/AppDrawer.vue'
 import AppModal from '@/components/app/AppModal.vue'
 import AddressForm from '@/components/address/AddressForm.vue'
-import { ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { computed, ref } from 'vue'
 import AddressShippingSelect from '@/components/address/AddressShippingSelect.vue'
 import CardPaymentMethod from '@/components/cards/CardPaymentMethod.vue'
+
+import { useUserStore } from '@/stores/UserStore'
+import { useAuthStore } from '@/stores/AuthStore'
+import { useCartStore } from '@/stores/CartStore'
+import { formatPrice } from '@/lib/helpers'
+import { useOrderStore } from '@/stores/OrderStore'
+import { useRoute } from 'vue-router'
+
+const userStore = useUserStore()
+const authStore = useAuthStore()
+const orderStore = useOrderStore()
+const route = useRoute()
+
+const addresses = userStore.getUserAddressesById(authStore.user as string)
+
+const address = ref(userStore.getUserDefaultShippingAddressById(authStore.user as string))
+
+const orderId = orderStore.decodeOrderId(route.params.pendingOrderId as string)
+
+const products = ref(orderStore.getSelectedItemsByPendingOrderId(orderId as string))
+
+const pendingOrder = orderStore.getPendingOrderById(orderId as string)
+
+console.log(pendingOrder)
+
+function handleSelectedAddress(addressId: string, closeDrawer: () => void) {
+  address.value = userStore.getUserAddressByAddressId(authStore.user as string, addressId)
+  closeDrawer()
+}
 
 const deliveryOption = ref('standard')
 const paymentMethod = ref('gcash')
@@ -14,6 +42,10 @@ const paymentMethod = ref('gcash')
 function handleModalOpen(closeDrawer: () => void, openModal: () => void) {
   closeDrawer()
   openModal()
+}
+
+function handlePlaceOrder() {
+  orderStore.completePendingOrder(orderId as string)
 }
 
 const dialogStyle = {
@@ -55,16 +87,24 @@ const dialogStyle = {
                     <AddressForm />
                   </AppModal>
 
-                  <AddressShippingSelect />
+                  <AddressShippingSelect
+                    :addresses
+                    @save="
+                      (addressId) => handleSelectedAddress(addressId, drawerProps.handleCloseDrawer)
+                    "
+                  />
                 </div>
               </template>
             </AppDrawer>
           </div>
           <div class="address-info">
-            <div class="customer-name">Isabella Agumaldo 09220115407</div>
+            <div class="customer-name">{{ address?.fullName }} {{ address?.mobileNumber }}</div>
             <div class="address-badge">
               <AppAddressTag label="home" />
-              <span class="address-text">26 Mabini St. Purok 2, Mojon, Malolos, Bulacan</span>
+              <span class="address-text"
+                >{{ address?.unitNumber }} {{ address?.address }}, {{ address?.province }},
+                {{ address?.district }}, {{ address?.ward }}
+              </span>
             </div>
           </div>
         </div>
@@ -93,20 +133,18 @@ const dialogStyle = {
           </div>
 
           <!-- Product Item -->
-          <div class="product-item">
+          <div v-for="product in products" :key="product._id" class="product-item">
             <div class="product-image">
-              <img src="/Product+Showcase-1.jpg" alt="Product" />
+              <img :src="product.image" :alt="product.name" />
             </div>
             <div class="product-details">
               <div class="product-name">
-                Multipurpose Lanyard ID Badge Holder PU Leather Zipper Pocket with 4 Card Slots for
-                Offices School Credit
+                {{ product.name }}
               </div>
-              <div class="product-color">Black</div>
               <div class="product-meta">
-                <div class="current-price">₱278.02</div>
+                <div class="current-price">{{ formatPrice(product.price) }}</div>
 
-                <span>Qty: 1</span>
+                <span>Qty: {{ product.quantity }}</span>
               </div>
             </div>
           </div>
@@ -182,26 +220,25 @@ const dialogStyle = {
         <div class="section">
           <h3>Order Summary</h3>
           <div class="summary-item">
-            <span>Subtotal (1 Items)</span>
-            <span>₱278.02</span>
+            <span>Subtotal ({{ products?.length }} Items)</span>
+            <span>{{ formatPrice(pendingOrder!.pricing.subtotal) }}</span>
           </div>
           <div class="summary-item">
             <span>Shipping Fee</span>
-            <span>₱38.00</span>
+            <span>{{ formatPrice(pendingOrder!.pricing.shipping) }}</span>
           </div>
-          <div class="summary-item">
-            <span>Seller vouchers</span>
-            <span>₱0.00</span>
-          </div>
+
           <div class="summary-divider"></div>
           <div class="summary-total">
             <span>Total</span>
-            <span class="total-amount">₱308.02</span>
+            <span class="total-amount">{{ formatPrice(pendingOrder!.pricing.total) }}</span>
           </div>
         </div>
 
         <!-- Place Order Button -->
-        <el-button type="primary" size="large" class="place-order-btn">PLACE ORDER NOW</el-button>
+        <el-button type="primary" size="large" class="place-order-btn" @click="handlePlaceOrder"
+          >PLACE ORDER NOW</el-button
+        >
       </div>
     </div>
   </div>

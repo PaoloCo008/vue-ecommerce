@@ -48,7 +48,7 @@ const router = createRouter({
           meta: { operation: 'signup' },
         },
         {
-          path: '/checkout',
+          path: '/checkout/:pendingOrderId',
           name: 'checkout',
           component: CheckoutPage,
           meta: { operation: 'create' },

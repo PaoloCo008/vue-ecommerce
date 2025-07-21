@@ -37,8 +37,12 @@ function handleBuyClick(openFn: () => void, authMode: AuthMode) {
 
 function handleAddClick() {
   cartStore.addToCart({
+    _id: crypto.randomUUID(),
     productId: history.state.productId,
     quantity: quantity.value,
+    image: productStore.getProductPrimaryImageById(history.state.productId),
+    price: product?.price as number,
+    name: product?.name as string,
   })
 }
 </script>

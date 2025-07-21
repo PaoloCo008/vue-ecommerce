@@ -17,6 +17,8 @@ const router = useRouter()
 const user = userStore.getUserById(authStore.user as string)
 const defaultShippingAddress = userStore.getUserDefaultShippingAddressById(authStore.user as string)
 const defaultBillingAddress = userStore.getUserDefaultBillingAddressById(authStore.user as string)
+
+const orders = orderStore.getRecentOrders
 </script>
 
 <template>
@@ -106,7 +108,7 @@ const defaultBillingAddress = userStore.getUserDefaultBillingAddressById(authSto
           </div>
         </template>
 
-        <RecentOrdersTable />
+        <RecentOrdersTable :orders />
       </el-card>
     </template>
   </ProfileContentLayout>

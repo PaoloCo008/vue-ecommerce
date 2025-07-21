@@ -3,12 +3,16 @@ import type { Cart, CartItem } from '@/lib/types/globals'
 import { defineStore } from 'pinia'
 import { useAuthStore } from './AuthStore'
 import { carts } from '@/lib/constants/data/carts'
+import { useProductStore } from './ProductStore'
+import { DEFAULT_SHIPPING_FEE } from '@/lib/constants'
+import { useOrderStore } from './OrderStore'
+import router from '@/router'
 
 export const useCartStore = defineStore('cart', {
   state: () => ({
     carts: useLocalStorage<Cart[]>('carts', carts),
     guestCart: useLocalStorage<CartItem[]>('guestCart', []),
-    selectedCartItemIds: [],
+    selectedCartItems: [] as CartItem[],
   }),
   getters: {
     getCartByUserId: (state) => (userId: string) =>
@@ -27,15 +31,38 @@ export const useCartStore = defineStore('cart', {
     },
 
     isCartItemSelected: (state) => (productId: string) =>
-      state.selectedCartItemIds.includes(productId),
+      state.selectedCartItems.some((item) => item.productId === productId),
 
-    areAllItemsSelected: (state) => (productIds: string[]) => {
+    areAllItemsSelected: (state) => (cartItems: CartItem[]) => {
       return (
-        productIds.length > 0 && productIds.every((id) => state.selectedCartItemIds.includes(id))
+        cartItems.length > 0 &&
+        cartItems.every((item) =>
+          state.selectedCartItems.some((selected) => selected.productId === item.productId),
+        )
       )
     },
 
-    getSelectedItemsCount: (state) => state.selectedCartItemIds.length,
+    getSelectedItemsCount: (state) => state.selectedCartItems.length,
+
+    getSelectedCartSubtotal: (state) => {
+      const productStore = useProductStore()
+
+      return state.selectedCartItems.reduce((acc, item) => {
+        const product = productStore.getProductById(item.productId as string)
+
+        return acc + product!.price * item.quantity
+      }, 0)
+    },
+
+    getCheckoutSubtotal: (state) => {
+      const productStore = useProductStore()
+
+      return state.selectedCartItems.reduce((acc, item) => {
+        const product = productStore.getProductById(item.productId as string)
+
+        return acc + product!.price * item.quantity
+      }, DEFAULT_SHIPPING_FEE)
+    },
   },
   actions: {
     createCart(userId: string) {
@@ -78,34 +105,67 @@ export const useCartStore = defineStore('cart', {
       }
     },
 
-    toggleIdFromSelection(productId: string) {
-      if (!this.selectedCartItemIds.includes(productId)) {
-        this.selectedCartItemIds.push(productId)
+    toggleItemFromSelection(item: CartItem) {
+      const existingIndex = this.selectedCartItems.findIndex(
+        (selectedItem) => selectedItem.productId === item.productId,
+      )
+
+      if (existingIndex === -1) {
+        this.selectedCartItems.push(item)
       } else {
-        this.selectedCartItemIds = this.selectedCartItemIds.filter(
-          (selectedId) => selectedId !== productId,
-        )
+        this.selectedCartItems.splice(existingIndex, 1)
       }
     },
 
-    addItemToSelection(productId: string) {
-      if (!this.selectedCartItemIds.includes(productId)) {
-        this.selectedCartItemIds.push(productId)
+    addItemToSelection(item: CartItem) {
+      const exists = this.selectedCartItems.some(
+        (selectedItem) => selectedItem.productId === item.productId,
+      )
+
+      if (!exists) {
+        this.selectedCartItems.push(item)
       }
     },
 
     removeItemFromSelection(productId: string) {
-      this.selectedCartItemIds = this.selectedCartItemIds.filter(
-        (selectedId) => selectedId !== productId,
+      this.selectedCartItems = this.selectedCartItems.filter(
+        (selectedItem) => selectedItem.productId !== productId,
       )
     },
 
-    clearSelections() {
-      this.selectedCartItemIds = []
+    removeItemFromUserCart(userId: string, productId: string) {
+      const userCart = this.getCartByUserId(userId)
+
+      const existingItem = userCart?.items.find((cartItem) => cartItem.productId === productId)
+
+      if (existingItem) {
+        userCart.items = userCart?.items.filter((item) => item.productId !== productId)
+      }
     },
 
-    selectAllItems(ids: string[]) {
-      this.selectedCartItemIds = [...ids]
+    removeSelectedItemsFromUserCart(userId: string) {
+      const userCart = this.getCartByUserId(userId)
+
+      const selectedProductIds = this.selectedCartItems.map((item) => item.productId)
+
+      selectedProductIds.forEach((id) => {
+        const itemId = userCart?.items.findIndex((cartItem) => cartItem.productId === id)
+
+        const selectedId = this.selectedCartItems.findIndex((cartItem) => cartItem.productId === id)
+
+        console.log({ itemId, selectedId })
+
+        userCart?.items.splice(itemId, 1)
+        this.selectedCartItems.splice(selectedId, 1)
+      })
+    },
+
+    clearSelections() {
+      this.selectedCartItems = []
+    },
+
+    selectAllItems(items: CartItem[]) {
+      this.selectedCartItems = [...items]
     },
 
     addToCart(item: CartItem) {
@@ -132,6 +192,29 @@ export const useCartStore = defineStore('cart', {
           this.guestCart?.push(item)
         }
       }
+    },
+
+    proceedToCheckout(addressId: string) {
+      const orderStore = useOrderStore()
+
+      const subtotal = this.getSelectedCartSubtotal
+      const shipping = DEFAULT_SHIPPING_FEE
+      const total = this.getCheckoutSubtotal
+
+      const pendingOrderId = orderStore.createPendingOrder(this.selectedCartItems, addressId)
+
+      orderStore.updatePendingOrder(pendingOrderId, {
+        pricing: {
+          subtotal,
+          shipping,
+          total,
+        },
+      })
+
+      router.push({
+        name: 'checkout',
+        params: { pendingOrderId: orderStore.encodeOrderId(pendingOrderId) },
+      })
     },
   },
 })

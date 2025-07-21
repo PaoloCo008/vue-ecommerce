@@ -3,41 +3,35 @@ import { formatPrice } from '@/lib/helpers'
 import type { CartItem } from '@/lib/types/globals'
 import { useAuthStore } from '@/stores/AuthStore'
 import { useCartStore } from '@/stores/CartStore'
-import { useProductStore } from '@/stores/ProductStore'
 import { computed, ref } from 'vue'
 
 const props = defineProps<{ item: CartItem }>()
-
-const productStore = useProductStore()
 const cartStore = useCartStore()
 const authStore = useAuthStore()
 
 const count = ref(props.item.quantity)
 
-const product = productStore.getProductById(props.item.productId)
-const productPrimaryImage = productStore.getProductPrimaryImageById(props.item.productId)
-
 function handleNumberChange(number: number) {
   cartStore.updateUserCartItemQuantityByProductId(
     authStore.user as string,
-    product?._id as string,
+    props.item.productId as string,
     number,
   )
 }
 
 const isSelected = computed({
-  get: () => cartStore.isCartItemSelected(product?._id as string),
+  get: () => cartStore.isCartItemSelected(props.item.productId as string),
   set: (value: boolean) => {
     if (value) {
-      cartStore.addItemToSelection(product?._id as string)
+      cartStore.addItemToSelection(props.item)
     } else {
-      cartStore.removeItemFromSelection(product?._id as string)
+      cartStore.removeItemFromSelection(props.item.productId as string)
     }
   },
 })
 
 function handleSelect() {
-  cartStore.toggleIdFromSelection(product?._id as string)
+  cartStore.toggleItemFromSelection(props.item)
 }
 </script>
 
@@ -45,15 +39,19 @@ function handleSelect() {
   <div :class="{ 'product-item': true, selected: isSelected }" @click="handleSelect">
     <div class="flex-align-center">
       <el-checkbox class="item-checkbox opaque" v-model="isSelected" @click.stop />
-      <el-image class="product-image" :src="productPrimaryImage" />
+      <el-image class="product-image" :src="item.image" />
     </div>
     <h4>
-      {{ product?.name }}
+      {{ item?.name }}
     </h4>
     <div class="flex-align-center">
       <div class="product-item__price">
-        <span class="price">{{ formatPrice(product?.price as number) }}</span>
-        <el-icon class="opaque"><Delete /></el-icon>
+        <span class="price">{{ formatPrice(item?.price as number) }}</span>
+        <el-icon
+          class="opaque trash-icon"
+          @click.stop="cartStore.removeItemFromUserCart(authStore.user as string, item!._id)"
+          ><Delete
+        /></el-icon>
       </div>
       <el-input-number
         v-model="count"
@@ -67,6 +65,10 @@ function handleSelect() {
 </template>
 
 <style scoped>
+.trash-icon {
+  cursor: pointer;
+}
+
 .selected {
   background-color: var(--color-main-transparent);
 }

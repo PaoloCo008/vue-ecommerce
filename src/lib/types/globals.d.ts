@@ -37,8 +37,11 @@ export interface Cart {
 
 export interface CartItem {
   productId: Product['_id']
-  // selected: boolean
+  _id: string
   quantity: number
+  name: string
+  price: number
+  image: string
 }
 
 export interface Product {
@@ -62,7 +65,7 @@ export interface Image {
   isPrimary: boolean
 }
 
-type OrderStatus = 'placed' | 'paid' | 'shipped' | 'received'
+type OrderStatus = 'pending' | 'placed' | 'paid' | 'shipped' | 'received'
 
 export interface Order {
   _id: string
@@ -70,14 +73,15 @@ export interface Order {
   orderNumber: string
   status: OrderStatus
   items: CartItem[]
-  placedAt: Date
+  createdAt: Date
+  placedAt?: Date
   paidAt?: Date
   shippedAt?: Date
   receivedAt?: Date
   pricing: Pricing
-  shippingAddress: Address
+  shippingAddress: Address['_id']
   paymentMethod: PaymentMethod
-  shipping: Shipping
+  shippedBy: Shipping
 }
 
 export interface Pricing {
@@ -86,7 +90,7 @@ export interface Pricing {
   total: number
 }
 
-export interface Shipping {
+export interface ShippingCompany {
   method: 'standard'
   carrier: 'J10 Express'
   trackingNumber: string
@@ -111,7 +115,7 @@ export interface MobileWallet {
   accountName: string
 }
 
-export type PaymentMethod = CreditCard | MobileWallet
+export type PaymentMethod = CreditCard | MobileWallet | null
 
 export type Gender = 'male' | 'female' | 'other'
 

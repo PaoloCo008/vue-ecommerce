@@ -1,0 +1,2 @@
+export const DEFAULT_SHIPPING_FEE = 38
+export const DEFAULT_EXPIRY_MINUTES = 120

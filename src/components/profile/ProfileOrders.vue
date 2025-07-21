@@ -1,11 +1,20 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { Search, Shop } from '@element-plus/icons-vue'
+import { Search } from '@element-plus/icons-vue'
 import ProfileContentLayout from '@/layouts/ProfileContentLayout.vue'
 import { formatPrice } from '@/lib/helpers'
+import { useAuthStore } from '@/stores/AuthStore'
+import { useOrderStore } from '@/stores/OrderStore'
 
 const activeTab = ref('all')
 const searchQuery = ref('')
+
+const authStore = useAuthStore()
+const orderStore = useOrderStore()
+
+const orders = orderStore.getOrdersByUserId(authStore.user as string)
+
+console.log(orders)
 
 const ordersData = [
   {
