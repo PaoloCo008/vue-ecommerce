@@ -1,281 +1,346 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { formatDate, formatPrice } from '@/lib/helpers'
+import type { Order } from '@/lib/types/globals'
+import { useAuthStore } from '@/stores/AuthStore'
+import { useOrderStore } from '@/stores/OrderStore'
+import { useUserStore } from '@/stores/UserStore'
+import { ref, computed, onMounted } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 
+const route = useRoute()
 const router = useRouter()
+const orderStore = useOrderStore()
+const userStore = useUserStore()
+const authStore = useAuthStore()
 
+const order = computed(() =>
+  orderStore.getOrderById(orderStore.decodeOrderId(route.params.orderId as string) as string),
+)
+
+const address = userStore.getUserAddressByAddressId(
+  authStore.user as string,
+  order.value?.shippingAddress as string,
+)
+
+// Main steps - keep Order Placed as first step
 const steps = ref([
   {
     id: 1,
     title: 'Order Placed',
-    description: '07/05/2025 04:36',
+    description: '',
     icon: 'Document',
+    field: 'placedAt',
   },
   {
     id: 2,
-    title: 'Order Paid (₱518)',
-    description: '07/05/2025 04:36',
+    title: 'Order Paid',
+    description: '',
     icon: 'CreditCard',
+    field: 'paidAt',
   },
   {
     id: 3,
     title: 'Order Shipped Out',
-    description: '07/05/2025 17:05',
+    description: '',
     icon: 'Truck',
+    field: 'shippedAt',
   },
   {
     id: 4,
     title: 'Order Received',
-    description: '07/06/2025 10:14',
-    icon: 'Box',
-  },
-  {
-    id: 5,
-    title: 'To Rate',
     description: '',
-    icon: 'Star',
+    icon: 'Box',
+    field: 'receivedAt',
   },
 ])
 
-const trackingSteps = ref([
-  {
-    title: 'Delivered',
-    description: '07/06/2025 10:14 - Parcel has been delivered - View Proof of Delivery',
-    status: 'finish',
-  },
-  {
-    title: 'In transit',
-    description: '07/06/2025 08:48 - Parcel is out for delivery',
-    status: 'process',
-  },
-  {
-    title: 'Processing',
-    description: '07/06/2025 08:06 - Your parcel has arrived at the delivery hub',
-    status: 'wait',
-  },
-  {
-    title: 'Processing',
-    description: '07/05/2025 21:58 - Parcel has departed from sorting facility',
-    status: 'wait',
-  },
-  {
-    title: 'Processing',
-    description: '07/05/2025 21:53 - Parcel has arrived at sorting facility',
-    status: 'wait',
-  },
-  {
-    title: 'Processing',
-    description: '07/05/2025 17:05 - Parcel has arrived at sorting facility',
-    status: 'wait',
-  },
-])
+// Enhanced tracking steps with more detail and action buttons
+const trackingSteps = computed(() => {
+  if (!order.value) return []
+
+  const baseSteps = []
+
+  // If delivered
+  if (order.value.receivedAt) {
+    baseSteps.push({
+      title: 'Delivered',
+      description: `${formatDate(order.value.receivedAt)} - Parcel has been delivered successfully - View Proof of Delivery`,
+      status: 'success',
+      showButton: false,
+    })
+
+    baseSteps.push({
+      title: 'Out for delivery',
+      description: `${formatDate(order.value.shippedAt!)} - Package is out for delivery to your address`,
+      status: 'finish',
+      showButton: false,
+    })
+
+    baseSteps.push({
+      title: 'Package departed facility',
+      description: `${formatDate(order.value.shippedAt!)} - Package has departed from sorting facility`,
+      status: 'finish',
+      showButton: false,
+    })
+
+    baseSteps.push({
+      title: 'Package arrived at facility',
+      description: `${formatDate(order.value.shippedAt!)} - Package has arrived at delivery hub`,
+      status: 'finish',
+      showButton: false,
+    })
+  }
+  // If shipped but not delivered
+  else if (order.value.shippedAt) {
+    baseSteps.push({
+      title: 'Out for delivery',
+      description: `${formatDate(order.value.shippedAt)} - Package is out for delivery to your address`,
+      status: 'process',
+      showButton: true,
+      buttonLabel: 'Mark as Received',
+      buttonAction: () => updateOrderStatus('receivedAt'),
+      buttonVariant: 'success',
+    })
+
+    baseSteps.push({
+      title: 'Package departed facility',
+      description: `${formatDate(order.value.shippedAt)} - Package has departed from sorting facility`,
+      status: 'finish',
+      showButton: false,
+    })
+
+    baseSteps.push({
+      title: 'Package arrived at facility',
+      description: `${formatDate(order.value.shippedAt)} - Package has arrived at delivery hub`,
+      status: 'finish',
+      showButton: false,
+    })
+  }
+  // If paid but not shipped
+  else if (order.value.paidAt) {
+    baseSteps.push({
+      title: 'Processing',
+      description: `${formatDate(order.value.paidAt)} - Your order is being prepared for shipment`,
+      status: 'process',
+      showButton: true,
+      buttonLabel: 'Ship Order',
+      buttonAction: () => updateOrderStatus('shippedAt'),
+      buttonVariant: 'primary',
+    })
+  }
+
+  // Always show initial steps
+  if (order.value.paidAt) {
+    baseSteps.push({
+      title: 'Payment confirmed',
+      description: `${formatDate(order.value.paidAt)} - Payment has been confirmed and order is processing`,
+      status: 'finish',
+      showButton: false,
+    })
+  }
+
+  if (order.value.placedAt) {
+    baseSteps.push({
+      title: 'Order placed',
+      description: `${formatDate(order.value.placedAt)} - Order has been placed successfully`,
+      status: 'finish',
+      showButton: false,
+    })
+  }
+
+  return baseSteps
+})
+
+// Current step calculation with all 4 steps
+const currentStep = computed(() => {
+  if (!order.value) return 0
+
+  if (order.value.status === 'received' || order.value.receivedAt) return 4
+  if (order.value.status === 'shipped' || order.value.shippedAt) return 3
+  if (order.value.status === 'paid' || order.value.paidAt) return 2
+  if (order.value.status === 'placed' || order.value.placedAt) return 1
+  return 0
+})
+
+const updateStepDescriptions = () => {
+  if (!order.value) return
+
+  steps.value.forEach((step) => {
+    if (step.field && order.value[step.field]) {
+      const date = order.value[step.field]
+      step.description = formatDate(date)
+
+      // Add pricing info for paid step
+      if (step.field === 'paidAt' && order.value.pricing) {
+        step.description = `${step.description} (${formatPrice(order.value.pricing.total)})`
+      }
+    }
+  })
+}
+
+const updateOrderStatus = async (field: string) => {
+  if (!order.value) return
+
+  try {
+    const updates: Partial<Order> = {}
+    updates[field] = new Date()
+
+    // Update order status based on the field
+    if (field === 'shippedAt') {
+      updates.status = 'shipped'
+    } else if (field === 'receivedAt') {
+      updates.status = 'received'
+    }
+
+    orderStore.updateOrder(order.value._id, updates)
+    updateStepDescriptions()
+
+    console.log(`Order ${field} updated successfully`)
+  } catch (error) {
+    console.error(`Error updating order ${field}:`, error)
+  }
+}
+
+onMounted(() => {
+  updateStepDescriptions()
+})
 </script>
 
 <template>
   <div class="order-page">
-    <!-- Header -->
     <div class="header">
       <button class="back-btn" @click="router.back()">
         <span>‹</span>
         <span>BACK</span>
       </button>
       <div class="order-info">
-        <div class="order-id">ORDER ID: 250705A3BETUD0</div>
-        <div class="order-status">ORDER COMPLETED</div>
+        <div class="order-id">ORDER NUMBER: {{ order?.orderNumber }}</div>
+        <div class="order-status">ORDER {{ order?.status }}</div>
       </div>
     </div>
 
-    <!-- Progress Steps -->
     <div class="progress-section">
-      <!-- Desktop optimized steps -->
+      <!-- Desktop Steps using Element Plus -->
       <div class="desktop-steps">
-        <div class="progress-container">
-          <div class="progress-line">
-            <div class="progress-line-fill" :style="{ width: '80%' }"></div>
-          </div>
-          <div
-            v-for="(step, index) in steps"
-            :key="step.id"
-            class="desktop-step"
-            :class="{
-              completed: index < 4,
-              current: index === 4,
-              pending: index > 4,
-            }"
-          >
-            <div class="desktop-step-icon">
-              <span v-if="index < 4">✓</span>
-              <span v-else-if="index === 4">{{ step.id }}</span>
-              <span v-else>{{ step.id }}</span>
-            </div>
-            <div class="desktop-step-content">
-              <div class="desktop-step-title">{{ step.title }}</div>
-              <div class="desktop-step-description" v-if="step.description">
-                {{ step.description }}
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Mobile optimized steps -->
-      <div class="mobile-steps">
-        <div
-          v-for="(step, index) in steps"
-          :key="step.id"
-          class="mobile-step"
-          :class="{
-            completed: index < 4,
-            current: index === 4,
-            pending: index > 4,
-          }"
+        <el-steps
+          :active="currentStep"
+          finish-status="success"
+          process-status="process"
+          class="custom-steps"
         >
-          <div class="mobile-step-icon">
-            <div class="step-number">
-              <span v-if="index < 4">✓</span>
-              <span v-else>{{ step.id }}</span>
-            </div>
-          </div>
-          <div class="mobile-step-content">
-            <div class="mobile-step-title">{{ step.title }}</div>
-            <div class="mobile-step-description" v-if="step.description">
-              {{ step.description }}
-            </div>
-          </div>
-          <div class="mobile-step-line" v-if="index < steps.length - 1"></div>
-        </div>
+          <el-step
+            v-for="step in steps"
+            :key="step.id"
+            :title="step.title"
+            :description="step.description"
+          />
+        </el-steps>
+      </div>
+
+      <!-- Mobile Steps using Element Plus -->
+      <div class="mobile-steps">
+        <el-steps
+          :active="currentStep"
+          direction="vertical"
+          finish-status="success"
+          process-status="process"
+        >
+          <el-step
+            v-for="step in steps"
+            :key="step.id"
+            :title="step.title"
+            :description="step.description"
+          />
+        </el-steps>
       </div>
     </div>
 
-    <!-- Return Notice -->
-    <div class="return-notice">Request for return/refund by 07/21/2025 if necessary</div>
-
-    <!-- Action Buttons -->
-    <div class="action-buttons">
-      <el-button type="danger" size="large" style="width: 100%">Rate</el-button>
-      <el-button size="large" style="width: 100%">Request For Return/Refund</el-button>
-      <el-button size="large" style="width: 100%">Contact Seller</el-button>
-      <el-button size="large" style="width: 100%">Buy Again</el-button>
-      <el-button size="large" style="width: 100%">View E-Invoice</el-button>
-    </div>
-
-    <!-- Delivery Address & Tracking -->
     <div class="delivery-info">
       <div class="delivery-address">
         <h3 class="section-title">Delivery Address</h3>
         <div class="address-details">
-          <strong>Paolo Henry Co</strong><br />
-          <div class="contact-info">(+63) 9178777471</div>
-          <div>840 L12-5 Winter Green Street, South Green Heights,</div>
-          <div>Putatan, Muntinlupa City, Putatan, Muntinlupa City,</div>
-          <div>Metro Manila, Metro Manila, 1772</div>
+          <strong>{{ address?.fullName }}</strong
+          ><br />
+          <div class="contact-info">(+63) {{ address?.mobileNumber }}</div>
+          <div>{{ address?.unitNumber }} {{ address?.address }}</div>
+          <div>{{ address?.province }}, {{ address?.district }}, {{ address?.ward }}</div>
         </div>
         <div class="express-info">
-          J10 Express<br />
-          206804148729836
+          {{ order?.shippedBy.carrier }}<br />
+          {{ order?.shippedBy.trackingNumber }}
         </div>
       </div>
 
       <div class="delivery-tracking">
+        <h3 class="section-title">Tracking Information</h3>
         <div class="tracking-steps">
-          <el-steps :active="0" direction="vertical" finish-status="success">
-            <el-step
-              v-for="(track, index) in trackingSteps"
-              :key="index"
-              :title="track.title"
-              :description="track.description"
-              :status="track.status"
-            />
-          </el-steps>
+          <div class="tracking-step" v-for="(track, index) in trackingSteps" :key="index">
+            <!-- Step indicator and content -->
+            <div class="step-wrapper">
+              <div :class="['step-indicator', `step-${track.status}`]">
+                <div class="step-dot"></div>
+                <div v-if="index < trackingSteps.length - 1" class="step-line"></div>
+              </div>
+              <div class="step-content">
+                <div class="step-title">{{ track.title }}</div>
+                <div class="step-description">{{ track.description }}</div>
+
+                <!-- Action button for current active step -->
+                <div v-if="track.showButton" class="step-action">
+                  <button
+                    :class="['btn', 'btn-sm', `btn-${track.buttonVariant}`]"
+                    @click="track.buttonAction"
+                  >
+                    {{ track.buttonLabel }}
+                  </button>
+                  <p class="action-hint">Click to progress to next stage</p>
+                </div>
+              </div>
+            </div>
+          </div>
           <div class="see-more">See More</div>
         </div>
       </div>
     </div>
 
-    <!-- Seller Info -->
-    <div class="seller-info">
-      <div class="seller-badge">Mall</div>
-      <div class="seller-name">ankerphilippines</div>
-      <div class="seller-actions">
-        <a href="#" class="action-link">💬 Chat</a>
-        <a href="#" class="action-link">👁 View Shop</a>
-      </div>
-    </div>
-
-    <!-- Products -->
-    <div class="product-item">
-      <img
-        src="https://via.placeholder.com/80x80/f0f0f0/999?text=Product"
-        alt="Product"
-        class="product-image"
-      />
+    <div v-for="item in order?.items" :key="item._id" class="product-item">
+      <img :src="item.image" :alt="item.name" class="product-image" />
       <div class="product-details">
         <div class="product-name">
-          Anker Zolo 30W/20W Fast Wall Charger Compact Size Foldable Plug for iPhone 16/15/14 Series
+          {{ item.name }}
         </div>
-        <div class="product-variant">Variation: White,30W</div>
-        <div class="product-quantity">x1</div>
+        <div class="product-quantity">x{{ item.quantity }}</div>
       </div>
     </div>
 
-    <div class="product-item">
-      <img
-        src="https://via.placeholder.com/80x80/f0f0f0/999?text=Product"
-        alt="Product"
-        class="product-image"
-      />
-      <div class="product-details">
-        <div class="product-name">
-          Anker 322 USB C to USB C 3ft Nylon Braided Cable Fast Charging
-        </div>
-        <div class="product-variant">x1</div>
-      </div>
-    </div>
-
-    <!-- Price Summary -->
     <div class="price-summary">
       <div class="price-row">
         <div class="price-label">
           <span class="bundle-tag">Bundle</span>
-          Buy 2, Saved ₱31
+          Buy {{ order?.items.length }}
         </div>
-        <div class="price-value">₱745</div>
+        <div class="price-value">{{ formatPrice(order?.pricing.total as number) }}</div>
       </div>
 
       <div class="price-row">
         <div class="price-label">Merchandise Subtotal</div>
-        <div class="price-value">₱745</div>
+        <div class="price-value">{{ formatPrice(order?.pricing.subtotal as number) }}</div>
       </div>
 
       <div class="price-row">
         <div class="price-label">Shipping Fee</div>
-        <div class="price-value">₱36</div>
-      </div>
-
-      <div class="price-row">
-        <div class="price-label">Shipping Discount Subtotal</div>
-        <div class="price-discount">-₱36</div>
-      </div>
-
-      <div class="price-row">
-        <div class="price-label">Shopee Voucher Applied</div>
-        <div class="price-discount">-₱147</div>
-      </div>
-
-      <div class="price-row">
-        <div class="price-label">Shop Voucher Applied</div>
-        <div class="price-discount">-₱80</div>
+        <div class="price-value">{{ formatPrice(order?.pricing.shipping as number) }}</div>
       </div>
 
       <div class="price-row price-total">
         <div class="price-label">Order Total</div>
-        <div class="price-value">₱518</div>
+        <div class="price-value">{{ formatPrice(order?.pricing.total as number) }}</div>
       </div>
 
       <div class="payment-method">
         <div class="price-row">
           <div class="price-label">Payment Method</div>
-          <div class="payment-method-value">BPI Online</div>
+          <div class="payment-method-value">[[ TBD ]]</div>
         </div>
       </div>
     </div>
@@ -283,6 +348,157 @@ const trackingSteps = ref([
 </template>
 
 <style scoped>
+/* Custom tracking steps styling */
+.tracking-steps {
+  margin-top: 10px;
+}
+
+.tracking-step {
+  margin-bottom: 0;
+}
+
+.step-wrapper {
+  display: flex;
+  align-items: flex-start;
+  gap: 15px;
+  padding-bottom: 20px;
+}
+
+.step-indicator {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.step-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid #ddd;
+  background: white;
+  transition: all 0.3s ease;
+}
+
+.step-line {
+  width: 2px;
+  height: 30px;
+  background: #ddd;
+  margin-top: 4px;
+}
+
+.step-success .step-dot {
+  background: #4caf50;
+  border-color: #4caf50;
+}
+
+.step-success .step-line {
+  background: #4caf50;
+}
+
+.step-finish .step-dot {
+  background: #4caf50;
+  border-color: #4caf50;
+}
+
+.step-finish .step-line {
+  background: #4caf50;
+}
+
+.step-process .step-dot {
+  background: #ff9800;
+  border-color: #ff9800;
+  animation: pulse-orange 2s infinite;
+}
+
+.step-process .step-line {
+  background: #ddd;
+}
+
+@keyframes pulse-orange {
+  0% {
+    box-shadow: 0 0 0 0 rgba(255, 152, 0, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 6px rgba(255, 152, 0, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(255, 152, 0, 0);
+  }
+}
+
+.step-content {
+  flex: 1;
+  padding-top: 0;
+}
+
+.step-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 4px;
+}
+
+.step-description {
+  font-size: 12px;
+  color: #666;
+  line-height: 1.4;
+  margin-bottom: 8px;
+}
+
+.step-action {
+  margin-top: 12px;
+}
+
+.btn-sm {
+  padding: 8px 16px;
+  font-size: 12px;
+  border-radius: 4px;
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+  color: white;
+}
+
+.btn-primary:hover {
+  background: linear-gradient(135deg, #0056b3 0%, #004085 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 123, 255, 0.3);
+}
+
+.btn-success {
+  background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);
+  color: white;
+}
+
+.btn-success:hover {
+  background: linear-gradient(135deg, #1e7e34 0%, #155724 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(40, 167, 69, 0.3);
+}
+
+.action-hint {
+  margin: 6px 0 0 0;
+  font-size: 10px;
+  color: #999;
+  font-style: italic;
+}
+
+.see-more {
+  color: #ee4d2d;
+  font-size: 12px;
+  cursor: pointer;
+  margin-left: 27px;
+  margin-top: 5px;
+}
+
+/* All your existing styles remain the same */
 .order-page {
   max-width: 800px;
   margin: 0 auto;
@@ -328,9 +544,9 @@ const trackingSteps = ref([
   color: #ee4d2d;
   font-weight: 600;
   margin-top: 4px;
+  text-transform: uppercase;
 }
 
-/* Progress Section Styles */
 .progress-section {
   margin-bottom: 40px;
   background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
@@ -340,254 +556,12 @@ const trackingSteps = ref([
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
-/* Desktop Steps (Custom Design) */
 .desktop-steps {
   display: block;
 }
 
-.progress-container {
-  position: relative;
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  max-width: 100%;
-}
-
-.progress-line {
-  position: absolute;
-  top: 30px;
-  left: 60px;
-  right: 60px;
-  height: 3px;
-  background-color: #e9ecef;
-  border-radius: 2px;
-  z-index: 1;
-}
-
-.progress-line-fill {
-  height: 100%;
-  background: linear-gradient(90deg, #4caf50 0%, #66bb6a 100%);
-  border-radius: 2px;
-  transition: width 0.6s ease;
-}
-
-.desktop-step {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  flex: 1;
-  z-index: 2;
-  max-width: 160px;
-}
-
-.desktop-step-icon {
-  width: 60px;
-  height: 60px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 24px;
-  font-weight: 700;
-  margin-bottom: 16px;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-}
-
-.desktop-step.completed .desktop-step-icon {
-  background: linear-gradient(135deg, #4caf50 0%, #66bb6a 100%);
-  color: white;
-  transform: scale(1.1);
-}
-
-.desktop-step.current .desktop-step-icon {
-  background: linear-gradient(135deg, #ee4d2d 0%, #ff6b47 100%);
-  color: white;
-  transform: scale(1.1);
-  animation: pulse 2s infinite;
-}
-
-.desktop-step.pending .desktop-step-icon {
-  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-  color: #6c757d;
-  border: 2px solid #dee2e6;
-}
-
-@keyframes pulse {
-  0% {
-    box-shadow: 0 4px 12px rgba(238, 77, 45, 0.3);
-  }
-  50% {
-    box-shadow: 0 4px 20px rgba(238, 77, 45, 0.6);
-  }
-  100% {
-    box-shadow: 0 4px 12px rgba(238, 77, 45, 0.3);
-  }
-}
-
-.desktop-step-content {
-  min-height: 60px;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-}
-
-.desktop-step-title {
-  font-size: 15px;
-  font-weight: 600;
-  color: #212529;
-  margin-bottom: 8px;
-  line-height: 1.3;
-}
-
-.desktop-step-description {
-  font-size: 13px;
-  color: #6c757d;
-  line-height: 1.4;
-  font-weight: 500;
-}
-
-.desktop-step.completed .desktop-step-title {
-  color: #4caf50;
-}
-
-.desktop-step.current .desktop-step-title {
-  color: #ee4d2d;
-  font-weight: 700;
-}
-
-.desktop-step.pending .desktop-step-title {
-  color: #adb5bd;
-}
-
-/* Mobile Steps (Custom) */
 .mobile-steps {
   display: none;
-}
-
-.mobile-step {
-  position: relative;
-  display: flex;
-  align-items: flex-start;
-  gap: 15px;
-  padding: 15px 0;
-}
-
-.mobile-step-icon {
-  position: relative;
-  z-index: 2;
-  flex-shrink: 0;
-}
-
-.step-number {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 16px;
-  font-weight: 600;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.mobile-step.completed .step-number {
-  background: linear-gradient(135deg, #4caf50 0%, #66bb6a 100%);
-  color: white;
-}
-
-.mobile-step.current .step-number {
-  background: linear-gradient(135deg, #ee4d2d 0%, #ff6b47 100%);
-  color: white;
-}
-
-.mobile-step.pending .step-number {
-  background: #f8f9fa;
-  color: #6c757d;
-  border: 2px solid #dee2e6;
-}
-
-.mobile-step-content {
-  flex: 1;
-  padding-top: 4px;
-}
-
-.mobile-step-title {
-  font-size: 14px;
-  font-weight: 500;
-  color: #333;
-  margin-bottom: 4px;
-  line-height: 1.3;
-}
-
-.mobile-step-description {
-  font-size: 12px;
-  color: #666;
-  line-height: 1.3;
-}
-
-.mobile-step-line {
-  position: absolute;
-  left: 15px;
-  top: 47px;
-  bottom: -15px;
-  width: 2px;
-  background: #ddd;
-  z-index: 1;
-}
-
-.mobile-step.completed .mobile-step-line {
-  background: #4caf50;
-}
-
-.mobile-step:last-child .mobile-step-line {
-  display: none;
-}
-
-.return-notice {
-  background: #fff3cd;
-  border: 1px solid #ffeaa7;
-  border-radius: 4px;
-  padding: 12px;
-  margin-bottom: 30px;
-  font-size: 13px;
-  color: #856404;
-}
-
-.action-buttons {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  margin-bottom: 30px;
-}
-
-.btn-primary {
-  background: #ee4d2d;
-  border: none;
-  color: white;
-  padding: 12px 24px;
-  border-radius: 4px;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-}
-
-.btn-secondary {
-  background: white;
-  border: 1px solid #ddd;
-  color: #666;
-  padding: 12px 24px;
-  border-radius: 4px;
-  font-size: 14px;
-  cursor: pointer;
-}
-
-.btn-secondary:hover {
-  border-color: #ee4d2d;
-  color: #ee4d2d;
 }
 
 .section-title {
@@ -629,117 +603,6 @@ const trackingSteps = ref([
   margin-top: 10px;
 }
 
-.tracking-steps {
-  margin-top: 10px;
-}
-
-.tracking-steps .el-steps {
-  flex-direction: column;
-  align-items: flex-start;
-}
-
-.tracking-steps .el-step {
-  padding-bottom: 15px;
-}
-
-.tracking-steps .el-step__head {
-  width: 20px;
-  height: 20px;
-}
-
-.tracking-steps .el-step__icon {
-  width: 20px;
-  height: 20px;
-  font-size: 12px;
-  line-height: 20px;
-}
-
-.tracking-steps .el-step__title {
-  font-size: 13px !important;
-  font-weight: 500 !important;
-  color: #333 !important;
-  margin-bottom: 2px !important;
-}
-
-.tracking-steps .el-step__description {
-  font-size: 12px !important;
-  color: #666 !important;
-  line-height: 1.3 !important;
-}
-
-.tracking-steps .el-step__main {
-  margin-left: 30px;
-}
-
-.tracking-steps .el-step__line {
-  left: 10px;
-  top: 20px;
-  height: calc(100% - 5px);
-}
-
-.tracking-steps .el-step__head.is-finish .el-step__icon {
-  background-color: #4caf50 !important;
-  border-color: #4caf50 !important;
-}
-
-.tracking-steps .el-step__head.is-process .el-step__icon {
-  background-color: #ff9800 !important;
-  border-color: #ff9800 !important;
-}
-
-.tracking-steps .el-step__line.is-finish {
-  background-color: #4caf50 !important;
-}
-
-.see-more {
-  color: #ee4d2d;
-  font-size: 12px;
-  cursor: pointer;
-  margin-left: 35px;
-  margin-top: 10px;
-}
-
-.seller-info {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 20px;
-}
-
-.seller-badge {
-  background: #ee4d2d;
-  color: white;
-  padding: 2px 6px;
-  border-radius: 3px;
-  font-size: 11px;
-  font-weight: 500;
-}
-
-.seller-name {
-  font-weight: 500;
-  font-size: 14px;
-}
-
-.seller-actions {
-  display: flex;
-  gap: 10px;
-  margin-left: auto;
-}
-
-.action-link {
-  color: #666;
-  font-size: 12px;
-  text-decoration: none;
-  padding: 4px 8px;
-  border: 1px solid #ddd;
-  border-radius: 3px;
-}
-
-.action-link:hover {
-  color: #ee4d2d;
-  border-color: #ee4d2d;
-}
-
 .product-item {
   display: flex;
   gap: 15px;
@@ -766,12 +629,6 @@ const trackingSteps = ref([
   line-height: 1.4;
 }
 
-.product-variant {
-  font-size: 12px;
-  color: #666;
-  margin-bottom: 10px;
-}
-
 .product-quantity {
   font-size: 14px;
   color: #666;
@@ -795,10 +652,6 @@ const trackingSteps = ref([
 
 .price-value {
   color: #333;
-}
-
-.price-discount {
-  color: #4caf50;
 }
 
 .price-total {
@@ -841,24 +694,6 @@ const trackingSteps = ref([
     padding: 25px 20px;
   }
 
-  .el-steps {
-    padding: 0 10px;
-  }
-
-  .el-step__title {
-    font-size: 13px !important;
-  }
-
-  .el-step__description {
-    font-size: 11px !important;
-  }
-
-  .el-step__icon {
-    font-size: 20px !important;
-    width: 36px !important;
-    height: 36px !important;
-  }
-
   .delivery-info {
     grid-template-columns: 1fr;
     gap: 20px;
@@ -892,7 +727,6 @@ const trackingSteps = ref([
     text-align: center;
   }
 
-  /* Switch to mobile steps */
   .desktop-steps {
     display: none;
   }
@@ -908,27 +742,9 @@ const trackingSteps = ref([
     border-radius: 8px;
   }
 
-  .mobile-step-title {
-    font-size: 13px;
-  }
-
-  .mobile-step-description {
-    font-size: 11px;
-  }
-
   .delivery-info {
     grid-template-columns: 1fr;
     gap: 15px;
-  }
-
-  .action-buttons {
-    grid-template-columns: 1fr;
-    gap: 10px;
-  }
-
-  .product-item {
-    grid-template-columns: 60px 1fr;
-    gap: 10px;
   }
 
   .product-image {
@@ -936,20 +752,12 @@ const trackingSteps = ref([
     height: 60px;
   }
 
-  .seller-actions {
-    flex-direction: column;
-    gap: 5px;
+  .step-wrapper {
+    gap: 12px;
   }
 
-  .price-row {
-    flex-direction: column;
-    gap: 5px;
-    align-items: flex-start;
-  }
-
-  .price-row .price-value,
-  .price-row .price-discount {
-    align-self: flex-end;
+  .see-more {
+    margin-left: 22px;
   }
 }
 
@@ -968,31 +776,6 @@ const trackingSteps = ref([
     border-radius: 6px;
   }
 
-  .mobile-step {
-    padding: 12px 0;
-    gap: 12px;
-  }
-
-  .step-number {
-    width: 28px;
-    height: 28px;
-    font-size: 12px;
-  }
-
-  .mobile-step-line {
-    left: 13px;
-    top: 40px;
-  }
-
-  .mobile-step-title {
-    font-size: 12px;
-    font-weight: 500;
-  }
-
-  .mobile-step-description {
-    font-size: 10px;
-  }
-
   .section-title {
     font-size: 14px;
     margin-bottom: 15px;
@@ -1002,42 +785,20 @@ const trackingSteps = ref([
     font-size: 13px;
   }
 
-  .product-variant {
-    font-size: 11px;
-  }
-
   .address-details {
     font-size: 13px;
   }
 
-  .tracking-steps .el-step__title {
-    font-size: 12px !important;
+  .step-wrapper {
+    gap: 10px;
   }
 
-  .tracking-steps .el-step__description {
-    font-size: 11px !important;
+  .step-title {
+    font-size: 12px;
   }
-}
 
-/* Extra small devices */
-@media (max-width: 360px) {
-  .mobile-step-title {
+  .step-description {
     font-size: 11px;
-    line-height: 1.2;
-  }
-
-  .mobile-step-description {
-    font-size: 9px;
-  }
-
-  .step-number {
-    width: 26px;
-    height: 26px;
-    font-size: 11px;
-  }
-
-  .mobile-step-line {
-    left: 12px;
   }
 }
 </style>

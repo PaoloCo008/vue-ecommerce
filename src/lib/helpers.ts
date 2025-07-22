@@ -30,3 +30,16 @@ export function buildAddressLine(address: {
 
   return `${capitalize(province)} - ${capitalize(district)} - ${capitalize(ward)}`
 }
+
+export const formatDate = (date: Date | string) => {
+  const d = new Date(date)
+  return d
+    .toLocaleDateString('en-PH', {
+      month: '2-digit',
+      day: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    })
+    .replace(',', '')
+}

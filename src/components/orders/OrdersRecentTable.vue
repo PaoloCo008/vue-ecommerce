@@ -3,101 +3,21 @@ import { formatPrice } from '@/lib/helpers'
 import type { Order } from '@/lib/types/globals'
 import { format } from 'date-fns'
 import { useRouter } from 'vue-router'
+import { useOrderStore } from '../../stores/OrderStore'
 
 const props = defineProps<{ orders: Order[] }>()
+const orderStore = useOrderStore()
 
 const router = useRouter()
 
 const tableOrderData = props.orders.map((order) => ({
+  _id: order._id,
   orderNumber: order.orderNumber,
   placedAt: format(order.placedAt as Date, 'yyyy-MM-dd'),
   items: order.items.map((item) => ({ name: item.name, image: item.image })).slice(0, 4),
   additionalItems: order.items.length > 4 ? `${order.items.length - 4} more` : null,
   total: `${formatPrice(order.pricing.total)}`,
 }))
-
-// const recentOrders = [
-//   {
-//     orderNumber: 'ORD-2024-001234',
-//     placedOn: '2024-07-10',
-//     items: [
-//       {
-//         name: 'Wireless Headphones',
-//         image: 'https://via.placeholder.com/40x40/4a90e2/ffffff?text=HP',
-//       },
-//       {
-//         name: 'Phone Case',
-//         image: 'https://via.placeholder.com/40x40/7ed321/ffffff?text=PC',
-//       },
-//     ],
-//     additionalItems: null,
-//     total: '₱2,450.00',
-//   },
-//   {
-//     orderNumber: 'ORD-2024-001235',
-//     placedOn: '2024-07-08',
-//     items: [
-//       {
-//         name: 'Laptop Stand',
-//         image: 'https://via.placeholder.com/40x40/f5a623/ffffff?text=LS',
-//       },
-//       {
-//         name: 'Mouse Pad',
-//         image: 'https://via.placeholder.com/40x40/bd10e0/ffffff?text=MP',
-//       },
-//       {
-//         name: 'USB Cable',
-//         image: 'https://via.placeholder.com/40x40/b8e986/ffffff?text=UC',
-//       },
-//       {
-//         name: 'USB Cable',
-//         image: 'https://via.placeholder.com/40x40/b8e986/ffffff?text=UC',
-//       },
-//     ],
-//     additionalItems: '2 more',
-//     total: '₱3,200.00',
-//   },
-//   {
-//     orderNumber: 'ORD-2024-001236',
-//     placedOn: '2024-07-05',
-//     items: [
-//       {
-//         name: 'Bluetooth Speaker',
-//         image: 'https://via.placeholder.com/40x40/50e3c2/ffffff?text=BS',
-//       },
-//     ],
-//     additionalItems: null,
-//     total: '₱1,800.00',
-//   },
-//   {
-//     orderNumber: 'ORD-2024-001237',
-//     placedOn: '2024-07-03',
-//     items: [
-//       {
-//         name: 'Smart Watch',
-//         image: 'https://via.placeholder.com/40x40/d0021b/ffffff?text=SW',
-//       },
-//       {
-//         name: 'Watch Band',
-//         image: 'https://via.placeholder.com/40x40/9013fe/ffffff?text=WB',
-//       },
-//     ],
-//     additionalItems: '1 more',
-//     total: '₱8,500.00',
-//   },
-//   {
-//     orderNumber: 'ORD-2024-001238',
-//     placedOn: '2024-06-28',
-//     items: [
-//       {
-//         name: 'Tablet',
-//         image: 'https://via.placeholder.com/40x40/417505/ffffff?text=TB',
-//       },
-//     ],
-//     additionalItems: null,
-//     total: '₱15,000.00',
-//   },
-// ]
 </script>
 
 <template>
@@ -124,8 +44,16 @@ const tableOrderData = props.orders.map((order) => ({
     </el-table-column>
     <el-table-column prop="total" label="Total" width="120" />
     <el-table-column label="Action" width="100">
-      <template #default>
-        <el-button link type="primary" @click="router.push({ name: 'orderdetails' })"
+      <template #default="scope">
+        <el-button
+          link
+          type="primary"
+          @click="
+            router.push({
+              name: 'orderdetails',
+              params: { orderId: orderStore.encodeOrderId(scope.row._id) },
+            })
+          "
           >MANAGE</el-button
         >
       </template>

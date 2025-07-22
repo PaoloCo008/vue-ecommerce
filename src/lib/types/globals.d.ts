@@ -81,7 +81,7 @@ export interface Order {
   pricing: Pricing
   shippingAddress: Address['_id']
   paymentMethod: PaymentMethod
-  shippedBy: Shipping
+  shippedBy: ShippingCompany
 }
 
 export interface Pricing {
@@ -101,6 +101,7 @@ type CardExpiration = [number, number]
 export interface CreditCard {
   type: 'credit_card'
   _id: string
+  provider: 'gcash'
   lastFour: string
   cardName: string
   expiration: CardExpiration

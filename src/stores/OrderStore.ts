@@ -164,6 +164,28 @@ export const useOrderStore = defineStore('order', {
       this.pendingOrders = this.pendingOrders.filter((order) => order.id !== id)
     },
 
+    updateOrder(orderId: string, updates: Partial<Order>) {
+      const orderIndex = this.orders.findIndex((order) => order._id === orderId)
+
+      if (orderIndex !== -1) {
+        this.orders[orderIndex] = {
+          ...this.orders[orderIndex],
+          ...updates,
+          // Ensure dates are properly converted
+          ...(updates.shippedAt && { shippedAt: new Date(updates.shippedAt) }),
+          ...(updates.receivedAt && { receivedAt: new Date(updates.receivedAt) }),
+          ...(updates.paidAt && { paidAt: new Date(updates.paidAt) }),
+          ...(updates.placedAt && { placedAt: new Date(updates.placedAt) }),
+        }
+
+        console.log(`Order ${orderId} updated successfully`, this.orders[orderIndex])
+        return this.orders[orderIndex]
+      } else {
+        console.error(`Order ${orderId} not found`)
+        return null
+      }
+    },
+
     encodeOrderId(orderId: string) {
       // Simple algorithm: reverse + base64 + random padding
       const reversed = orderId.split('').reverse().join('')

@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { computed, inject, ref } from 'vue'
+import { computed, inject, ref, onMounted, onUnmounted, nextTick } from 'vue'
 import ModalTemplate from '../ModalTemplate.vue'
 import { useAuthStore } from '@/stores/AuthStore'
 import { useUserStore } from '@/stores/UserStore'
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElNotification } from 'element-plus'
 import { useRouter } from 'vue-router'
 
 const authStore = useAuthStore()
@@ -20,6 +20,133 @@ const emit = defineEmits<{
   (e: 'back'): void
 }>()
 
+// OTP functionality
+const otpInputs = ref<string[]>(['', '', '', ''])
+const generatedOtp = ref<string>('')
+const countdown = ref(60)
+const canResend = ref(false)
+const inputRefs = ref<HTMLInputElement[]>([])
+const countdownTimer = ref<number | null>(null)
+
+// Generate 4-digit OTP
+function generateOtp(): string {
+  return Math.floor(1000 + Math.random() * 9000).toString()
+}
+
+// Send OTP via notification
+function sendOtp() {
+  generatedOtp.value = generateOtp()
+  startCountdown()
+}
+
+// Start countdown timer
+function startCountdown() {
+  countdown.value = 60
+  canResend.value = false
+
+  // Clear existing timer if any
+  if (countdownTimer.value) {
+    clearInterval(countdownTimer.value)
+  }
+
+  countdownTimer.value = setInterval(() => {
+    countdown.value--
+
+    // Show notification when countdown hits 50
+    if (countdown.value === 50) {
+      ElNotification({
+        title: 'Oops!',
+        message: `Looks like we don't have the api for that yet! Here is your OTP: ${generatedOtp.value}`,
+        duration: 0,
+      })
+    }
+
+    if (countdown.value <= 0) {
+      clearInterval(countdownTimer.value!)
+      countdownTimer.value = null
+      canResend.value = true
+    }
+  }, 1000)
+}
+
+// Handle OTP input
+function handleOtpInput(index: number, event: Event) {
+  const target = event.target as HTMLInputElement
+  const value = target.value.replace(/[^0-9]/g, '') // Only allow numbers
+
+  // Only allow input in sequential order
+  if (index > 0 && otpInputs.value[index - 1] === '') {
+    target.value = ''
+    return
+  }
+
+  otpInputs.value[index] = value
+
+  // Move to next input if current is filled
+  if (value && index < 3) {
+    nextTick(() => {
+      const nextInput = inputRefs.value[index + 1]
+      if (nextInput) {
+        nextInput.focus()
+      }
+    })
+  }
+
+  // Check if OTP is complete and correct
+  checkOtp()
+}
+
+// Handle backspace/delete
+function handleKeydown(index: number, event: KeyboardEvent) {
+  if (event.key === 'Backspace' || event.key === 'Delete') {
+    if (otpInputs.value[index] === '' && index > 0) {
+      // Move to previous input if current is empty
+      otpInputs.value[index - 1] = ''
+      nextTick(() => {
+        const prevInput = inputRefs.value[index - 1]
+        if (prevInput) {
+          prevInput.focus()
+        }
+      })
+    } else {
+      otpInputs.value[index] = ''
+    }
+  }
+}
+
+// Check if entered OTP matches generated OTP
+function checkOtp() {
+  const enteredOtp = otpInputs.value.join('')
+  if (enteredOtp.length === 4) {
+    if (enteredOtp === generatedOtp.value) {
+      ElMessage.success('OTP verified successfully!')
+      handleConfirm()
+    } else {
+      ElMessage.error('Invalid OTP. Please try again.')
+      resetOtpInputs()
+    }
+  }
+}
+
+// Reset OTP inputs
+function resetOtpInputs() {
+  otpInputs.value = ['', '', '', '']
+  nextTick(() => {
+    const firstInput = inputRefs.value[0]
+    if (firstInput) {
+      firstInput.focus()
+    }
+  })
+}
+
+// Resend OTP
+function resendOtp() {
+  if (canResend.value) {
+    resetOtpInputs()
+    sendOtp()
+  }
+}
+
 function handleConfirm() {
   const mode = authStore.getMode
 
@@ -34,6 +161,25 @@ function handleConfirm() {
     router.push({ name: 'passwordReset', params: { id: 1 } })
   }
 }
+
+// Initialize on mount
+onMounted(() => {
+  sendOtp()
+  nextTick(() => {
+    const firstInput = inputRefs.value[0]
+    if (firstInput) {
+      firstInput.focus()
+    }
+  })
+})
+
+// Cleanup on unmount
+onUnmounted(() => {
+  if (countdownTimer.value) {
+    clearInterval(countdownTimer.value)
+    countdownTimer.value = null
+  }
+})
 </script>
 
 <template>
@@ -63,12 +209,30 @@ function handleConfirm() {
 
     <div class="otp-input-container">
       <div class="otp-inputs">
-        <el-input v-for="index in 4" :key="index" maxlength="1" size="large" class="otp-input" />
+        <input
+          v-for="(value, index) in otpInputs"
+          :key="index"
+          ref="inputRefs"
+          :value="value"
+          :disabled="index > 0 && otpInputs[index - 1] === ''"
+          maxlength="1"
+          class="otp-input"
+          type="text"
+          inputmode="numeric"
+          @input="(event) => handleOtpInput(index, event)"
+          @keydown="(event) => handleKeydown(index, event)"
+        />
       </div>
     </div>
 
     <div class="resend-container">
-      <span class="resend-text"> Resend OTP in <span class="countdown">42</span>s </span>
+      <span v-if="!canResend" class="resend-text">
+        Resend OTP in <span class="countdown">{{ countdown }}</span
+        >s
+      </span>
+      <el-button v-else type="primary" link class="resend-btn" @click="resendOtp">
+        Resend OTP
+      </el-button>
     </div>
   </ModalTemplate>
 </template>
@@ -159,28 +323,28 @@ function handleConfirm() {
 .otp-input {
   width: 48px;
   height: 48px;
-}
-
-.otp-input :deep(.el-input__wrapper) {
   text-align: center;
   border-radius: 8px;
   border: 2px solid #e4e7ed;
-  transition: border-color 0.2s;
-}
-
-.otp-input :deep(.el-input__inner) {
-  text-align: center;
   font-size: 18px;
   font-weight: 600;
   color: #333333;
+  transition: border-color 0.2s;
+  outline: none;
 }
 
-.otp-input :deep(.el-input__wrapper:focus) {
+.otp-input:focus {
   border-color: #409eff;
 }
 
-.otp-input :deep(.el-input__wrapper:hover) {
+.otp-input:hover:not(:disabled) {
   border-color: #c0c4cc;
+}
+
+.otp-input:disabled {
+  background-color: #f5f7fa;
+  color: #c0c4cc;
+  cursor: not-allowed;
 }
 
 .resend-container {
@@ -195,6 +359,17 @@ function handleConfirm() {
 .countdown {
   color: #409eff;
   font-weight: 500;
+}
+
+.resend-btn {
+  padding: 0;
+  height: auto;
+  font-size: 14px;
+  color: #409eff;
+}
+
+.resend-btn:hover {
+  color: #337ecc;
 }
 
 .otp-buttons {
