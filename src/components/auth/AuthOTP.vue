@@ -5,6 +5,7 @@ import { useAuthStore } from '@/stores/AuthStore'
 import { useUserStore } from '@/stores/UserStore'
 import { ElMessage, ElNotification } from 'element-plus'
 import { useRouter } from 'vue-router'
+import { generateOtp } from '@/lib/helpers'
 
 const authStore = useAuthStore()
 const userStore = useUserStore()
@@ -28,23 +29,16 @@ const canResend = ref(false)
 const inputRefs = ref<HTMLInputElement[]>([])
 const countdownTimer = ref<number | null>(null)
 
-// Generate 4-digit OTP
-function generateOtp(): string {
-  return Math.floor(1000 + Math.random() * 9000).toString()
-}
-
 // Send OTP via notification
-function sendOtp() {
+function generateOTP() {
   generatedOtp.value = generateOtp()
   startCountdown()
 }
 
-// Start countdown timer
 function startCountdown() {
   countdown.value = 60
   canResend.value = false
 
-  // Clear existing timer if any
   if (countdownTimer.value) {
     clearInterval(countdownTimer.value)
   }
@@ -52,7 +46,6 @@ function startCountdown() {
   countdownTimer.value = setInterval(() => {
     countdown.value--
 
-    // Show notification when countdown hits 50
     if (countdown.value === 50) {
       ElNotification({
         title: 'Oops!',
@@ -143,7 +136,7 @@ function resetOtpInputs() {
 function resendOtp() {
   if (canResend.value) {
     resetOtpInputs()
-    sendOtp()
+    generateOTP()
   }
 }
 
@@ -164,7 +157,7 @@ function handleConfirm() {
 
 // Initialize on mount
 onMounted(() => {
-  sendOtp()
+  generateOTP()
   nextTick(() => {
     const firstInput = inputRefs.value[0]
     if (firstInput) {

@@ -194,27 +194,41 @@ export const useCartStore = defineStore('cart', {
       }
     },
 
-    proceedToCheckout(addressId: string) {
+    proceedToCheckout(addressId: string, from?: 'cart' | 'product', item?: CartItem) {
       const orderStore = useOrderStore()
 
-      const subtotal = this.getSelectedCartSubtotal
+      let subtotal: number = 0
+      let pendingOrderId: string = ''
+      let total: number = 0
+
       const shipping = DEFAULT_SHIPPING_FEE
-      const total = this.getCheckoutSubtotal
 
-      const pendingOrderId = orderStore.createPendingOrder(this.selectedCartItems, addressId)
+      if (from === 'cart') {
+        subtotal = this.getSelectedCartSubtotal
+        total = this.getCheckoutSubtotal
 
-      orderStore.updatePendingOrder(pendingOrderId, {
-        pricing: {
-          subtotal,
-          shipping,
-          total,
-        },
-      })
+        pendingOrderId = orderStore.createPendingOrder(this.selectedCartItems, addressId)
+      } else if (from === 'product') {
+        subtotal = item!.price * item!.quantity
+        total = subtotal + shipping
 
-      router.push({
-        name: 'checkout',
-        params: { pendingOrderId: orderStore.encodeOrderId(pendingOrderId) },
-      })
+        pendingOrderId = orderStore.createPendingOrder([item as CartItem], addressId)
+      }
+
+      if (subtotal && total && pendingOrderId) {
+        orderStore.updatePendingOrder(pendingOrderId, {
+          pricing: {
+            subtotal,
+            shipping,
+            total,
+          },
+        })
+
+        router.push({
+          name: 'checkout',
+          params: { pendingOrderId: orderStore.encodeOrderId(pendingOrderId as string) },
+        })
+      }
     },
   },
 })

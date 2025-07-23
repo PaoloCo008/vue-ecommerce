@@ -194,5 +194,15 @@ export const useAuthStore = defineStore('auth', {
         this.decrementStep()
       }
     },
+
+    changeUserPassword(password: string) {
+      const userStore = useUserStore()
+
+      const user = userStore.getUserById(this.user as string)
+
+      if (user) {
+        user.password = password
+      }
+    },
   },
 })

@@ -2,34 +2,21 @@
 import { ref, reactive, computed } from 'vue'
 import { View, Hide } from '@element-plus/icons-vue'
 import ProfileContentLayout from '@/layouts/ProfileContentLayout.vue'
+import { ElMessage, type FormInstance } from 'element-plus'
+import { useAuthStore } from '@/stores/AuthStore'
+import { useRouter } from 'vue-router'
 
-// Props
-const props = defineProps({
-  modelValue: {
-    type: Boolean,
-    default: false,
-  },
+const authStore = useAuthStore()
+const router = useRouter()
+
+const passwordResetFormRef = ref<FormInstance>()
+const passwordResetForm = reactive({
+  newPassword: 'TestPassword123*',
+  passwordConfirm: 'TestPassword123*',
 })
-
-// Emits
-const emit = defineEmits<{ (e: 'back'): void; (e: 'toLogin'): void }>()
-
-// Reactive data
-const dialogVisible = computed({
-  get: () => props.modelValue,
-  set: (value) => emit('update:modelValue', value),
-})
-
-const formRef = ref(null)
 const showPassword = ref(false)
 const showConfirm = ref(false)
 
-const form = reactive({
-  newPassword: '',
-  passwordConfirm: '',
-})
-
-// Validation rules
 const rules = reactive({
   newPassword: [
     {
@@ -67,25 +54,30 @@ const rules = reactive({
       trigger: 'blur',
     },
   ],
+  passwordConfirm: [
+    {
+      required: true,
+      message: 'Please re-enter your new password',
+      trigger: 'blur',
+    },
+    {
+      validator: (rule, value, callback) => {
+        if (!value) {
+          callback()
+          return
+        }
+
+        if (passwordResetForm.newPassword !== value) {
+          callback(new Error('Passwords must match'))
+        } else {
+          callback()
+        }
+      },
+      trigger: 'blur',
+    },
+  ],
 })
 
-// Computed
-const isFormValid = computed(() => {
-  const { newPassword } = form
-
-  if (!newPassword || newPassword.length < 8 || newPassword.length > 20) {
-    return false
-  }
-
-  const hasAlpha = /[a-zA-Z]/.test(newPassword)
-  const hasNumber = /\d/.test(newPassword)
-  const hasSpecial = /[~!@#$%^&*<>]/.test(newPassword)
-  const onlyAllowedChars = /^[a-zA-Z0-9~!@#$%^&*<>]+$/.test(newPassword)
-
-  return hasAlpha && hasNumber && hasSpecial && onlyAllowedChars
-})
-
-// Methods
 const togglePassword = () => {
   showPassword.value = !showPassword.value
 }
@@ -94,26 +86,27 @@ const toggleConfirm = () => {
   showConfirm.value = !showConfirm.value
 }
 
-const handleConfirm = async () => {
-  emit('toLogin')
-  // if (!formRef.value) return
+const resetPassword = async () => {
+  if (!passwordResetFormRef.value) return
 
-  // try {
-  //   await formRef.value.validate()
+  try {
+    await passwordResetFormRef.value.validate()
 
-  //   emit('confirm', form.newPassword)
+    authStore.changeUserPassword(passwordResetForm.newPassword)
 
-  //   ElMessage({
-  //     type: 'success',
-  //     message: 'Password has been reset successfully!',
-  //   })
-  // } catch (error) {
-  //   console.log('Validation failed:', error)
-  //   ElMessage({
-  //     type: 'error',
-  //     message: 'Please check your password requirements',
-  //   })
-  // }
+    ElMessage({
+      type: 'success',
+      message: 'Password has been reset successfully!',
+    })
+
+    router.push({ name: 'profile' })
+  } catch (error) {
+    console.log('Validation failed:', error)
+    ElMessage({
+      type: 'error',
+      message: 'Please check your password requirements',
+    })
+  }
 }
 </script>
 
@@ -123,15 +116,16 @@ const handleConfirm = async () => {
       <p class="description">Please enter your new password.</p>
 
       <el-form
-        ref="formRef"
-        :model="form"
+        ref="passwordResetFormRef"
+        :model="passwordResetForm"
         :rules="rules"
         label-position="top"
         class="password-form"
+        @submit.prevent="resetPassword"
       >
         <el-form-item label="New Password" prop="newPassword">
           <el-input
-            v-model="form.newPassword"
+            v-model="passwordResetForm.newPassword"
             :type="showPassword ? 'text' : 'password'"
             placeholder="Enter new password"
             size="large"
@@ -148,9 +142,9 @@ const handleConfirm = async () => {
           </el-input>
         </el-form-item>
 
-        <el-form-item label="Password Confirm" prop="newPassword">
+        <el-form-item label="Password Confirm" prop="passwordConfirm">
           <el-input
-            v-model="form.passwordConfirm"
+            v-model="passwordResetForm.passwordConfirm"
             :type="showConfirm ? 'text' : 'password'"
             placeholder="Confirm your password"
             size="large"

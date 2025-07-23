@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { formatPrice } from '@/lib/helpers'
 import TextExpander from '@/components/TextExpander.vue'
 import Carousel from '@/components/Carousel.vue'
@@ -10,6 +10,7 @@ import AppModal from '@/components/app/AppModal.vue'
 import AuthTransitionWrapper from '@/components/auth/AuthTransitionWrapper.vue'
 import { useRouter } from 'vue-router'
 import { useCartStore } from '@/stores/CartStore'
+import { useUserStore } from '@/stores/UserStore'
 
 const dialogStyle = {
   width: '95vw',
@@ -22,13 +23,25 @@ const quantity = ref(1)
 const productStore = useProductStore()
 const cartStore = useCartStore()
 const authStore = useAuthStore()
+const userStore = useUserStore()
 const router = useRouter()
 
 const product = productStore.getProductById(history.state.productId)
+const userDefaultShippingAddressId = computed(
+  () => userStore.getUserDefaultShippingAddressById(authStore.user as string)?._id,
+)
 
 function handleBuyClick(openFn: () => void, authMode: AuthMode) {
   if (authStore.isAuthenticated) {
-    router.push({ name: 'checkout' })
+    const item = {
+      _id: crypto.randomUUID(),
+      productId: history.state.productId,
+      quantity: quantity.value,
+      image: productStore.getProductPrimaryImageById(history.state.productId),
+      price: product?.price as number,
+      name: product?.name as string,
+    }
+    cartStore.proceedToCheckout(userDefaultShippingAddressId.value as string, 'product', item)
   } else {
     openFn()
     authStore.setAuthMode(authMode)

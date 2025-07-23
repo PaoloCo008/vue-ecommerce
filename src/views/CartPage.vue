@@ -21,7 +21,6 @@ const cart = cartStore.getCartByUserId(authStore.user as string)
 
 const items = computed(() => cart?.items || [])
 
-
 const address = userStore.getUserDefaultBillingAddressById(authStore.user as string)
 
 const isAllSelected = computed({
@@ -45,7 +44,7 @@ const isIndeterminate = computed(() => {
 const hasItemsInSelected = computed(() => !!cartStore.getSelectedItemsCount)
 
 function handleCheckout() {
-  cartStore.proceedToCheckout(address?._id as string)
+  cartStore.proceedToCheckout(address?._id as string, 'cart')
 }
 </script>
 

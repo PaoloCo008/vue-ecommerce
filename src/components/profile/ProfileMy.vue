@@ -59,14 +59,25 @@ const user = userStore.getUserById(authStore.user as string)
         </div>
       </div>
 
-      <el-button class="edit-button" @click="router.push({ name: 'editprofile' })"
-        >EDIT PROFILE</el-button
-      >
+      <div class="action-buttons">
+        <el-button class="edit-button" @click="router.push({ name: 'editprofile' })"
+          >EDIT PROFILE</el-button
+        >
+        <el-button class="edit-button" @click="router.push({ name: 'user-verification' })"
+          >CHANGE PASSWORD</el-button
+        >
+      </div>
     </div>
   </ProfileContentLayout>
 </template>
 
 <style scoped>
+.action-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
 .profile {
   padding: 20px;
   background-color: #fff;
@@ -125,6 +136,10 @@ const user = userStore.getUserById(authStore.user as string)
   font-size: 14px;
   border-radius: unset;
   margin-top: 20px;
+}
+
+.edit-button:last-of-type {
+  margin: 0;
 }
 
 :deep(.el-form-item__label) {
