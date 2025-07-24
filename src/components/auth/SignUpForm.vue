@@ -67,7 +67,7 @@ const handlesignUp = async () => {
       ref="signUpFormRef"
       :model="signUpForm"
       :rules="rules"
-      class="signUp-form"
+      class="signup-form"
       @submit.prevent="handlesignUp"
     >
       <div>
@@ -128,16 +128,12 @@ const handlesignUp = async () => {
 </template>
 
 <style scoped>
-.signUp-container {
-  height: 315px;
-}
-
-.signUp-form {
+.signup-form {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   gap: 0.5rem;
-  height: 100%;
+  height: calc(100% - 50px);
 }
 
 :deep(.el-form-item__error) {

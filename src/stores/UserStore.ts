@@ -37,14 +37,18 @@ export const useUserStore = defineStore('user', {
 
     addAddressToUser(userId: string, address: NewAddressForm) {
       const user = this.getUserById(userId)
+
       if (user) {
-        user.addresses.push({
+        const newAddress = {
           ...address,
           deliveryLabel: address.deliveryLabel as AddressLabel,
           _id: crypto.randomUUID(),
-          isDefaultBilling: false,
-          isDefaultShipping: false,
-        })
+          isDefaultBilling: user.addresses.length === 0,
+          isDefaultShipping: user.addresses.length === 0,
+        }
+        user.addresses.push(newAddress)
+
+        return newAddress._id
       }
     },
 
@@ -83,6 +87,14 @@ export const useUserStore = defineStore('user', {
             address.isDefaultShipping = address._id === addressId
           }
         })
+      }
+    },
+
+    updateMethodValue(id: string, method: 'email' | 'mobileNumber', value: string) {
+      const user = this.getUserById(id)
+
+      if (user) {
+        user[method] = value
       }
     },
   },

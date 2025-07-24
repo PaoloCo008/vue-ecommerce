@@ -14,8 +14,6 @@ const { operation } = defineProps<{ operation?: AuthStages }>()
 const state = ref<AuthStages>(operation)
 
 const authStore = useAuthStore()
-
-console.log(authStore.getMode)
 </script>
 
 <template>
@@ -55,6 +53,7 @@ console.log(authStore.getMode)
   width: 100%;
   background-color: #fff;
   margin: 0 auto;
+  height: 100%;
 }
 
 .forms-enter-active,

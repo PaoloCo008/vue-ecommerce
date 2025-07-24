@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, defineEmits, computed } from 'vue'
+import { ref, defineEmits, computed, onUpdated } from 'vue'
 import { Check } from '@element-plus/icons-vue'
 import AppAddressTag from '../app/AppAddressTag.vue'
 import type { Address } from '@/lib/types/globals'
@@ -11,19 +11,36 @@ const props = defineProps<{ addresses: Address[] }>()
 const userStore = useUserStore()
 const authStore = useAuthStore()
 
-const defaultShippingAddress = userStore.getUserDefaultShippingAddressById(authStore.user as string)
+const defaultShippingAddress = computed(() =>
+  userStore.getUserDefaultShippingAddressById(authStore.user as string),
+)
 
 // Emits
-const emit = defineEmits(['save', 'cancel', 'addNew'])
+const emit = defineEmits(['save', 'cancel'])
 
 // Reactive data
-const selectedAddressId = ref(defaultShippingAddress!._id)
+const selectedAddressId = computed(() =>
+  defaultShippingAddress.value ? defaultShippingAddress.value._id : undefined,
+)
 
 const selectedAddress = computed(() => {
-  return userStore.getUserAddressByAddressId(authStore.user as string, selectedAddressId.value)
+  if (defaultShippingAddress.value) {
+    console.log('hello')
+    return userStore.getUserAddressByAddressId(
+      authStore.user as string,
+      selectedAddressId.value as string,
+    )
+  }
+
+  return null
 })
 
-console.log(selectedAddress.value)
+onUpdated(() => {
+  console.log('updated')
+  console.log(selectedAddress.value)
+  console.log(selectedAddressId.value)
+  console.log(defaultShippingAddress.value)
+})
 
 // Sample data
 // const addresses = ref([
@@ -89,7 +106,6 @@ console.log(selectedAddress.value)
 //   },
 // ])
 
-// Methods
 const selectAddress = (id) => {
   selectedAddressId.value = id
 }
@@ -101,16 +117,12 @@ const handleSave = () => {
 const handleCancel = () => {
   emit('cancel')
 }
-
-const handleAddNew = () => {
-  emit('addNew')
-}
 </script>
 
 <template>
   <div class="shipping-address-container">
     <!-- Address List -->
-    <div class="address-list">
+    <div class="address-list" v-if="addresses.length">
       <div
         v-for="address in addresses"
         :key="address._id"
@@ -159,6 +171,9 @@ const handleAddNew = () => {
           </div>
         </div>
       </div>
+    </div>
+    <div v-else>
+      <p>Add a address to continue with your checkout.</p>
     </div>
 
     <!-- Action Buttons -->
@@ -329,6 +344,10 @@ const handleAddNew = () => {
   padding: 12px 16px;
   background: white;
   border-top: 1px solid #ebeef5;
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  left: 0;
 }
 
 .cancel-btn {

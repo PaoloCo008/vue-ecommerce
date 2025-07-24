@@ -4,8 +4,19 @@ import type { NewAddressForm } from '@/lib/types/forms'
 import { useAuthStore } from '@/stores/AuthStore'
 import { useUserStore } from '@/stores/UserStore'
 import { ElMessage, ElMessageBox, type FormInstance } from 'element-plus'
-import { computed, h, reactive, ref } from 'vue'
+import { computed, h, reactive, ref, type PropType } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+
+const props = defineProps({
+  renderedFrom: {
+    type: String as PropType<'signup' | 'checkout'>,
+  },
+})
+
+const emit = defineEmits<{
+  (e: 'addNewAddress'): void
+  (e: 'cancelAdd'): void
+}>()
 
 const router = useRouter()
 const route = useRoute()
@@ -14,6 +25,10 @@ const userStore = useUserStore()
 
 const isEditting = computed(() => route.meta.operation === 'edit')
 const isCreating = computed(() => route.meta.operation === 'create')
+
+const inLoginSignupRoute = computed(() => route.path === '/login-signup')
+
+console.log(props.renderedFrom)
 
 const address = userStore.getUserAddressByAddressId(
   authStore.user as string,
@@ -55,20 +70,30 @@ const handleRegister = async () => {
         loading.value = false
         ElMessage.success('Login successful!')
 
-        if (isEditting.value) {
-          // Update existing address logic
-          userStore.updateUserAddressById(
-            authStore.user as string,
-            route.params.id as string,
-            addressForm,
-          )
-          router.push({ name: 'address' })
-        } else if (isCreating.value) {
-          userStore.addAddressToUser(authStore.user as string, addressForm)
-          router.push({ name: 'address' })
-        } else {
+        if (!props.renderedFrom) {
+          if (isEditting.value) {
+            // Update existing address logic
+            userStore.updateUserAddressById(
+              authStore.user as string,
+              route.params.id as string,
+              addressForm,
+            )
+            router.push({ name: 'address' })
+          } else if (isCreating.value) {
+            userStore.addAddressToUser(authStore.user as string, addressForm)
+            router.push({ name: 'address' })
+          }
+        } else if (props.renderedFrom === 'signup') {
           authStore.registerUser(addressForm)
+
+          if (inLoginSignupRoute.value) {
+            router.push({ name: 'profile' })
+          }
+        } else {
+          userStore.addAddressToUser(authStore.user as string, addressForm)
+          emit('addNewAddress')
         }
+
         // Add your login logic here
       }, 1500)
     } else {
@@ -76,17 +101,22 @@ const handleRegister = async () => {
     }
   })
 }
-// <p class="address-text">{{ address.unitNumber }}{{ address.address }}</p>
-//             <p class="postcode">
-//               {{
-//                 buildAddressLine({
-//                   province: address.province,
-//                   district: address.district,
-//                   ward: address.ward,
-//                 })
-//               }}
-//             </p>
-// <p class="phone-text">{{ address.mobileNumber }}</p>
+
+function handleCancelOrSkip() {
+  if (!props.renderedFrom) return router.back()
+
+  if (props.renderedFrom === 'signup') {
+    authStore.registerUser()
+
+    if (inLoginSignupRoute.value) {
+      router.push({ name: 'profile' })
+    }
+  }
+
+  if (props.renderedFrom === 'checkout') {
+    emit('cancelAdd')
+  }
+}
 
 function handleDelete() {
   ElMessageBox({
@@ -193,9 +223,10 @@ function handleDelete() {
           </el-button>
         </div>
       </el-form-item>
-
       <div class="form-buttons">
-        <el-button class="cancel-button form-button" @click="router.back()">cancel</el-button>
+        <el-button class="cancel-button form-button" @click="handleCancelOrSkip">{{
+          renderedFrom === 'signup' ? 'Skip for now' : 'Cancel'
+        }}</el-button>
 
         <el-button class="save-button form-button" native-type="submit">{{
           isEditting ? 'Edit' : 'Save'
@@ -336,6 +367,7 @@ function handleDelete() {
   .form-buttons {
     flex-direction: row;
     justify-content: flex-end;
+    grid-column: 2;
   }
 
   .label-buttons {

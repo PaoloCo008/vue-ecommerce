@@ -13,6 +13,7 @@ import { useCartStore } from '@/stores/CartStore'
 import { formatPrice } from '@/lib/helpers'
 import { useOrderStore } from '@/stores/OrderStore'
 import { useRoute } from 'vue-router'
+import { ElMessageBox } from 'element-plus'
 
 const userStore = useUserStore()
 const authStore = useAuthStore()
@@ -29,11 +30,14 @@ const products = ref(orderStore.getSelectedItemsByPendingOrderId(orderId as stri
 
 const pendingOrder = orderStore.getPendingOrderById(orderId as string)
 
-console.log(pendingOrder)
-
 function handleSelectedAddress(addressId: string, closeDrawer: () => void) {
   address.value = userStore.getUserAddressByAddressId(authStore.user as string, addressId)
   closeDrawer()
+}
+
+function handleNewAddress(closeModal: () => void, openDrawer: () => void) {
+  closeModal()
+  openDrawer()
 }
 
 const deliveryOption = ref('standard')
@@ -48,9 +52,19 @@ function handlePlaceOrder() {
   orderStore.completePendingOrder(orderId as string)
 }
 
+const handleClose = (done: () => void) => {
+  ElMessageBox.confirm('Are you sure you want to cancel without saving what you selected?')
+    .then(() => {
+      done()
+    })
+    .catch(() => {
+      // catch error
+    })
+}
+
 const dialogStyle = {
   width: '100%',
-  maxWidth: '1200px',
+  maxWidth: '700px',
 }
 </script>
 
@@ -63,7 +77,7 @@ const dialogStyle = {
         <div class="section">
           <div class="section-header">
             <h3>Shipping Address</h3>
-            <AppDrawer header="Shipping Address">
+            <AppDrawer header="Shipping Address" :handleClose>
               <template #trigger="props">
                 <el-button type="text" class="edit-btn" @click="props.handleOpenDrawer"
                   >Edit</el-button
@@ -71,7 +85,7 @@ const dialogStyle = {
               </template>
               <template #default="drawerProps">
                 <div class="shipping">
-                  <AppModal :dialog-style="dialogStyle">
+                  <AppModal :dialog-style="dialogStyle" title="Add new shipping address">
                     <template #trigger="modalProps">
                       <el-button
                         link
@@ -84,7 +98,15 @@ const dialogStyle = {
                       >
                     </template>
 
-                    <AddressForm />
+                    <template #default="modalProps">
+                      <AddressForm
+                        rendered-from="checkout"
+                        @cancel-add="modalProps.closeModal"
+                        @add-new-address="
+                          handleNewAddress(modalProps.closeModal, drawerProps.handleOpenDrawer)
+                        "
+                      />
+                    </template>
                   </AppModal>
 
                   <AddressShippingSelect
@@ -92,21 +114,24 @@ const dialogStyle = {
                     @save="
                       (addressId) => handleSelectedAddress(addressId, drawerProps.handleCloseDrawer)
                     "
+                    @cancel="() => handleClose(drawerProps.handleCloseDrawer)"
                   />
                 </div>
               </template>
             </AppDrawer>
           </div>
-          <div class="address-info">
+          <div class="address-info" v-if="address">
             <div class="customer-name">{{ address?.fullName }} {{ address?.mobileNumber }}</div>
             <div class="address-badge">
-              <AppAddressTag label="home" />
+              <AppAddressTag v-if="address?.deliveryLabel === 'home'" label="home" />
+              <AppAddressTag v-else label="office" />
               <span class="address-text"
                 >{{ address?.unitNumber }} {{ address?.address }}, {{ address?.province }},
                 {{ address?.district }}, {{ address?.ward }}
               </span>
             </div>
           </div>
+          <p v-else>Select a address for for you shipping address to continue your purchase.</p>
         </div>
 
         <!-- Package Info -->

@@ -4,22 +4,15 @@ import ModalTemplate from '../ModalTemplate.vue'
 import { useAuthStore } from '@/stores/AuthStore'
 import { useUserStore } from '@/stores/UserStore'
 import { ElMessage, ElNotification } from 'element-plus'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { generateOtp } from '@/lib/helpers'
 
 const authStore = useAuthStore()
 const userStore = useUserStore()
 const router = useRouter()
+const route = useRoute()
 
 const forPhone = computed(() => authStore.getMode === 'signup')
-
-const onConfirm = inject('closeModal')
-
-const emit = defineEmits<{
-  (e: 'confirmSignUp'): void
-  (e: 'changeNumber'): void
-  (e: 'back'): void
-}>()
 
 // OTP functionality
 const otpInputs = ref<string[]>(['', '', '', ''])
@@ -145,13 +138,19 @@ function handleConfirm() {
 
   if (mode === 'signup') {
     authStore.incrementStep()
+
+    if (route.meta.operation === 'signup') {
+      router.push({ name: 'profile' })
+    }
   } else if (mode === 'login') {
     authStore.authorize()
-    onConfirm()
     ElMessage.success('Login successful')
+
+    if (route.meta.operation === 'login') {
+      router.push({ name: 'homepage' })
+    }
   } else {
-    onConfirm()
-    router.push({ name: 'passwordReset', params: { id: 1 } })
+    router.push({ name: 'password-reset' })
   }
 }
 
@@ -176,7 +175,11 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <ModalTemplate title="Verify your identity" :confirm="handleConfirm" @back="">
+  <ModalTemplate
+    title="Verify your identity"
+    :confirm="handleConfirm"
+    :back="() => authStore.decrementStep()"
+  >
     <p class="description">
       {{
         forPhone
@@ -289,6 +292,7 @@ onUnmounted(() => {
 .info-state__wrapper {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 0.5rem;
 }
 
@@ -300,8 +304,8 @@ onUnmounted(() => {
 
 .change-number-btn {
   padding: 0;
-  height: auto;
   font-size: 14px;
+  transform: translateY(2px);
 }
 
 .otp-input-container {

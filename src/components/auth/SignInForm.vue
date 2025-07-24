@@ -147,7 +147,7 @@ const handleLogin = async () => {
   flex-direction: column;
   justify-content: space-between;
   gap: 0.5rem;
-  height: 100%;
+  height: calc(100% - 50px);
 }
 
 :deep(.el-form-item__error) {

@@ -8,7 +8,7 @@ const authStore = useAuthStore()
 
 const phoneFormRef = ref()
 const phoneForm = reactive({
-  mobileNumber: '091823414819',
+  mobileNumber: '09182341481',
 })
 
 const rules = {
@@ -22,6 +22,7 @@ const loading = ref(false)
 
 const handleRegister = async () => {
   if (!phoneFormRef.value) return
+
   await phoneFormRef.value.validate((valid) => {
     if (valid) {
       loading.value = true
@@ -41,30 +42,28 @@ const handleRegister = async () => {
 
 <template>
   <ModalTemplate title="Register a  phone number" has-content-buttons>
-    <!-- Header with QR icon and tabs -->
-
-    <!-- Phone number input form -->
     <el-form
       ref="phoneFormRef"
-      :model="phoneFormRef"
+      :model="phoneForm"
       :rules="rules"
-      class="signUp-form"
+      class="phone-form"
       @submit.prevent="handleRegister"
     >
       <div class="form-section">
-        <div class="input-container">
-          <div class="country-prefix">PH+63</div>
+        <div class="country-prefix">PH+63</div>
+        <el-form-item prop="mobileNumber" class="input-container">
           <input
             v-model="phoneForm.mobileNumber"
             type="text"
             placeholder="Please enter your phone number"
             class="phone-input"
           />
-        </div>
-
+        </el-form-item>
+      </div>
+      <div>
         <el-button class="send-button" :loading="loading" native-type="submit">
           <el-icon><Iphone /></el-icon>
-          Register phone number
+          <span> Register phone number </span>
         </el-button>
       </div>
     </el-form>
@@ -79,8 +78,11 @@ const handleRegister = async () => {
   margin-bottom: 40px;
 }
 
-.qr-icon {
-  margin-top: 2px;
+.phone-form {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: calc(100% - 55px);
 }
 
 .tabs-wrapper {
@@ -119,16 +121,15 @@ const handleRegister = async () => {
 }
 
 .form-section {
+  margin-top: 1rem;
   display: flex;
-  flex-direction: column;
-  gap: 24px;
+  gap: 0.5rem;
 }
 
 .input-container {
   display: flex;
   border-radius: 8px;
   width: 100%;
-
   background: white;
   gap: 6px;
 }
@@ -136,7 +137,8 @@ const handleRegister = async () => {
 .country-prefix {
   display: flex;
   align-items: center;
-  padding: 14px 16px;
+  height: fit-content;
+  padding: 12px 16px;
   font-size: 14px;
   font-weight: 500;
   color: #666666;
@@ -173,7 +175,7 @@ const handleRegister = async () => {
   border: none;
   border-radius: 8px;
   color: white;
-  font-size: 16px;
+  font-size: 1rem;
   font-weight: 500;
   cursor: pointer;
   display: flex;

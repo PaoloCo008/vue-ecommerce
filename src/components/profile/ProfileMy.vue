@@ -19,12 +19,18 @@ const user = userStore.getUserById(authStore.user as string)
       <div class="profile-group">
         <div>
           <span class="group-item__header">Full Name</span>
-          <p>{{ user!.fullName || 'Please enter your full name' }}</p>
+          <p>{{ user?.fullName || 'Please enter your full name' }}</p>
         </div>
 
         <div>
           <span class="group-item__header">Email Address</span>
-          <el-button link type="primary" size="small" @click="changeEmail" class="change-link">
+          <el-button
+            link
+            type="primary"
+            size="small"
+            @click="router.push({ name: 'verification-methods', query: { for: 'change-email' } })"
+            class="change-link"
+          >
             | Change
           </el-button>
           <p>{{ hideEmail(user!.email) }}</p>
@@ -35,7 +41,13 @@ const user = userStore.getUserById(authStore.user as string)
 
         <div>
           <span class="group-item__header">Mobile</span>
-          <el-button link type="primary" size="small" @click="changeEmail" class="change-link">
+          <el-button
+            link
+            type="primary"
+            size="small"
+            @click="router.push({ name: 'verification-methods', query: { for: 'change-number' } })"
+            class="change-link"
+          >
             | Change
           </el-button>
           <p>+63 {{ user!.mobileNumber || 'Please enter your mobile number' }}</p>
@@ -49,13 +61,21 @@ const user = userStore.getUserById(authStore.user as string)
         <div>
           <span class="group-item__header">Birthday</span>
 
-          <p>{{ format(user!.birthday as Date, 'yyyy-dd-MM') || 'Please enter your birthday' }}</p>
+          <p>
+            {{
+              user?.birthday
+                ? format(user!.birthday as Date, 'yyyy-dd-MM')
+                : 'Please enter your birthday'
+            }}
+          </p>
         </div>
 
         <div>
           <span class="group-item__header">Gender</span>
 
-          <p>{{ capitalize(user!.gender as string) || 'Please enter your gender' }}</p>
+          <p>
+            {{ user?.gender ? capitalize(user!.gender as string) : 'Please enter your gender' }}
+          </p>
         </div>
       </div>
 
@@ -63,7 +83,9 @@ const user = userStore.getUserById(authStore.user as string)
         <el-button class="edit-button" @click="router.push({ name: 'editprofile' })"
           >EDIT PROFILE</el-button
         >
-        <el-button class="edit-button" @click="router.push({ name: 'user-verification' })"
+        <el-button
+          class="edit-button"
+          @click="router.push({ name: 'verification-methods', query: { for: 'reset-password' } })"
           >CHANGE PASSWORD</el-button
         >
       </div>

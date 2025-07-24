@@ -37,6 +37,8 @@ export const useAuthStore = defineStore('auth', {
   }),
 
   getters: {
+    getAuthCurrentStep: (state) => state.currentStep,
+
     getMode: (state) => state.authMode,
 
     getFormDataByProperty: (state) => (form: AuthMode, property: string) => {

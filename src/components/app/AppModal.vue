@@ -1,9 +1,27 @@
 <script lang="ts" setup>
-import { provide, ref } from 'vue'
+import { useAuthStore } from '@/stores/AuthStore'
+import { computed, provide, ref } from 'vue'
+import { useRoute } from 'vue-router'
 
 const modalVisible = ref(false)
+const authStore = useAuthStore()
+const route = useRoute()
 
-defineProps<{
+const notInAddressForm = computed(() => authStore.getAuthCurrentStep <= 3)
+const isSpecificRoute = computed(() => route.name === 'checkout')
+
+const headerStyles = computed(() => {
+  if (isSpecificRoute.value) {
+    return {
+      '--header-margin-bottom': '1rem',
+    }
+  }
+  return {
+    '--el-dialog-padding-primary': '0',
+  }
+})
+
+const props = defineProps<{
   dialogStyle: {
     width?: string
     maxWidth?: string
@@ -17,35 +35,33 @@ function onTriggerClick() {
   modalVisible.value = true
 }
 
-function onSubmit() {
+function closeModal() {
   modalVisible.value = false
 }
 
-provide('closeModal', onSubmit)
+provide('closeModal', closeModal)
 </script>
 
 <template>
   <slot name="trigger" :onTriggerClick></slot>
 
   <Teleport to="body">
-    <el-dialog destroy-on-close v-model="modalVisible" align-center :title="title">
-      <slot name="default" :onSubmit></slot>
+    <el-dialog
+      destroy-on-close
+      v-model="modalVisible"
+      :width="notInAddressForm ? props.dialogStyle.width : '100%'"
+      :style="{
+        maxWidth: notInAddressForm ? props.dialogStyle.maxWidth : '700px',
+        height: notInAddressForm ? props.dialogStyle.height : '620px',
+        overflow: notInAddressForm ? 'hidden' : 'auto',
+        textTransform: 'none',
+        padding: '2rem',
+        ...headerStyles,
+      }"
+      align-center
+      :title="title"
+    >
+      <slot name="default" :closeModal></slot>
     </el-dialog>
   </Teleport>
 </template>
-
-<style>
-.el-dialog {
-  width: 90vw;
-  max-width: 500px;
-  padding: 1.5rem;
-  text-transform: none;
-  overflow: hidden;
-}
-
-/* @media screen and (min-width: 575px) {
-  .el-dialog {
-    padding: 2.25rem;
-  }
-} */
-</style>

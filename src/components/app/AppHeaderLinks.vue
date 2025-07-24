@@ -11,9 +11,9 @@ import { computed } from 'vue'
 const route = useRoute()
 
 const dialogStyle = {
-  width: '95vw',
+  width: '100%',
   maxWidth: '450px',
-  height: '400px',
+  height: '450px',
 }
 
 const authStore = useAuthStore()
@@ -42,7 +42,7 @@ function handleLogout() {
       <RouterLink :to="{ name: 'signup' }">signup</RouterLink>
     </template>
 
-    <template v-if="authStore.isAuthenticated">
+    <template v-else-if="authStore.isAuthenticated">
       <el-dropdown>
         <span class="el-dropdown-link">
           {{ dropdownText }}

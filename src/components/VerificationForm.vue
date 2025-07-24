@@ -12,9 +12,11 @@ const userStore = useUserStore()
 const authStore = useAuthStore()
 
 const user = computed(() => userStore.getUserById(authStore.user as string))
+const operation = computed(() => route.query.operation as string)
+const type = computed(() => route.query.type as string)
 
 const isSendingThroughEmail = computed(() => {
-  return route.meta.formFor === 'email'
+  return type.value === 'email'
 })
 
 const verificationCode = ref('')
@@ -57,7 +59,13 @@ function sendCode() {
 
 function verifyCode() {
   if (generatedOtp.value === verificationCode.value) {
-    router.push({ name: 'password-reset' })
+    const [to, method] = operation.value.split('-')
+
+    if (to === 'reset') {
+      router.push({ name: 'password-reset' })
+    } else {
+      router.push({ name: 'change', params: { method } })
+    }
   }
 }
 
@@ -111,7 +119,7 @@ watch(verificationCode, (newValue) => {
         <el-button type="primary" text class="otp-actions" @click="sendCode" v-if="canResend">
           SEND
         </el-button>
-        <span class="otp-actions" v-else>{{ countdown }}s</span>
+        <span class="otp-actions" v-else>RESEND({{ countdown }})</span>
       </div>
 
       <el-button
@@ -125,7 +133,7 @@ watch(verificationCode, (newValue) => {
 
       <el-button
         class="other-ways-button button"
-        @click="router.push({ name: 'user-verification' })"
+        @click="router.push({ name: 'verification-methods', query: { for: operation } })"
       >
         Use other ways to verify
       </el-button>
@@ -166,6 +174,7 @@ watch(verificationCode, (newValue) => {
 }
 
 .phone-input-group :deep(.el-input__wrapper) {
+  border: 1px solid #e2e2e2;
   border-radius: 0;
   box-shadow: none;
   padding: 0.5rem 1rem;
@@ -183,7 +192,7 @@ watch(verificationCode, (newValue) => {
 }
 
 .verification-input :deep(.el-input__wrapper) {
-  background-color: #f8f9fa;
+  border: 1px solid #e2e2e2;
   border-radius: 0;
   box-shadow: none;
   padding: 0.5rem 60px 0.5rem 1rem;
