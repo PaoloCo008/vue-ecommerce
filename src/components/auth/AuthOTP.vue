@@ -5,7 +5,7 @@ import { useAuthStore } from '@/stores/AuthStore'
 import { useUserStore } from '@/stores/UserStore'
 import { ElMessage, ElNotification } from 'element-plus'
 import { useRoute, useRouter } from 'vue-router'
-import { generateOtp } from '@/lib/helpers'
+import { formatPhilippinePhone, generateOtp } from '@/lib/helpers'
 
 const authStore = useAuthStore()
 const userStore = useUserStore()
@@ -39,7 +39,7 @@ function startCountdown() {
   countdownTimer.value = setInterval(() => {
     countdown.value--
 
-    if (countdown.value === 50) {
+    if (countdown.value === 58) {
       ElNotification({
         title: 'Oops!',
         message: `Looks like we don't have the api for that yet! Here is your OTP: ${generatedOtp.value}`,
@@ -77,9 +77,6 @@ function handleOtpInput(index: number, event: Event) {
       }
     })
   }
-
-  // Check if OTP is complete and correct
-  checkOtp()
 }
 
 // Handle backspace/delete
@@ -177,8 +174,9 @@ onUnmounted(() => {
 <template>
   <ModalTemplate
     title="Verify your identity"
-    :confirm="handleConfirm"
+    :confirm="checkOtp"
     :back="() => authStore.decrementStep()"
+    :disabled="otpInputs.join('').length < 4"
   >
     <p class="description">
       {{
@@ -194,7 +192,7 @@ onUnmounted(() => {
       <div class="info-state__wrapper">
         <span class="info-state">{{
           forPhone
-            ? authStore.getFormDataByProperty('signup', 'mobileNumber')
+            ? formatPhilippinePhone(authStore.getFormDataByProperty('signup', 'mobileNumber'))
             : authStore.getFormDataByProperty('login', 'email')
         }}</span>
         <el-button type="primary" link class="change-number-btn" @click="authStore.decrementStep()">
@@ -305,7 +303,6 @@ onUnmounted(() => {
 .change-number-btn {
   padding: 0;
   font-size: 14px;
-  transform: translateY(2px);
 }
 
 .otp-input-container {

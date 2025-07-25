@@ -4,6 +4,8 @@ defineProps<{
   hasContentButtons?: boolean
   confirm?: () => void
   back?: () => void
+  loading?: boolean
+  disabled?: boolean
 }>()
 </script>
 
@@ -18,8 +20,15 @@ defineProps<{
     </div>
 
     <div v-if="!hasContentButtons" class="buttons">
-      <el-button size="large" class="back-button" @click="back"> Back </el-button>
-      <el-button type="primary" size="large" class="confirm-button" @click="confirm">
+      <el-button size="large" class="back-button button" @click="back"> Back </el-button>
+      <el-button
+        :loading="loading"
+        type="primary"
+        size="large"
+        class="confirm-button button"
+        @click="confirm"
+        :disabled
+      >
         Confirm
       </el-button>
     </div>
@@ -67,6 +76,10 @@ defineProps<{
   justify-content: flex-end;
 }
 
+.button {
+  width: 125px;
+}
+
 .back-button {
   padding: 0.75rem 1.5rem;
   border: 1px solid #dcdfe6;
@@ -91,6 +104,12 @@ defineProps<{
 .confirm-button:hover {
   background: #ff5722;
   border-color: #ff5722;
+}
+
+.confirm-button:disabled {
+  background-color: #cccccc;
+  border-color: #cccccc;
+  cursor: not-allowed;
 }
 
 @media screen and (min-width: 500px) {

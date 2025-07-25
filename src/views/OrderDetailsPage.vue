@@ -298,49 +298,50 @@ onMounted(() => {
               </div>
             </div>
           </div>
-          <div class="see-more">See More</div>
         </div>
       </div>
     </div>
 
-    <div v-for="item in order?.items" :key="item._id" class="product-item">
-      <img :src="item.image" :alt="item.name" class="product-image" />
-      <div class="product-details">
-        <div class="product-name">
-          {{ item.name }}
+    <div class="test">
+      <div v-for="item in order?.items" :key="item._id" class="product-item">
+        <img :src="item.image" :alt="item.name" class="product-image" />
+        <div class="product-details">
+          <div class="product-name">
+            {{ item.name }}
+          </div>
+          <div class="product-quantity">x{{ item.quantity }}</div>
         </div>
-        <div class="product-quantity">x{{ item.quantity }}</div>
-      </div>
-    </div>
-
-    <div class="price-summary">
-      <div class="price-row">
-        <div class="price-label">
-          <span class="bundle-tag">Bundle</span>
-          Buy {{ order?.items.length }}
-        </div>
-        <div class="price-value">{{ formatPrice(order?.pricing.total as number) }}</div>
       </div>
 
-      <div class="price-row">
-        <div class="price-label">Merchandise Subtotal</div>
-        <div class="price-value">{{ formatPrice(order?.pricing.subtotal as number) }}</div>
-      </div>
-
-      <div class="price-row">
-        <div class="price-label">Shipping Fee</div>
-        <div class="price-value">{{ formatPrice(order?.pricing.shipping as number) }}</div>
-      </div>
-
-      <div class="price-row price-total">
-        <div class="price-label">Order Total</div>
-        <div class="price-value">{{ formatPrice(order?.pricing.total as number) }}</div>
-      </div>
-
-      <div class="payment-method">
+      <div class="price-summary">
         <div class="price-row">
-          <div class="price-label">Payment Method</div>
-          <div class="payment-method-value">[[ TBD ]]</div>
+          <div class="price-label">
+            <span class="bundle-tag">Bundle</span>
+            Buy {{ order?.items.length }}
+          </div>
+          <div class="price-value">{{ formatPrice(order?.pricing.total as number) }}</div>
+        </div>
+
+        <div class="price-row">
+          <div class="price-label">Merchandise Subtotal</div>
+          <div class="price-value">{{ formatPrice(order?.pricing.subtotal as number) }}</div>
+        </div>
+
+        <div class="price-row">
+          <div class="price-label">Shipping Fee</div>
+          <div class="price-value">{{ formatPrice(order?.pricing.shipping as number) }}</div>
+        </div>
+
+        <div class="price-row price-total">
+          <div class="price-label">Order Total</div>
+          <div class="price-value">{{ formatPrice(order?.pricing.total as number) }}</div>
+        </div>
+
+        <div class="payment-method">
+          <div class="price-row">
+            <div class="price-label">Payment Method</div>
+            <div class="payment-method-value">[[ TBD ]]</div>
+          </div>
         </div>
       </div>
     </div>
@@ -348,7 +349,6 @@ onMounted(() => {
 </template>
 
 <style scoped>
-/* Custom tracking steps styling */
 .tracking-steps {
   margin-top: 10px;
 }
@@ -490,21 +490,12 @@ onMounted(() => {
   font-style: italic;
 }
 
-.see-more {
-  color: #ee4d2d;
-  font-size: 12px;
-  cursor: pointer;
-  margin-left: 27px;
-  margin-top: 5px;
-}
-
 /* All your existing styles remain the same */
 .order-page {
   max-width: 800px;
   margin: 0 auto;
   padding: 20px;
   background: white;
-  min-height: 100vh;
 }
 
 .header {
@@ -754,10 +745,6 @@ onMounted(() => {
 
   .step-wrapper {
     gap: 12px;
-  }
-
-  .see-more {
-    margin-left: 22px;
   }
 }
 

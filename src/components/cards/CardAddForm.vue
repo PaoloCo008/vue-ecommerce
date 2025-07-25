@@ -1,5 +1,176 @@
+<script setup lang="ts">
+import { ref, reactive } from 'vue'
+import { QuestionFilled } from '@element-plus/icons-vue'
+import { getCardProvider } from '@/lib/helpers'
+import { useUserStore } from '@/stores/UserStore'
+import { useAuthStore } from '@/stores/AuthStore'
+import type { CardProviders, CreditCard } from '@/lib/types/globals'
+
+const props = defineProps<{ openedFrom: string }>()
+
+const userStore = useUserStore()
+const authStore = useAuthStore()
+
+// Save ref
+const save = ref()
+
+// Form reference
+const formRef = ref()
+
+// Form data
+const form = reactive({
+  cardNumber: '4532 1234 5678 9012',
+  nameOnCard: 'John Michael Smith',
+  expiration: '12/28',
+  cvv: '123',
+})
+
+// Loading state
+const isSubmitting = ref(false)
+
+// Form validation rules
+const rules = {
+  cardNumber: [
+    { required: true, message: 'Please enter card number', trigger: 'blur' },
+    {
+      validator: (rule: any, value: string, callback: Function) => {
+        const cleaned = value.replace(/\s/g, '')
+        if (cleaned.length < 15 || cleaned.length > 16) {
+          callback(new Error('Card number should be 16 digits'))
+        } else if (!/^\d+$/.test(cleaned)) {
+          callback(new Error('Card number should only contain digits'))
+        } else if (!getCardProvider(value)) {
+          callback(new Error('Please provide a valid card number'))
+        } else {
+          callback()
+        }
+      },
+      trigger: 'blur',
+    },
+  ],
+  nameOnCard: [
+    { required: true, message: 'Please enter name on card', trigger: 'blur' },
+    { min: 2, message: 'Name must be at least 2 characters', trigger: 'blur' },
+  ],
+  expiration: [
+    { required: true, message: 'Please enter expiration date', trigger: 'blur' },
+    {
+      validator: (rule: any, value: string, callback: Function) => {
+        const pattern = /^(0[1-9]|1[0-2])\/\d{2}$/
+        if (!pattern.test(value)) {
+          callback(new Error('Please enter valid expiration date (MM/YY)'))
+        } else {
+          // Check if date is not in the past
+          const [month, year] = value.split('/')
+          const currentDate = new Date()
+          const currentYear = currentDate.getFullYear() % 100
+          const currentMonth = currentDate.getMonth() + 1
+
+          const expYear = parseInt(year)
+          const expMonth = parseInt(month)
+
+          if (expYear < currentYear || (expYear === currentYear && expMonth < currentMonth)) {
+            callback(new Error('Card has expired'))
+          } else {
+            callback()
+          }
+        }
+      },
+      trigger: 'blur',
+    },
+  ],
+  cvv: [
+    { required: true, message: 'Please enter CVV', trigger: 'blur' },
+    {
+      validator: (rule: any, value: string, callback: Function) => {
+        if (!/^\d+$/.test(value)) {
+          callback(new Error('CVV should only contain digits'))
+        } else if (value.length < 3 || value.length > 4) {
+          callback(new Error('CVV should be 3-4 digits'))
+        } else {
+          callback()
+        }
+      },
+      trigger: 'blur',
+    },
+  ],
+}
+
+// Emits
+const emit = defineEmits(['submit', 'cancel'])
+
+// Methods
+const formatCardNumber = (value: string) => {
+  // Remove all non-digits
+  const cleaned = value.replace(/\D/g, '')
+
+  // Add spaces every 4 digits
+  const formatted = cleaned.replace(/(\d{4})(?=\d)/g, '$1 ')
+
+  form.cardNumber = formatted
+}
+
+const formatExpiration = (value: string) => {
+  // Remove all non-digits
+  const cleaned = value.replace(/\D/g, '')
+
+  // Add slash after 2 digits
+  if (cleaned.length >= 2) {
+    form.expiration = cleaned.substring(0, 2) + '/' + cleaned.substring(2, 4)
+  } else {
+    form.expiration = cleaned
+  }
+}
+
+const handleSubmit = async () => {
+  if (!formRef.value) return
+
+  try {
+    const valid = await formRef.value.validate()
+    if (valid) {
+      isSubmitting.value = true
+
+      // Simulate API call
+      await new Promise((resolve) => setTimeout(resolve, 1000))
+
+      const newCard: CreditCard = {
+        type: 'credit_card',
+        _id: crypto.randomUUID(),
+        provider: getCardProvider(form.cardNumber) as CardProviders,
+        lastFour: form.cardNumber.slice(-4),
+        cardName: form.nameOnCard,
+        expiration: form.expiration,
+        cvv: form.cvv,
+      }
+
+      userStore.addCardByUserID(authStore.user as string, newCard)
+
+      isSubmitting.value = false
+    }
+  } catch (error) {
+    console.error('Form validation failed:', error)
+    isSubmitting.value = false
+  }
+}
+
+const handleCancel = () => {
+  emit('cancel')
+}
+
+// Reset form method
+const resetForm = () => {
+  formRef.value?.resetFields()
+}
+
+// Expose methods
+defineExpose({
+  resetForm,
+})
+</script>
+
 <template>
   <div class="card-form-container">
+    <h3 class="form-title" v-if="openedFrom === 'checkout'">Add Card</h3>
     <el-form ref="formRef" :model="form" :rules="rules" label-position="top" class="card-form">
       <!-- Card Number -->
       <el-form-item prop="cardNumber" class="card-number-item">
@@ -96,166 +267,30 @@
         </el-button>
       </div>
     </el-form>
+    <div class="save-container" v-if="openedFrom === 'checkout'">
+      <p>Save Card</p>
+      <el-switch v-model="save" />
+    </div>
   </div>
 </template>
 
-<script setup lang="ts">
-import { ref, reactive } from 'vue'
-import { QuestionFilled } from '@element-plus/icons-vue'
-
-// Form reference
-const formRef = ref()
-
-// Form data
-const form = reactive({
-  cardNumber: '',
-  nameOnCard: '',
-  expiration: '',
-  cvv: '',
-})
-
-// Loading state
-const isSubmitting = ref(false)
-
-// Form validation rules
-const rules = {
-  cardNumber: [
-    { required: true, message: 'Please enter card number', trigger: 'blur' },
-    {
-      validator: (rule: any, value: string, callback: Function) => {
-        const cleaned = value.replace(/\s/g, '')
-        if (cleaned.length < 13 || cleaned.length > 19) {
-          callback(new Error('Card number should be 13-19 digits'))
-        } else if (!/^\d+$/.test(cleaned)) {
-          callback(new Error('Card number should only contain digits'))
-        } else {
-          callback()
-        }
-      },
-      trigger: 'blur',
-    },
-  ],
-  nameOnCard: [
-    { required: true, message: 'Please enter name on card', trigger: 'blur' },
-    { min: 2, message: 'Name must be at least 2 characters', trigger: 'blur' },
-  ],
-  expiration: [
-    { required: true, message: 'Please enter expiration date', trigger: 'blur' },
-    {
-      validator: (rule: any, value: string, callback: Function) => {
-        const pattern = /^(0[1-9]|1[0-2])\/\d{2}$/
-        if (!pattern.test(value)) {
-          callback(new Error('Please enter valid expiration date (MM/YY)'))
-        } else {
-          // Check if date is not in the past
-          const [month, year] = value.split('/')
-          const currentDate = new Date()
-          const currentYear = currentDate.getFullYear() % 100
-          const currentMonth = currentDate.getMonth() + 1
-
-          const expYear = parseInt(year)
-          const expMonth = parseInt(month)
-
-          if (expYear < currentYear || (expYear === currentYear && expMonth < currentMonth)) {
-            callback(new Error('Card has expired'))
-          } else {
-            callback()
-          }
-        }
-      },
-      trigger: 'blur',
-    },
-  ],
-  cvv: [
-    { required: true, message: 'Please enter CVV', trigger: 'blur' },
-    {
-      validator: (rule: any, value: string, callback: Function) => {
-        if (!/^\d+$/.test(value)) {
-          callback(new Error('CVV should only contain digits'))
-        } else if (value.length < 3 || value.length > 4) {
-          callback(new Error('CVV should be 3-4 digits'))
-        } else {
-          callback()
-        }
-      },
-      trigger: 'blur',
-    },
-  ],
-}
-
-// Emits
-const emit = defineEmits(['submit', 'cancel'])
-
-// Methods
-const formatCardNumber = (value: string) => {
-  // Remove all non-digits
-  const cleaned = value.replace(/\D/g, '')
-
-  // Add spaces every 4 digits
-  const formatted = cleaned.replace(/(\d{4})(?=\d)/g, '$1 ')
-
-  form.cardNumber = formatted
-}
-
-const formatExpiration = (value: string) => {
-  // Remove all non-digits
-  const cleaned = value.replace(/\D/g, '')
-
-  // Add slash after 2 digits
-  if (cleaned.length >= 2) {
-    form.expiration = cleaned.substring(0, 2) + '/' + cleaned.substring(2, 4)
-  } else {
-    form.expiration = cleaned
-  }
-}
-
-const handleSubmit = async () => {
-  if (!formRef.value) return
-
-  try {
-    const valid = await formRef.value.validate()
-    if (valid) {
-      isSubmitting.value = true
-
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000))
-
-      emit('submit', {
-        cardNumber: form.cardNumber.replace(/\s/g, ''),
-        nameOnCard: form.nameOnCard,
-        expiration: form.expiration,
-        cvv: form.cvv,
-      })
-
-      isSubmitting.value = false
-    }
-  } catch (error) {
-    console.error('Form validation failed:', error)
-    isSubmitting.value = false
-  }
-}
-
-const handleCancel = () => {
-  emit('cancel')
-}
-
-// Reset form method
-const resetForm = () => {
-  formRef.value?.resetFields()
-}
-
-// Expose methods
-defineExpose({
-  resetForm,
-})
-</script>
-
 <style scoped>
+.form-title {
+  margin-bottom: 1rem;
+}
+.save-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 1rem;
+  padding: 1rem 2rem;
+}
+
 .card-form-container {
-  max-width: 500px;
+  max-width: 580px;
+  width: 100%;
   margin: 0 auto;
   padding: 16px;
-  background: #f8f9fa;
   border-radius: 8px;
 }
 

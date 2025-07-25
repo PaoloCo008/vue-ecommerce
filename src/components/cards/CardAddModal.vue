@@ -12,7 +12,7 @@ import CardAddForm from './CardAddForm.vue'
       </el-button>
     </template>
 
-    <CardAddForm />
+    <CardAddForm opened-from="payment-options" />
   </AppDrawer>
 </template>
 

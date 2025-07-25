@@ -47,7 +47,7 @@ const drawerSize = computed(() => {
 <template>
   <slot name="trigger" :handleOpenDrawer></slot>
   <Teleport to="body">
-    <el-drawer v-model="drawer" :size="drawerSize" :before-close="handleClose">
+    <el-drawer v-model="drawer" :size="drawerSize" :before-close="handleClose" destroy-on-close>
       <template #header v-if="props.header">
         <h3>{{ props.header }}</h3>
       </template>

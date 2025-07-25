@@ -18,13 +18,20 @@ const defaultShippingAddress = computed(() =>
 // Emits
 const emit = defineEmits(['save', 'cancel'])
 
-// Reactive data
-const selectedAddressId = computed(() =>
-  defaultShippingAddress.value ? defaultShippingAddress.value._id : undefined,
-)
+// Reactive data - Use ref for manual override, computed for automatic behavior
+const manuallySelectedId = ref<string | undefined>(undefined)
+
+const selectedAddressId = computed(() => {
+  // If user manually selected an address, use that
+  if (manuallySelectedId.value) {
+    return manuallySelectedId.value
+  }
+  // Otherwise, automatically use default shipping address
+  return defaultShippingAddress.value ? defaultShippingAddress.value._id : undefined
+})
 
 const selectedAddress = computed(() => {
-  if (defaultShippingAddress.value) {
+  if (selectedAddressId.value) {
     console.log('hello')
     return userStore.getUserAddressByAddressId(
       authStore.user as string,
@@ -42,72 +49,9 @@ onUpdated(() => {
   console.log(defaultShippingAddress.value)
 })
 
-// Sample data
-// const addresses = ref([
-//   {
-//     id: 1,
-//     contactName: 'Paolo Co',
-//     phone: '09178777471',
-//     street: '38 Silver Road',
-//     area: 'Metro Manila',
-//     city: 'Las Pinas',
-//     region: 'Las Pinas City - Pilar',
-//     isHome: true,
-//     isDefaultShipping: true,
-//     isDefaultBilling: true,
-//   },
-//   {
-//     id: 2,
-//     contactName: 'Paolo Co',
-//     phone: '09178777471',
-//     street: '38 Silver Road',
-//     area: 'Metro Manila',
-//     city: 'Las Pinas',
-//     region: 'Las Pinas City - Pilar',
-//     isHome: false,
-//     isDefaultShipping: true,
-//     isDefaultBilling: true,
-//   },
-//   {
-//     id: 3,
-//     contactName: 'Paolo Co',
-//     phone: '09178777471',
-//     street: '38 Silver Road',
-//     area: 'Metro Manila',
-//     city: 'Las Pinas',
-//     region: 'Las Pinas City - Pilar',
-//     isHome: false,
-//     isDefaultShipping: true,
-//     isDefaultBilling: true,
-//   },
-//   {
-//     id: 4,
-//     contactName: 'Paolo Co',
-//     phone: '09178777471',
-//     street: '38 Silver Road',
-//     area: 'Metro Manila',
-//     city: 'Las Pinas',
-//     region: 'Las Pinas City - Pilar',
-//     isHome: false,
-//     isDefaultShipping: true,
-//     isDefaultBilling: true,
-//   },
-//   {
-//     id: 5,
-//     contactName: 'Paolo Co',
-//     phone: '09178777471',
-//     street: '38 Silver Road',
-//     area: 'Metro Manila',
-//     city: 'Las Pinas',
-//     region: 'Las Pinas City - Pilar',
-//     isHome: false,
-//     isDefaultShipping: true,
-//     isDefaultBilling: true,
-//   },
-// ])
-
-const selectAddress = (id) => {
-  selectedAddressId.value = id
+// Fixed selectAddress function
+const selectAddress = (id: string) => {
+  manuallySelectedId.value = id
 }
 
 const handleSave = () => {

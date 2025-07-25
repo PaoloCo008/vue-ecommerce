@@ -8,13 +8,17 @@ const authStore = useAuthStore()
 
 const phoneFormRef = ref()
 const phoneForm = reactive({
-  mobileNumber: '09182341481',
+  mobileNumber: '9182341481',
 })
 
 const rules = {
   mobileNumber: [
     { required: true, message: 'Please enter your phone number', trigger: 'blur' },
-    { pattern: /^09\d{9}$/, message: 'Please enter a valid phone number', trigger: 'blur' },
+    {
+      pattern: /^9\d{9}$/,
+      message: 'Please enter a valid PH mobile number (10 digits)',
+      trigger: 'blur',
+    },
   ],
 }
 
@@ -29,7 +33,6 @@ const handleRegister = async () => {
       // Simulate API call
       setTimeout(() => {
         loading.value = false
-        ElMessage.success('signUp successful!')
 
         authStore.registerPhone({ mobileNumber: phoneForm.mobileNumber })
       }, 1500)

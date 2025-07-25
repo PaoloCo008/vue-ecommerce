@@ -1,8 +1,15 @@
 import useLocalStorage from '@/composables/useLocalStorage'
 import { users } from '@/lib/constants/data/users'
 import type { NewAddressForm } from '@/lib/types/forms'
-import type { AddressLabel, AddressType, User } from '@/lib/types/globals'
+import type {
+  AddressLabel,
+  AddressType,
+  CreditCard,
+  PaymentMethod,
+  User,
+} from '@/lib/types/globals'
 import { defineStore } from 'pinia'
+import { useCartStore } from './CartStore'
 
 export const useUserStore = defineStore('user', {
   state: () => ({
@@ -29,10 +36,18 @@ export const useUserStore = defineStore('user', {
       const user = state.users.find((user) => user._id === userId)
       return user ? user.addresses.find((address) => address.isDefaultShipping) : null
     },
+    getUserPaymentMethods: (state) => (userId: string, type: PaymentMethod['type']) => {
+      const user = state.users.find((user) => user._id === userId)
+      return user ? user.paymentMethods.filter((method) => method?.type === type) : null
+    },
   },
   actions: {
     createUser(user: User) {
+      const cartStore = useCartStore()
+
       this.users.push(user)
+
+      cartStore.createCart(user._id)
     },
 
     addAddressToUser(userId: string, address: NewAddressForm) {
@@ -52,6 +67,14 @@ export const useUserStore = defineStore('user', {
       }
     },
 
+    addCardByUserID(userId: string, card: CreditCard) {
+      const user = this.getUserById(userId)
+
+      if (user) {
+        user.paymentMethods.push(card)
+      }
+    },
+
     deleteUserAddressById(userId: string, addressId: string) {
       const user = this.getUserById(userId)
       if (user) {
@@ -66,6 +89,14 @@ export const useUserStore = defineStore('user', {
         if (address) {
           Object.assign(address, updatedAddress)
         }
+      }
+    },
+
+    deleteCardFromUser(userId: string, cardId: string) {
+      const user = this.getUserById(userId)
+
+      if (user) {
+        user.paymentMethods = user.paymentMethods.filter((method) => method._id === cardId)
       }
     },
 

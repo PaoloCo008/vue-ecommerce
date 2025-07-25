@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import AppModal from './AppModal.vue'
 import AuthTransitionWrapper from '../auth/AuthTransitionWrapper.vue'
 import { useAuthStore } from '@/stores/AuthStore'
@@ -9,6 +9,7 @@ import { LogOut, Package2, Smile } from 'lucide-vue-next'
 import { computed } from 'vue'
 
 const route = useRoute()
+const router = useRouter()
 
 const dialogStyle = {
   width: '100%',
@@ -52,17 +53,19 @@ function handleLogout() {
         </span>
         <template #dropdown>
           <el-dropdown-menu>
-            <el-dropdown-item>
-              <RouterLink :to="{ name: 'profile' }"
-                ><Smile :size="16" />Manage my profile
-              </RouterLink>
+            <el-dropdown-item @click="router.push({ name: 'profile' })">
+              <el-button class="button-link" link>
+                <Smile :size="16" /><span class="button-text">Manage my profile</span>
+              </el-button>
             </el-dropdown-item>
-            <el-dropdown-item>
-              <RouterLink :to="{ name: 'orders' }"><Package2 :size="16" />My Orders</RouterLink>
+            <el-dropdown-item @click="router.push({ name: 'orders' })">
+              <el-button class="button-link" link
+                ><Package2 :size="16" /><span class="button-text">My Orders</span>
+              </el-button>
             </el-dropdown-item>
-            <el-dropdown-item>
-              <el-button class="logout-button" link @click="handleLogout"
-                ><LogOut :size="16" /><span class="logout-text"> Logout </span></el-button
+            <el-dropdown-item @click="handleLogout">
+              <el-button class="button-link" link
+                ><LogOut :size="16" /><span class="button-text"> Logout </span></el-button
               >
             </el-dropdown-item>
           </el-dropdown-menu>
@@ -136,11 +139,11 @@ a {
   --el-button-active-color: #00bd7e;
 }
 
-.logout-button {
+.button-link {
   color: #00bd7e;
 }
 
-.logout-text {
+.button-text {
   margin-left: 5px;
   font-weight: 500;
 }

@@ -129,13 +129,10 @@ export const useAuthStore = defineStore('auth', {
     },
 
     login({ userId, email, password }: Login) {
-      const cartStore = useCartStore()
-
       this.user = userId
       this.loginData.email = email
       this.loginData.password = password
 
-      cartStore.mergeGuestCartToUserCart(this.user)
       this.incrementStep()
     },
 
@@ -175,7 +172,7 @@ export const useAuthStore = defineStore('auth', {
       }
 
       userStore.createUser(newUser)
-      cartStore.createCart(newUser._id)
+
       this.authorize()
       this.user = newUser._id
     },

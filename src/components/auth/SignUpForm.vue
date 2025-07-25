@@ -16,10 +16,40 @@ const loading = ref(false)
 
 // Form data
 const signUpForm = reactive({
-  email: 'email',
-  password: 'password',
-  passwordConfirm: 'password',
+  email: 'email@email.com',
+  password: 'passwordTest-008',
+  passwordConfirm: 'passwordTest-008',
 })
+
+function validateEmail(rule: any, value: any, callback: any) {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
+  if (!emailRegex.test(value)) {
+    callback(new Error('Please provide a valid email'))
+  } else {
+    callback()
+  }
+}
+
+function validatePassword(rule, value, callback) {
+  if (!value) {
+    callback()
+    return
+  }
+
+  const hasAlpha = /[a-zA-Z]/.test(value)
+  const hasNumber = /\d/.test(value)
+  const hasSpecial = /[_-~!@#$%^&*<>]/.test(value)
+  const onlyAllowedChars = /^[a-zA-Z0-9~!@#$%^&*-_<>]+$/.test(value)
+
+  if (!hasAlpha || !hasNumber || !hasSpecial) {
+    callback(new Error('Password must contain alphabets, numbers and special characters'))
+  } else if (!onlyAllowedChars) {
+    callback(new Error('Password can only include _-~!@#$%^&*<> symbols'))
+  } else {
+    callback()
+  }
+}
 
 function validatePasswordConfirm(rule: any, value: any, callback: any) {
   if (value === '') {
@@ -33,10 +63,19 @@ function validatePasswordConfirm(rule: any, value: any, callback: any) {
 
 // Form validation rules
 const rules = {
-  email: [{ required: true, message: 'Please enter your email', trigger: 'blur' }],
+  email: [
+    { required: true, message: 'Please enter your email', trigger: 'blur' },
+    { validator: validateEmail, trigger: 'blur' },
+  ],
   password: [
     { required: true, message: 'Please enter your password', trigger: 'blur' },
-    { min: 6, message: 'Password must be at least 6 characters', trigger: 'blur' },
+    {
+      min: 8,
+      max: 20,
+      message: 'Password length should be 8-20 characters',
+      trigger: 'blur',
+    },
+    { validator: validatePassword, trigger: 'blur' },
   ],
   passwordConfirm: [{ validator: validatePasswordConfirm, trigger: 'blur' }],
 }
@@ -47,10 +86,8 @@ const handlesignUp = async () => {
   await signUpFormRef.value.validate((valid) => {
     if (valid) {
       loading.value = true
-      // Simulate API call
       setTimeout(() => {
         loading.value = false
-        ElMessage.success('signUp successful!')
 
         authStore.signup({ email: signUpForm.email, password: signUpForm.password })
       }, 1500)

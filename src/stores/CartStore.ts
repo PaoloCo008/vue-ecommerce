@@ -71,14 +71,17 @@ export const useCartStore = defineStore('cart', {
         userId,
         items: [],
       }
-      this.mergeGuestCartToUserCart(userId)
+
       this.carts.push(newCart)
+      this.mergeGuestCartToUserCart(userId)
     },
 
     mergeGuestCartToUserCart(userId: string) {
       if (this.guestCart.length === 0) return
 
       const userCart = this.getCartByUserId(userId)
+
+      console.log(userCart)
 
       if (userCart) {
         this.guestCart.forEach((item) => {
