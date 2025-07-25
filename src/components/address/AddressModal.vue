@@ -5,7 +5,7 @@ import AddressForm from './AddressForm.vue'
 
 <template>
   <ModalTemplate title="Register Address" has-content-buttons>
-    <AddressForm />
+    <AddressForm rendered-from="signup" />
   </ModalTemplate>
 </template>
 

@@ -5,9 +5,11 @@ import ProfileContentLayout from '@/layouts/ProfileContentLayout.vue'
 import { formatPrice } from '@/lib/helpers'
 import { useAuthStore } from '@/stores/AuthStore'
 import { useOrderStore } from '@/stores/OrderStore'
+import { useRouter } from 'vue-router'
 
 const activeTab = ref('all')
 const searchQuery = ref('')
+const router = useRouter()
 
 const authStore = useAuthStore()
 const orderStore = useOrderStore()
@@ -43,7 +45,7 @@ console.log(orders)
       </div>
 
       <!-- Orders List -->
-      <div class="orders-list">
+      <div class="orders-list" v-if="!!orders.length">
         <RouterLink
           :to="{ name: 'orderdetails', params: { orderId: orderStore.encodeOrderId(order._id) } }"
           v-for="order in orders"
@@ -76,11 +78,21 @@ console.log(orders)
           </div>
         </RouterLink>
       </div>
+      <el-empty description="You have no orders placed yet." v-else>
+        <el-button type="primary" @click="router.push({ name: 'homepage' })" class="reroute-button"
+          >Continue Shopping</el-button
+        >
+      </el-empty>
     </div>
   </ProfileContentLayout>
 </template>
 
 <style scoped>
+.reroute-button {
+  background-color: transparent;
+  color: var(--color-main);
+  border: 1px solid var(--color-main);
+}
 .my-orders-container {
   max-width: 1200px;
 }

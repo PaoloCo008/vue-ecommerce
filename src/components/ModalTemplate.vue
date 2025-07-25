@@ -4,31 +4,53 @@ defineProps<{
   hasContentButtons?: boolean
   confirm?: () => void
   back?: () => void
+  loading?: boolean
+  disabled?: boolean
 }>()
 </script>
 
 <template>
   <div class="container">
-    <div class="header">
-      <h3 class="title">{{ title }}</h3>
+    <div class="content">
+      <div class="header">
+        <h3 class="title">{{ title }}</h3>
+      </div>
+
+      <slot></slot>
     </div>
 
-    <div class="body">
-      <div class="content">
-        <slot></slot>
-      </div>
-
-      <div v-if="!hasContentButtons" class="buttons">
-        <el-button size="large" class="back-button" @click="back"> Back </el-button>
-        <el-button type="primary" size="large" class="confirm-button" @click="confirm">
-          Confirm
-        </el-button>
-      </div>
+    <div v-if="!hasContentButtons" class="buttons">
+      <el-button size="large" class="back-button button" @click="back"> Back </el-button>
+      <el-button
+        :loading="loading"
+        type="primary"
+        size="large"
+        class="confirm-button button"
+        @click="confirm"
+        :disabled
+      >
+        Confirm
+      </el-button>
     </div>
   </div>
 </template>
 
 <style scoped>
+.container {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.content {
+  height: 100%;
+}
+
+.body {
+  height: 100%;
+}
+
 .header {
   display: flex;
   justify-content: space-between;
@@ -44,12 +66,6 @@ defineProps<{
   margin: 0;
 }
 
-.body {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-}
-
 .content {
   text-align: left;
 }
@@ -58,6 +74,10 @@ defineProps<{
   display: flex;
   gap: 12px;
   justify-content: flex-end;
+}
+
+.button {
+  width: 125px;
 }
 
 .back-button {
@@ -84,6 +104,12 @@ defineProps<{
 .confirm-button:hover {
   background: #ff5722;
   border-color: #ff5722;
+}
+
+.confirm-button:disabled {
+  background-color: #cccccc;
+  border-color: #cccccc;
+  cursor: not-allowed;
 }
 
 @media screen and (min-width: 500px) {

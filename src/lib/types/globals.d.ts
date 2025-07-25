@@ -96,15 +96,15 @@ export interface ShippingCompany {
   trackingNumber: string
 }
 
-type CardExpiration = [number, number]
+export type CardProviders = 'visa' | 'mastercard' | 'american-express' | 'jcb'
 
 export interface CreditCard {
   type: 'credit_card'
   _id: string
-  provider: 'gcash'
+  provider: CardProviders
   lastFour: string
   cardName: string
-  expiration: CardExpiration
+  expiration: string
   cvv: string
 }
 
@@ -116,7 +116,12 @@ export interface MobileWallet {
   accountName: string
 }
 
-export type PaymentMethod = CreditCard | MobileWallet | null
+export interface CashOnDelivery {
+  type: 'cash_on_delivery'
+  _id: string
+}
+
+export type PaymentMethod = CreditCard | MobileWallet | CashOnDelivery
 
 export type Gender = 'male' | 'female' | 'other'
 

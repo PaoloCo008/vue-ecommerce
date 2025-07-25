@@ -1,37 +1,33 @@
 <script setup lang="ts">
 import ProfileContentLayout from '@/layouts/ProfileContentLayout.vue'
-import { ref } from 'vue'
+import { computed, provide } from 'vue'
 import CardAddModal from '../cards/CardAddModal.vue'
+import { useUserStore } from '@/stores/UserStore'
+import { useAuthStore } from '@/stores/AuthStore'
+import { cardProviderLogos } from '@/lib/constants'
+import type { CreditCard } from '@/lib/types/globals'
+import { buildCardNumber } from '@/lib/helpers'
 
-const creditCards = ref([
-  {
-    id: 'visa-1',
-    type: 'visa',
-    number: '483442******1225',
-    expiry: '08/26',
-    logo: 'VISA',
-    logoClass: 'visa-logo',
-  },
-])
+const userStore = useUserStore()
+const authStore = useAuthStore()
 
-const digitalWallets = ref([
-  {
-    id: 'maya-1',
-    type: 'maya',
-    number: '+639****5407',
-    expiry: '-',
-    logo: 'maya',
-    logoClass: 'maya-logo',
-  },
-  {
-    id: 'gcash-1',
-    type: 'gcash',
-    number: '63-9****15407',
-    expiry: '-',
-    logo: 'G',
-    logoClass: 'gcash-logo',
-  },
-])
+const creditCards = computed(() =>
+  userStore
+    .getUserPaymentMethods(authStore.user as string, 'credit_card')
+    ?.map((card: CreditCard) => ({
+      logo: cardProviderLogos[card.provider].img,
+      provider: cardProviderLogos[card.provider].provider,
+      number: card.lastFour,
+      expiry: card.expiration,
+      id: card._id,
+    })),
+)
+
+console.log(creditCards.value)
+
+const digitalWallets = computed(() =>
+  userStore.getUserPaymentMethods(authStore.user as string, 'mobile_wallet'),
+)
 
 // Methods
 const deleteCard = (cardId, cardType) => {
@@ -71,10 +67,10 @@ const addDigitalWallet = () => {
           <el-table-column label="Card Number" min-width="200">
             <template #default="scope">
               <div class="card-info-row">
-                <div :class="['card-logo', scope.row.logoClass]">
-                  {{ scope.row.logo }}
+                <div>
+                  <img :src="scope.row.logo" :alt="scope.row.provider" class="card-logo" />
                 </div>
-                <span class="card-number">{{ scope.row.number }}</span>
+                <span class="card-number">{{ buildCardNumber(scope.row.number) }}</span>
               </div>
             </template>
           </el-table-column>
@@ -118,7 +114,7 @@ const addDigitalWallet = () => {
           <el-table-column label="Card Number" min-width="200">
             <template #default="scope">
               <div class="card-info-row">
-                <div :class="['card-logo', scope.row.logoClass]">
+                <div class="card-logo">
                   {{ scope.row.logo }}
                 </div>
                 <span class="card-number">{{ scope.row.number }}</span>
@@ -145,10 +141,6 @@ const addDigitalWallet = () => {
             </template>
           </el-table-column>
         </el-table>
-
-        <div class="add-card-section">
-          <CardAddModal />
-        </div>
       </div>
     </div>
   </ProfileContentLayout>
@@ -195,27 +187,6 @@ const addDigitalWallet = () => {
   justify-content: center;
   border-radius: 4px;
   font-weight: bold;
-}
-
-.visa-logo {
-  background: #1a1f71;
-  color: white;
-  font-size: 12px;
-}
-
-.maya-logo {
-  background: #00d4aa;
-  color: white;
-  font-size: 10px;
-}
-
-.gcash-logo {
-  background: #007cff;
-  color: white;
-  font-size: 10px;
-  border-radius: 50%;
-  width: 32px;
-  height: 32px;
 }
 
 .card-number {

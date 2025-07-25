@@ -124,7 +124,7 @@ export const useOrderStore = defineStore('order', {
         this.orders.push(completedOrder)
         this.removePendingOrder(orderId)
 
-        router.push({ name: 'cart' })
+        router.push({ name: 'orders' })
 
         return completedOrder
       }

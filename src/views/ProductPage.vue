@@ -13,9 +13,9 @@ import { useCartStore } from '@/stores/CartStore'
 import { useUserStore } from '@/stores/UserStore'
 
 const dialogStyle = {
-  width: '95vw',
+  width: '100%',
   maxWidth: '450px',
-  height: '400px',
+  height: '450px',
 }
 
 const quantity = ref(1)

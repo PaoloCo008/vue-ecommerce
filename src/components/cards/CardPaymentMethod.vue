@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { ref, defineEmits } from 'vue'
 import { ArrowRight } from '@element-plus/icons-vue'
+import CODConfirm from '../CODConfirm.vue'
+import CardAddForm from './CardAddForm.vue'
 
 // Emits
 const emit = defineEmits(['methodSelected'])
@@ -16,7 +18,7 @@ const selectMethod = (method) => {
 </script>
 
 <template>
-  <div class="payment-methods-container">
+  <div class="payment-methods-container" v-if="selectedMethod === ''">
     <!-- Recommended Method -->
     <div class="section">
       <h3 class="section-title">Recommended method(s)</h3>
@@ -122,6 +124,8 @@ const selectMethod = (method) => {
       </div>
     </div>
   </div>
+  <CODConfirm v-else-if="selectedMethod === 'cod'" />
+  <CardAddForm v-else-if="selectedMethod === 'card'" opened-from="checkout" />
 </template>
 
 <style scoped>

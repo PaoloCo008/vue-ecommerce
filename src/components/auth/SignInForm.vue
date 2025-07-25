@@ -24,20 +24,16 @@ const loginForm = reactive({
 
 function validatePassword(rule: any, value: any, callback: any) {
   console.log(userStore.getUserByEmail(loginForm.email))
-  if (value === '') {
-    callback(new Error('Username is required'))
-  } else if (value !== userStore.getUserByEmail(loginForm.email)?.password) {
-    callback(new Error('Please provide a valid username.'))
+  if (value !== userStore.getUserByEmail(loginForm.email)?.password) {
+    callback(new Error())
   } else {
     callback()
   }
 }
 
 function validateEmail(rule: any, value: any, callback: any) {
-  if (value === '') {
-    callback(new Error('Password is required'))
-  } else if (value !== userStore.getUserByEmail(loginForm.email)?.email) {
-    callback(new Error('Please provide a valid password.'))
+  if (value !== userStore.getUserByEmail(loginForm.email)?.email) {
+    callback(new Error())
   } else {
     callback()
   }
@@ -51,7 +47,6 @@ const rules = {
   ],
   password: [
     { required: true, message: 'Please enter your password', trigger: 'blur' },
-    { min: 6, message: 'Password must be at least 6 characters', trigger: 'blur' },
     { validator: validatePassword },
   ],
 }
@@ -75,7 +70,7 @@ const handleLogin = async () => {
         // Add your login logic here
       }, 1500)
     } else {
-      ElMessage.error('Please fill in all required fields correctly')
+      ElMessage.error('Email or Password are invalid')
     }
   })
 }
@@ -147,7 +142,7 @@ const handleLogin = async () => {
   flex-direction: column;
   justify-content: space-between;
   gap: 0.5rem;
-  height: 100%;
+  height: calc(100% - 50px);
 }
 
 :deep(.el-form-item__error) {

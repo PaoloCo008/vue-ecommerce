@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, defineEmits, computed } from 'vue'
+import { ref, defineEmits, computed, onUpdated } from 'vue'
 import { Check } from '@element-plus/icons-vue'
 import AppAddressTag from '../app/AppAddressTag.vue'
 import type { Address } from '@/lib/types/globals'
@@ -11,87 +11,47 @@ const props = defineProps<{ addresses: Address[] }>()
 const userStore = useUserStore()
 const authStore = useAuthStore()
 
-const defaultShippingAddress = userStore.getUserDefaultShippingAddressById(authStore.user as string)
+const defaultShippingAddress = computed(() =>
+  userStore.getUserDefaultShippingAddressById(authStore.user as string),
+)
 
 // Emits
-const emit = defineEmits(['save', 'cancel', 'addNew'])
+const emit = defineEmits(['save', 'cancel'])
 
-// Reactive data
-const selectedAddressId = ref(defaultShippingAddress!._id)
+// Reactive data - Use ref for manual override, computed for automatic behavior
+const manuallySelectedId = ref<string | undefined>(undefined)
 
-const selectedAddress = computed(() => {
-  return userStore.getUserAddressByAddressId(authStore.user as string, selectedAddressId.value)
+const selectedAddressId = computed(() => {
+  // If user manually selected an address, use that
+  if (manuallySelectedId.value) {
+    return manuallySelectedId.value
+  }
+  // Otherwise, automatically use default shipping address
+  return defaultShippingAddress.value ? defaultShippingAddress.value._id : undefined
 })
 
-console.log(selectedAddress.value)
+const selectedAddress = computed(() => {
+  if (selectedAddressId.value) {
+    console.log('hello')
+    return userStore.getUserAddressByAddressId(
+      authStore.user as string,
+      selectedAddressId.value as string,
+    )
+  }
 
-// Sample data
-// const addresses = ref([
-//   {
-//     id: 1,
-//     contactName: 'Paolo Co',
-//     phone: '09178777471',
-//     street: '38 Silver Road',
-//     area: 'Metro Manila',
-//     city: 'Las Pinas',
-//     region: 'Las Pinas City - Pilar',
-//     isHome: true,
-//     isDefaultShipping: true,
-//     isDefaultBilling: true,
-//   },
-//   {
-//     id: 2,
-//     contactName: 'Paolo Co',
-//     phone: '09178777471',
-//     street: '38 Silver Road',
-//     area: 'Metro Manila',
-//     city: 'Las Pinas',
-//     region: 'Las Pinas City - Pilar',
-//     isHome: false,
-//     isDefaultShipping: true,
-//     isDefaultBilling: true,
-//   },
-//   {
-//     id: 3,
-//     contactName: 'Paolo Co',
-//     phone: '09178777471',
-//     street: '38 Silver Road',
-//     area: 'Metro Manila',
-//     city: 'Las Pinas',
-//     region: 'Las Pinas City - Pilar',
-//     isHome: false,
-//     isDefaultShipping: true,
-//     isDefaultBilling: true,
-//   },
-//   {
-//     id: 4,
-//     contactName: 'Paolo Co',
-//     phone: '09178777471',
-//     street: '38 Silver Road',
-//     area: 'Metro Manila',
-//     city: 'Las Pinas',
-//     region: 'Las Pinas City - Pilar',
-//     isHome: false,
-//     isDefaultShipping: true,
-//     isDefaultBilling: true,
-//   },
-//   {
-//     id: 5,
-//     contactName: 'Paolo Co',
-//     phone: '09178777471',
-//     street: '38 Silver Road',
-//     area: 'Metro Manila',
-//     city: 'Las Pinas',
-//     region: 'Las Pinas City - Pilar',
-//     isHome: false,
-//     isDefaultShipping: true,
-//     isDefaultBilling: true,
-//   },
-// ])
+  return null
+})
 
-// Methods
-const selectAddress = (id) => {
-  selectedAddressId.value = id
+onUpdated(() => {
+  console.log('updated')
+  console.log(selectedAddress.value)
+  console.log(selectedAddressId.value)
+  console.log(defaultShippingAddress.value)
+})
+
+// Fixed selectAddress function
+const selectAddress = (id: string) => {
+  manuallySelectedId.value = id
 }
 
 const handleSave = () => {
@@ -101,16 +61,12 @@ const handleSave = () => {
 const handleCancel = () => {
   emit('cancel')
 }
-
-const handleAddNew = () => {
-  emit('addNew')
-}
 </script>
 
 <template>
   <div class="shipping-address-container">
     <!-- Address List -->
-    <div class="address-list">
+    <div class="address-list" v-if="addresses.length">
       <div
         v-for="address in addresses"
         :key="address._id"
@@ -159,6 +115,9 @@ const handleAddNew = () => {
           </div>
         </div>
       </div>
+    </div>
+    <div v-else>
+      <p>Add a address to continue with your checkout.</p>
     </div>
 
     <!-- Action Buttons -->
@@ -329,6 +288,10 @@ const handleAddNew = () => {
   padding: 12px 16px;
   background: white;
   border-top: 1px solid #ebeef5;
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  left: 0;
 }
 
 .cancel-btn {

@@ -26,7 +26,7 @@ import ProfileMenu from '@/components/profile/ProfileMenu.vue'
 }
 
 .account-management {
-  min-height: 100vh;
+  min-height: 100%;
   position: relative;
 }
 

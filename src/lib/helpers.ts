@@ -47,3 +47,31 @@ export const formatDate = (date: Date | string) => {
 export function generateOtp(): string {
   return Math.floor(1000 + Math.random() * 9000).toString()
 }
+
+export function formatPhilippinePhone(phoneNumber: string) {
+  let cleaned = phoneNumber.replace(/\D/g, '')
+
+  cleaned = '63' + cleaned
+
+  const countryCode = cleaned.substring(0, 2)
+  const areaCode = cleaned.substring(2, 5)
+  const firstPart = cleaned.substring(5, 8)
+  const secondPart = cleaned.substring(8, 12)
+
+  return `+${countryCode} ${areaCode} ${firstPart} ${secondPart}`
+}
+
+export function getCardProvider(cardNumber: string) {
+  const num = cardNumber.replace(/\s/g, '')
+
+  if (num.startsWith('4')) return 'visa'
+  if (num.startsWith('5') || (num >= '2221' && num <= '2720')) return 'mastercard'
+  if (num.startsWith('34') || num.startsWith('37')) return 'american-express'
+  if (num.startsWith('35')) return 'jcb'
+
+  return null
+}
+
+export function buildCardNumber(lastFour: string) {
+  return `**** **** **** ${lastFour}`
+}

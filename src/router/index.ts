@@ -19,6 +19,7 @@ import ProfilePasswordResetForm from '@/components/profile/ProfilePasswordResetF
 import UserVerification from '@/views/UserVerification.vue'
 import VerificationForm from '@/components/VerificationForm.vue'
 import VerificationMethods from '@/components/VerificationMethods.vue'
+import ProfileEmailOrPhoneChangeForm from '@/components/profile/ProfileEmailOrPhoneChangeForm.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -64,20 +65,13 @@ const router = createRouter({
               children: [
                 {
                   path: '',
-                  name: 'user-verification',
+                  name: 'verification-methods',
                   component: VerificationMethods,
                 },
                 {
                   path: '',
-                  name: 'phone-verification',
+                  name: 'verification-form',
                   component: VerificationForm,
-                  meta: { formFor: 'phone' },
-                },
-                {
-                  path: '',
-                  name: 'email-verification',
-                  component: VerificationForm,
-                  meta: { formFor: 'email' },
                 },
               ],
             },
@@ -110,6 +104,11 @@ const router = createRouter({
                       path: 'password-reset',
                       name: 'password-reset',
                       component: ProfilePasswordResetForm,
+                    },
+                    {
+                      path: ':method/change',
+                      name: 'change',
+                      component: ProfileEmailOrPhoneChangeForm,
                     },
                   ],
                 },

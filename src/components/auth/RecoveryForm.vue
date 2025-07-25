@@ -10,6 +10,8 @@ const emit = defineEmits<{ (e: 'confirm'): void; (e: 'back'): void }>()
 const authStore = useAuthStore()
 const userStore = useUserStore()
 
+const loading = ref(false)
+
 // Form reference
 const recoveryFormRef = ref(null)
 
@@ -26,7 +28,7 @@ function validateEmail(rule: any, value: any, callback: any) {
   } else if (!emailRegex.test(value)) {
     callback(new Error('Please provide a valid email'))
   } else if (value !== userStore.getUserByEmail(recoveryForm.account)?.email) {
-    callback(new Error('No user found with that email'))
+    callback(new Error('Sorry but no user was found with that email'))
   } else {
     callback()
   }
@@ -51,20 +53,18 @@ const rules = reactive({
 
 const handleConfirm = async () => {
   if (!recoveryFormRef.value) return
-  try {
-    // Validate form
-    await recoveryFormRef.value.validate()
-    // Process the form data
-    console.log('Form submitted:', recoveryForm.account)
-    // Show success message
-    authStore.goToRecoveryOTP({ email: recoveryForm.account })
-  } catch (error) {
-    console.log('Validation failed:', error)
-    ElMessage({
-      type: 'error',
-      message: 'Please check your input and try again',
-    })
-  }
+
+  await recoveryFormRef.value.validate((valid) => {
+    if (valid) {
+      loading.value = true
+
+      // Simulate API call
+      setTimeout(() => {
+        loading.value = false
+        authStore.goToRecoveryOTP({ email: recoveryForm.account })
+      }, 1500)
+    }
+  })
 }
 
 // Expose methods if needed by parent component
@@ -80,6 +80,7 @@ defineExpose({
     title="Forgot your password?"
     :confirm="handleConfirm"
     :back="() => authStore.goBack('login')"
+    :loading
   >
     <p class="description">Please enter the account that you want to reset the password.</p>
 

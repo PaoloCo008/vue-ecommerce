@@ -41,7 +41,7 @@ function handleSelect() {
       <el-checkbox class="item-checkbox opaque" v-model="isSelected" @click.stop />
       <el-image class="product-image" :src="item.image" />
     </div>
-    <h4>
+    <h4 class="product-item-name">
       {{ item?.name }}
     </h4>
     <div class="flex-align-center">
@@ -65,6 +65,10 @@ function handleSelect() {
 </template>
 
 <style scoped>
+.product-item-name {
+  flex: 1;
+}
+
 .trash-icon {
   cursor: pointer;
 }

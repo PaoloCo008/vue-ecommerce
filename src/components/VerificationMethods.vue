@@ -1,24 +1,12 @@
 <script setup lang="ts">
 import { ShieldUser } from 'lucide-vue-next'
-import { ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { computed } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 
 const router = useRouter()
+const route = useRoute()
 
-const selectedOption = ref('')
-
-const selectOption = (option) => {
-  selectedOption.value = option
-}
-
-// Emit events for parent component
-const emit = defineEmits(['verify'])
-
-const handleVerification = () => {
-  if (selectedOption.value) {
-    emit('verify', selectedOption.value)
-  }
-}
+const verificationFor = computed(() => route.query.for as string)
 </script>
 
 <template>
@@ -36,8 +24,12 @@ const handleVerification = () => {
     <div class="verification-options">
       <button
         class="verification-option"
-        :class="{ active: selectedOption === 'email' }"
-        @click="router.push({ name: 'email-verification' })"
+        @click="
+          router.push({
+            name: 'verification-form',
+            query: { operation: verificationFor, type: 'email' },
+          })
+        "
       >
         <div class="option-icon">
           <el-icon :size="20" color="#666">
@@ -49,8 +41,12 @@ const handleVerification = () => {
 
       <button
         class="verification-option"
-        :class="{ active: selectedOption === 'mobile' }"
-        @click="router.push({ name: 'phone-verification' })"
+        @click="
+          router.push({
+            name: 'verification-form',
+            query: { operation: verificationFor, type: 'mobile' },
+          })
+        "
       >
         <div class="option-icon">
           <el-icon :size="20" color="#666">

@@ -34,7 +34,7 @@ const orders = orderStore.getRecentOrders
             </div>
           </template>
           <div class="profile-content">
-            <p class="user-name">{{ user!.fullName }}</p>
+            <p class="user-name">{{ user?.fullName || '' }}</p>
             <p class="user-email">{{ hideEmail(user!.email) }}</p>
             <div class="preferences">
               <el-checkbox v-model="user!.receiveMarketingSMS" disabled>
