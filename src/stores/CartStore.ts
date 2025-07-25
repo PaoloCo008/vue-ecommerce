@@ -136,13 +136,15 @@ export const useCartStore = defineStore('cart', {
       )
     },
 
-    removeItemFromUserCart(userId: string, productId: string) {
+    removeItemFromUserCart(userId: string, itemId: string) {
       const userCart = this.getCartByUserId(userId)
 
-      const existingItem = userCart?.items.find((cartItem) => cartItem.productId === productId)
+      const existingItem = userCart?.items.find((cartItem) => cartItem._id === itemId)
+
+      console.log(userCart)
 
       if (existingItem) {
-        userCart.items = userCart?.items.filter((item) => item.productId !== productId)
+        userCart.items = userCart?.items.filter((item) => item._id !== itemId)
       }
     },
 

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import ProfileContentLayout from '@/layouts/ProfileContentLayout.vue'
-import { computed, provide } from 'vue'
+import { computed } from 'vue'
 import CardAddModal from '../cards/CardAddModal.vue'
 import { useUserStore } from '@/stores/UserStore'
 import { useAuthStore } from '@/stores/AuthStore'
