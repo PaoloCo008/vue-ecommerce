@@ -96,7 +96,7 @@ export const useUserStore = defineStore('user', {
       const user = this.getUserById(userId)
 
       if (user) {
-        user.paymentMethods = user.paymentMethods.filter((method) => method._id === cardId)
+        user.paymentMethods = user.paymentMethods.filter((method) => method._id !== cardId)
       }
     },
 

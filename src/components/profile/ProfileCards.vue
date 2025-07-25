@@ -30,15 +30,8 @@ const digitalWallets = computed(() =>
 )
 
 // Methods
-const deleteCard = (cardId, cardType) => {
-  if (cardType === 'credit') {
-    creditCards.value = creditCards.value.filter((card) => card.id !== cardId)
-  } else {
-    digitalWallets.value = digitalWallets.value.filter((wallet) => wallet.id !== cardId)
-  }
-
-  // Simulate Element Plus message
-  console.log(`Card ${cardId} deleted successfully`)
+const deleteCard = (cardId: string) => {
+  userStore.deleteCardFromUser(authStore.user as string, cardId)
 }
 
 const addCreditCard = () => {
@@ -87,7 +80,7 @@ const addDigitalWallet = () => {
                 type="text"
                 size="small"
                 class="delete-button"
-                @click="deleteCard(scope.row.id, 'credit')"
+                @click="deleteCard(scope.row.id)"
               >
                 Delete
               </el-button>
