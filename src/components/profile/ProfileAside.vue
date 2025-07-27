@@ -15,7 +15,7 @@
         <span>Manage My Account</span>
       </el-menu-item>
 
-      <el-menu-item :index="{ name: 'myprofile' }" class="sub-menu">
+      <el-menu-item :index="{ name: 'my-profile' }" class="sub-menu">
         <span>My Profile</span>
       </el-menu-item>
 
@@ -23,7 +23,7 @@
         <span>Address Book</span>
       </el-menu-item>
 
-      <el-menu-item :index="{ name: 'paymentoptions' }" class="sub-menu">
+      <el-menu-item :index="{ name: 'payment-options' }" class="sub-menu">
         <span>My Payment Options</span>
       </el-menu-item>
 

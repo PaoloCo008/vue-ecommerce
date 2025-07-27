@@ -3,35 +3,62 @@ import AppAddressTag from '@/components/app/AppAddressTag.vue'
 import AppDrawer from '@/components/app/AppDrawer.vue'
 import AppModal from '@/components/app/AppModal.vue'
 import AddressForm from '@/components/address/AddressForm.vue'
-import { computed, ref } from 'vue'
+import { ref } from 'vue'
 import AddressShippingSelect from '@/components/address/AddressShippingSelect.vue'
 import CardPaymentMethod from '@/components/cards/CardPaymentMethod.vue'
 
 import { useUserStore } from '@/stores/UserStore'
 import { useAuthStore } from '@/stores/AuthStore'
-import { useCartStore } from '@/stores/CartStore'
 import { formatPrice } from '@/lib/helpers'
 import { useOrderStore } from '@/stores/OrderStore'
 import { useRoute } from 'vue-router'
-import { ElMessageBox } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
+import type { PaymentMethod, PaymentMethodDisplay } from '@/lib/types/globals'
+import GCashPaymentModal from '@/components/GCashPaymentModal.vue'
 
 const userStore = useUserStore()
 const authStore = useAuthStore()
 const orderStore = useOrderStore()
 const route = useRoute()
 
-const addresses = userStore.getUserAddressesById(authStore.user as string)
-
-const address = ref(userStore.getUserDefaultShippingAddressById(authStore.user as string))
-
 const orderId = orderStore.decodeOrderId(route.params.pendingOrderId as string)
+const pendingOrder = orderStore.getPendingOrderById(orderId as string)
 
+const addresses = userStore.getUserAddressesById(authStore.user as string)
 const products = ref(orderStore.getSelectedItemsByPendingOrderId(orderId as string))
 
-const pendingOrder = orderStore.getPendingOrderById(orderId as string)
+const address = ref(
+  userStore.getUserAddressByAddressId(
+    authStore.user as string,
+    pendingOrder?.shippingAddress as string,
+  ) || userStore.getUserDefaultShippingAddressById(authStore.user as string),
+)
+
+const availablePaymentMethods = ref(pendingOrder?.availablePaymentMethods || [])
+const paymentMethod = ref(pendingOrder?.selectedPaymentMethodId || '')
+
+function updatePaymentMethodSelection(methodId: string) {
+  paymentMethod.value = methodId
+  orderStore.updatePendingOrder(orderId as string, {
+    selectedPaymentMethodId: methodId,
+  })
+}
+
+function handlePaymentMethodSelected(methodData: PaymentMethodDisplay, closeModal: () => void) {
+  orderStore.updatePendingOrderPaymentMethods(orderId as string, methodData)
+
+  const updatedOrder = orderStore.getPendingOrderById(orderId as string)
+  if (updatedOrder) {
+    availablePaymentMethods.value = updatedOrder.availablePaymentMethods || []
+    paymentMethod.value = updatedOrder.selectedPaymentMethodId || ''
+  }
+
+  closeModal()
+}
 
 function handleSelectedAddress(addressId: string, closeDrawer: () => void) {
   address.value = userStore.getUserAddressByAddressId(authStore.user as string, addressId)
+  orderStore.updatePendingOrder(orderId as string, { shippingAddress: addressId })
   closeDrawer()
 }
 
@@ -41,25 +68,63 @@ function handleNewAddress(closeModal: () => void, openDrawer: () => void) {
 }
 
 const deliveryOption = ref('standard')
-const paymentMethod = ref('gcash')
+const showGCashModal = ref(false)
+
+function handlePlaceOrder() {
+  const selectedPaymentMethodData = availablePaymentMethods.value.find(
+    (method) => method.id === paymentMethod.value,
+  )
+
+  let actualPaymentMethod: PaymentMethod | null = null
+
+  if (selectedPaymentMethodData?.paymentMethodData) {
+    // If it's a saved payment method (credit card, etc.)
+    actualPaymentMethod = selectedPaymentMethodData?.paymentMethodData
+    completeOrderWithPaymentMethod(actualPaymentMethod)
+  } else {
+    // If it's a default method (COD, GCash), handle accordingly
+    if (selectedPaymentMethodData?.id === 'cash_on_delivery') {
+      actualPaymentMethod = {
+        type: 'cash_on_delivery',
+        _id: crypto.randomUUID(),
+      } as PaymentMethod
+      completeOrderWithPaymentMethod(actualPaymentMethod)
+    } else if (selectedPaymentMethodData?.id === 'gcash') {
+      showGCashModal.value = true
+      return
+    }
+  }
+}
+
+// Helper function to complete the order
+function completeOrderWithPaymentMethod(paymentMethod: PaymentMethod) {
+  orderStore.completePendingOrder(orderId as string, {
+    paymentMethod: paymentMethod,
+  })
+}
+
+// Handle GCash modal confirmation
+function handleGCashConfirm(paymentMethod: PaymentMethod) {
+  completeOrderWithPaymentMethod(paymentMethod)
+}
+
+// Handle GCash modal cancellation
+function handleGCashCancel() {
+  // User cancelled GCash setup, just close modal
+  // Don't complete the order
+}
 
 function handleModalOpen(closeDrawer: () => void, openModal: () => void) {
   closeDrawer()
   openModal()
 }
 
-function handlePlaceOrder() {
-  orderStore.completePendingOrder(orderId as string)
-}
-
 const handleClose = (done: () => void) => {
-  ElMessageBox.confirm('Are you sure you want to cancel without saving what you selected?')
-    .then(() => {
+  ElMessageBox.confirm('Are you sure you want to cancel without saving what you selected?').then(
+    () => {
       done()
-    })
-    .catch(() => {
-      // catch error
-    })
+    },
+  )
 }
 
 const dialogStyle = {
@@ -110,6 +175,7 @@ const dialogStyle = {
                   </AppModal>
 
                   <AddressShippingSelect
+                    :selectedAddressId="address?._id"
                     :addresses
                     @save="
                       (addressId) => handleSelectedAddress(addressId, drawerProps.handleCloseDrawer)
@@ -138,7 +204,6 @@ const dialogStyle = {
         <div class="section">
           <div class="package-header">
             <h4>Package 1 of 1</h4>
-            <!-- <div class="shipped-by">Shipped by <strong>homesalesph2019</strong></div> -->
           </div>
 
           <!-- Delivery Option -->
@@ -168,7 +233,6 @@ const dialogStyle = {
               </div>
               <div class="product-meta">
                 <div class="current-price">{{ formatPrice(product.price) }}</div>
-
                 <span>Qty: {{ product.quantity }}</span>
               </div>
             </div>
@@ -182,94 +246,116 @@ const dialogStyle = {
         <div class="section">
           <div class="section-header">
             <h3>Select payment method</h3>
-            <AppDrawer header="Select Payment Method">
+            <AppDrawer header="Select Payment Method" destroy>
               <template #trigger="props">
                 <el-button type="text" class="view-all-btn" @click="props.handleOpenDrawer"
                   >View all methods ></el-button
                 >
               </template>
-              <CardPaymentMethod />
+
+              <template #default="props">
+                <CardPaymentMethod
+                  @method-selected="
+                    (method: PaymentMethodDisplay) =>
+                      handlePaymentMethodSelected(method, props.handleCloseDrawer)
+                  "
+                  @card-added="
+                    (method: PaymentMethodDisplay) =>
+                      handlePaymentMethodSelected(method, props.handleCloseDrawer)
+                  "
+                />
+              </template>
             </AppDrawer>
           </div>
 
           <div class="payment-options">
-            <div class="payment-card selected">
+            <div
+              v-for="method in availablePaymentMethods"
+              :key="method.id"
+              class="payment-card"
+              :class="{ selected: paymentMethod === method.id }"
+              @click="updatePaymentMethodSelection(method.id)"
+            >
               <div class="payment-method">
-                <el-radio v-model="paymentMethod" label="gcash" size="large">
+                <el-radio
+                  :model-value="paymentMethod"
+                  :label="method.id"
+                  size="large"
+                  @change="updatePaymentMethodSelection(method.id)"
+                >
                   <div class="payment-info">
-                    <div class="payment-icon gcash-icon">G</div>
+                    <div class="payment-img-container">
+                      <img :src="method.src" :alt="method.label" class="payment-img" />
+                    </div>
                     <div class="payment-details">
-                      <div class="payment-number">63-9****1507</div>
-                      <div class="payment-type">GCash e-Wallet</div>
+                      <div class="payment-number">{{ method.number ?? method.label }}</div>
+                      <div class="payment-type">{{ method.type }}</div>
                     </div>
                   </div>
                 </el-radio>
-                <div class="payment-checkmark">✓</div>
-              </div>
-            </div>
-
-            <div class="payment-card">
-              <div class="payment-method">
-                <el-radio v-model="paymentMethod" label="visa" size="large">
-                  <div class="payment-info">
-                    <div class="payment-icon visa-icon">VISA</div>
-                    <div class="payment-details">
-                      <div class="payment-number">VISA ***********1225</div>
-                      <div class="payment-type">Credit/Debit Card</div>
-                    </div>
-                  </div>
-                </el-radio>
+                <div v-if="paymentMethod === method.id" class="payment-checkmark">✓</div>
               </div>
             </div>
           </div>
         </div>
-
-        <!-- Voucher -->
-        <!-- <div class="section">
-          <h3>Voucher</h3>
-          <div class="voucher-input">
-            <el-input v-model="voucherCode" placeholder="Enter Voucher Code" size="large" />
-            <el-button type="primary" class="apply-btn">APPLY</el-button>
-          </div>
-        </div> -->
-
-        <!-- Invoice and Contact -->
-        <!-- <div class="section">
-          <div class="section-header">
-            <h3>Invoice and Contact Info</h3>
-            <el-button type="text" class="edit-btn">Edit</el-button>
-          </div>
-        </div> -->
 
         <!-- Order Summary -->
         <div class="section">
           <h3>Order Summary</h3>
           <div class="summary-item">
             <span>Subtotal ({{ products?.length }} Items)</span>
-            <span>{{ formatPrice(pendingOrder!.pricing.subtotal) }}</span>
+            <span>{{ formatPrice(pendingOrder?.pricing.subtotal as number) }}</span>
           </div>
           <div class="summary-item">
             <span>Shipping Fee</span>
-            <span>{{ formatPrice(pendingOrder!.pricing.shipping) }}</span>
+            <span>{{ formatPrice(pendingOrder?.pricing.shipping as number) }}</span>
           </div>
 
           <div class="summary-divider"></div>
           <div class="summary-total">
             <span>Total</span>
-            <span class="total-amount">{{ formatPrice(pendingOrder!.pricing.total) }}</span>
+            <span class="total-amount">{{
+              formatPrice(pendingOrder?.pricing.total as number)
+            }}</span>
           </div>
         </div>
 
         <!-- Place Order Button -->
-        <el-button type="primary" size="large" class="place-order-btn" @click="handlePlaceOrder"
-          >PLACE ORDER NOW</el-button
+        <el-button
+          type="primary"
+          size="large"
+          class="place-order-btn"
+          @click="handlePlaceOrder"
+          :disabled="!paymentMethod || !address"
+        >
+          PLACE ORDER NOW</el-button
         >
       </div>
+
+      <GCashPaymentModal
+        v-model="showGCashModal"
+        :user-id="authStore.user"
+        @confirm="handleGCashConfirm"
+        @cancel="handleGCashCancel"
+      />
     </div>
   </div>
 </template>
 
 <style scoped>
+.payment-img-container {
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-content: center;
+}
+
+.payment-img {
+  display: block;
+  width: 32px;
+  height: 32px;
+}
+
 .shipping {
   width: 100%;
   height: 100%;
@@ -633,6 +719,13 @@ const dialogStyle = {
 .place-order-btn:hover {
   background: #ff5722;
   border-color: #ff5722;
+}
+
+.place-order-btn:disabled,
+.place-order-btn:hover:disabled {
+  background: #c0c4cc;
+  border-color: #c0c4cc;
+  cursor: not-allowed;
 }
 
 @media screen and (min-width: 400px) {

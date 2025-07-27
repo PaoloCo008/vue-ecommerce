@@ -2,7 +2,11 @@
 import { computed, nextTick, onMounted, onUnmounted, ref, watchEffect } from 'vue'
 
 const drawer = ref<boolean>(false)
-const props = defineProps<{ header?: string; handleClose?: (done: () => void) => void }>()
+const props = defineProps<{
+  header?: string
+  handleClose?: (done: () => void) => void
+  destroy?: boolean
+}>()
 
 function handleCloseDrawer() {
   drawer.value = false
@@ -47,7 +51,12 @@ const drawerSize = computed(() => {
 <template>
   <slot name="trigger" :handleOpenDrawer></slot>
   <Teleport to="body">
-    <el-drawer v-model="drawer" :size="drawerSize" :before-close="handleClose" destroy-on-close>
+    <el-drawer
+      v-model="drawer"
+      :size="drawerSize"
+      :before-close="handleClose"
+      :destroy-on-close="destroy"
+    >
       <template #header v-if="props.header">
         <h3>{{ props.header }}</h3>
       </template>

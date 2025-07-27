@@ -36,7 +36,7 @@ const selectedAddressId = defineModel()
             <el-button
               link
               type="primary"
-              @click="router.push({ name: 'addressedit', params: { id: address._id } })"
+              @click="router.push({ name: 'address-edit', params: { id: address._id } })"
               class="edit-button"
             >
               EDIT

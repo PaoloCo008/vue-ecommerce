@@ -1,41 +1,136 @@
 <script setup lang="ts">
-import { ref, defineEmits } from 'vue'
-import { ArrowRight } from '@element-plus/icons-vue'
+import { ref, defineEmits, computed } from 'vue'
+import { ArrowRight, Plus } from '@element-plus/icons-vue'
 import CODConfirm from '../CODConfirm.vue'
 import CardAddForm from './CardAddForm.vue'
+import type { CreditCard, PaymentMethodDisplay } from '@/lib/types/globals'
+import { getCardImage } from '@/lib/helpers'
+import { useUserStore } from '@/stores/UserStore'
+import { useAuthStore } from '@/stores/AuthStore'
+import CardSelect from './CardSelect.vue'
 
 // Emits
-const emit = defineEmits(['methodSelected'])
+const emit = defineEmits(['methodSelected', 'cardAdded'])
+
+const userStore = useUserStore()
+const authStore = useAuthStore()
 
 // Reactive data
 const selectedMethod = ref('')
+const showCardForm = ref(false)
+
+// Get user's credit cards
+const userCreditCards = computed(() => {
+  const user = userStore.getUserById(authStore.user as string)
+  return (
+    (user?.paymentMethods.filter((method) => method.type === 'credit_card') as CreditCard[]) || []
+  )
+})
+
+// Show card form automatically if no cards exist
+const shouldShowCardForm = computed(() => {
+  return (
+    showCardForm.value || (selectedMethod.value === 'card' && userCreditCards.value.length === 0)
+  )
+})
+
+// Show card selection if cards exist and not showing form
+const shouldShowCardSelect = computed(() => {
+  return selectedMethod.value === 'card' && userCreditCards.value.length > 0 && !showCardForm.value
+})
 
 // Methods
-const selectMethod = (method) => {
+const selectMethod = (method: string) => {
   selectedMethod.value = method
-  emit('methodSelected', method)
+
+  // Define method data based on selection
+  let methodData = {}
+
+  switch (method) {
+    case 'cod':
+      methodData = {
+        id: 'cash_on_delivery',
+        label: 'Cash on Delivery',
+        type: 'Cash on Delivery',
+        src: 'https://img.lazcdn.com/g/tps/tfs/TB1ZP8kM1T2gK0jSZFvXXXnFXXa-96-96.png_2200x2200q75.png_.webp',
+        number: null,
+      }
+      break
+    case 'gcash':
+      methodData = {
+        id: 'gcash',
+        label: 'GCash e-Wallet',
+        type: 'GCash e-Wallet',
+        src: '/gcash-img.webp',
+        number: null,
+      }
+      break
+    case 'card':
+      // For card, we'll handle it in the computed properties
+      return
+  }
+
+  // Emit the method selection and close drawer
+  emit('methodSelected', methodData)
+}
+
+// Handle when a card is successfully added
+const handleCardAdded = (cardData: CreditCard) => {
+  const cardMethod = {
+    id: `card_${cardData._id}`,
+    label: `${cardData.provider.toUpperCase()} ***********${cardData.lastFour}`,
+    type: 'Credit/Debit Card',
+    src: getCardImage(cardData.provider),
+    number: `${cardData.provider.toUpperCase()} ***********${cardData.lastFour}`,
+    paymentMethodData: cardData,
+  }
+
+  // Reset form state
+  showCardForm.value = false
+  selectedMethod.value = ''
+
+  emit('cardAdded', cardMethod)
+}
+
+// Handle card selection from CreditCardSelect
+const handleCardSelected = (paymentMethodDisplay: PaymentMethodDisplay) => {
+  selectedMethod.value = ''
+  emit('methodSelected', paymentMethodDisplay)
+}
+
+// Handle going back from card form or COD confirm
+const handleGoBack = () => {
+  if (showCardForm.value) {
+    showCardForm.value = false
+  } else {
+    selectedMethod.value = ''
+  }
+}
+
+// Show the add card form
+const showAddCardForm = () => {
+  showCardForm.value = true
+}
+
+// Handle cancel from card selection
+const handleCardSelectCancel = () => {
+  selectedMethod.value = ''
 }
 </script>
 
 <template>
-  <div class="payment-methods-container" v-if="selectedMethod === ''">
+  <div class="payment-methods-container" v-if="selectedMethod === '' || selectedMethod === 'gcash'">
     <!-- Recommended Method -->
     <div class="section">
       <h3 class="section-title">Recommended method(s)</h3>
 
-      <div
-        class="payment-method"
-        :class="{ selected: selectedMethod === 'cod' }"
-        @click="selectMethod('cod')"
-      >
+      <div class="payment-method" @click="selectedMethod = 'cod'">
         <div class="method-icon">
-          <div class="cod-icon">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-              <rect x="2" y="6" width="20" height="12" rx="2" fill="#4A90E2" />
-              <rect x="4" y="8" width="16" height="2" fill="white" />
-              <rect x="4" y="12" width="8" height="2" fill="white" />
-            </svg>
-          </div>
+          <img
+            src="https://img.lazcdn.com/g/tps/tfs/TB1ZP8kM1T2gK0jSZFvXXXnFXXa-96-96.png_2200x2200q75.png_.webp"
+            alt="cod-icon"
+            class="cod-img"
+          />
         </div>
 
         <div class="method-content">
@@ -59,24 +154,10 @@ const selectMethod = (method) => {
       <div
         class="payment-method"
         :class="{ selected: selectedMethod === 'gcash' }"
-        @click="selectMethod('gcash')"
+        @click="selectedMethod = 'gcash'"
       >
         <div class="method-icon">
-          <div class="gcash-icon">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-              <circle cx="12" cy="12" r="10" fill="#007bff" />
-              <text
-                x="12"
-                y="16"
-                text-anchor="middle"
-                fill="white"
-                font-size="8"
-                font-weight="bold"
-              >
-                G
-              </text>
-            </svg>
-          </div>
+          <img src="/gcash-img.webp" alt="gcash-img" width="24px" height="24px" />
         </div>
 
         <div class="method-content">
@@ -92,11 +173,7 @@ const selectMethod = (method) => {
       </div>
 
       <!-- Credit/Debit Card -->
-      <div
-        class="payment-method"
-        :class="{ selected: selectedMethod === 'card' }"
-        @click="selectMethod('card')"
-      >
+      <div class="payment-method" @click="selectMethod('card')">
         <div class="method-icon">
           <div class="card-icon">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
@@ -108,24 +185,66 @@ const selectMethod = (method) => {
 
         <div class="method-content">
           <div class="method-name">Credit/Debit Card</div>
-          <div class="method-description">Credit/Debit Card</div>
+          <div class="method-description">
+            {{
+              userCreditCards.length > 0
+                ? `${userCreditCards.length} saved card${userCreditCards.length > 1 ? 's' : ''}`
+                : 'Credit/Debit Card'
+            }}
+          </div>
         </div>
 
         <div class="method-extras">
-          <div class="card-types">
-            <div class="card-type amex"></div>
-            <div class="card-type mastercard"></div>
-            <div class="card-type jcb"></div>
-          </div>
           <el-icon :size="16" color="#c0c4cc">
             <ArrowRight />
           </el-icon>
         </div>
       </div>
+
+      <el-button v-if="selectedMethod === 'gcash'" @click="() => selectMethod('gcash')">
+        Confirm
+      </el-button>
     </div>
   </div>
-  <CODConfirm v-else-if="selectedMethod === 'cod'" />
-  <CardAddForm v-else-if="selectedMethod === 'card'" opened-from="checkout" />
+
+  <!-- COD Confirmation -->
+  <CODConfirm
+    v-else-if="selectedMethod === 'cod'"
+    @go-back="handleGoBack"
+    @confirmed="() => selectMethod('cod')"
+  />
+
+  <!-- Credit Card Selection (when user has saved cards) -->
+  <div v-else-if="shouldShowCardSelect" class="credit-card-section">
+    <!-- Header with Add Card button -->
+    <div class="card-section-header">
+      <h3 class="section-title">Select a card</h3>
+      <el-button
+        type="primary"
+        size="small"
+        :icon="Plus"
+        @click="showAddCardForm"
+        class="add-card-btn"
+      >
+        Add Card
+      </el-button>
+    </div>
+
+    <!-- Credit Card Selection Component -->
+    <CardSelect
+      :credit-cards="userCreditCards"
+      @save="handleCardSelected"
+      @cancel="handleCardSelectCancel"
+    />
+  </div>
+
+  <!-- Card Add Form (when no cards or user clicks add card) -->
+  <CardAddForm
+    v-else-if="shouldShowCardForm"
+    opened-from="checkout"
+    @go-back="handleGoBack"
+    @card-added="handleCardAdded"
+  />
 </template>
 
 <style scoped>
@@ -196,8 +315,7 @@ const selectMethod = (method) => {
   background: #f0f2f5;
 }
 
-.cod-icon,
-.gcash-icon,
+.cod-img,
 .card-icon {
   width: 24px;
   height: 24px;
@@ -232,16 +350,6 @@ const selectMethod = (method) => {
   line-height: 1.4;
 }
 
-.discount-badge {
-  background: #f56c6c;
-  color: white;
-  font-size: 10px;
-  font-weight: 600;
-  padding: 2px 6px;
-  border-radius: 4px;
-  white-space: nowrap;
-}
-
 .method-selection {
   flex-shrink: 0;
 }
@@ -259,35 +367,25 @@ const selectMethod = (method) => {
   flex-shrink: 0;
 }
 
-.card-types {
+/* Credit Card Section Styles */
+.credit-card-section {
+  padding: 0;
+}
+
+.card-section-header {
   display: flex;
-  gap: 4px;
+  justify-content: space-between;
   align-items: center;
+  padding: 0 16px 12px 16px;
+  border-bottom: 1px solid #ebeef5;
+  margin-bottom: 0;
 }
 
-.card-type {
-  width: 20px;
-  height: 12px;
-  border-radius: 2px;
-  background: #ddd;
-}
-
-.card-type.amex {
-  background: #2e77bb;
-}
-
-.card-type.mastercard {
-  background: #eb001b;
-}
-
-.card-type.jcb {
-  background: #0e4c96;
-}
-
-.wallet-amount {
-  font-size: 14px;
+.add-card-btn {
+  height: 32px;
+  font-size: 12px;
   font-weight: 600;
-  color: #303133;
+  padding: 0 12px;
 }
 
 /* Small Mobile (320px+) */
@@ -308,6 +406,12 @@ const selectMethod = (method) => {
 
   .method-description {
     font-size: 13px;
+  }
+
+  .add-card-btn {
+    height: 34px;
+    font-size: 13px;
+    padding: 0 14px;
   }
 }
 
@@ -346,13 +450,18 @@ const selectMethod = (method) => {
     font-size: 13px;
   }
 
-  .discount-badge {
-    font-size: 11px;
-    padding: 3px 8px;
-  }
-
   .method-extras {
     gap: 16px;
+  }
+
+  .card-section-header {
+    padding: 0 20px 16px 20px;
+  }
+
+  .add-card-btn {
+    height: 36px;
+    font-size: 13px;
+    padding: 0 16px;
   }
 }
 
@@ -391,22 +500,14 @@ const selectMethod = (method) => {
     font-size: 14px;
   }
 
-  .discount-badge {
-    font-size: 12px;
-    padding: 4px 10px;
+  .card-section-header {
+    padding: 0 24px 20px 24px;
   }
 
-  .card-types {
-    gap: 6px;
-  }
-
-  .card-type {
-    width: 24px;
-    height: 16px;
-  }
-
-  .wallet-amount {
-    font-size: 15px;
+  .add-card-btn {
+    height: 38px;
+    font-size: 14px;
+    padding: 0 18px;
   }
 }
 
@@ -445,13 +546,14 @@ const selectMethod = (method) => {
     font-size: 15px;
   }
 
-  .discount-badge {
-    font-size: 12px;
-    padding: 4px 12px;
+  .card-section-header {
+    padding: 0 28px 24px 28px;
   }
 
-  .wallet-amount {
-    font-size: 16px;
+  .add-card-btn {
+    height: 40px;
+    font-size: 14px;
+    padding: 0 20px;
   }
 }
 </style>

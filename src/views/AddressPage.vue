@@ -24,7 +24,7 @@ const addresses = userStore.getUserAddressesById(authStore.user as string)
           <el-button
             link
             type="primary"
-            @click="router.push({ name: 'addresstypeedit', params: { type: 'shipping' } })"
+            @click="router.push({ name: 'address-type-edit', params: { type: 'shipping' } })"
             class="action-link"
           >
             Make default shipping address
@@ -33,7 +33,7 @@ const addresses = userStore.getUserAddressesById(authStore.user as string)
           <el-button
             link
             type="primary"
-            @click="router.push({ name: 'addresstypeedit', params: { type: 'billing' } })"
+            @click="router.push({ name: 'address-type-edit', params: { type: 'billing' } })"
             class="action-link"
           >
             Make default billing address
@@ -51,7 +51,7 @@ const addresses = userStore.getUserAddressesById(authStore.user as string)
         <el-button
           type="primary"
           class="add-address-button"
-          @click="router.push({ name: 'addresscreate' })"
+          @click="router.push({ name: 'address-create' })"
         >
           + ADD NEW ADDRESS
         </el-button>

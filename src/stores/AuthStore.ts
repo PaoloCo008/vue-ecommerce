@@ -6,7 +6,6 @@ import type { AuthMode, AuthStore } from '@/lib/types/stores'
 import { defineStore } from 'pinia'
 import { useUserStore } from './UserStore'
 import type { NewAddressForm } from '@/lib/types/forms'
-import { useCartStore } from './CartStore'
 
 const loginInitialState = {
   email: '',
@@ -44,7 +43,6 @@ export const useAuthStore = defineStore('auth', {
     getFormDataByProperty: (state) => (form: AuthMode, property: string) => {
       switch (form) {
         case 'login':
-          console.log(state.loginData)
           return state.loginData[property]
         case 'signup':
           return state.signupData[property]
@@ -138,8 +136,7 @@ export const useAuthStore = defineStore('auth', {
 
     registerUser(formAddressData?: NewAddressForm) {
       const userStore = useUserStore()
-      const cartStore = useCartStore()
-
+      
       const newUser: User = {
         ...this.signupData,
         _id: crypto.randomUUID(),

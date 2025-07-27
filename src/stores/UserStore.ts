@@ -36,9 +36,14 @@ export const useUserStore = defineStore('user', {
       const user = state.users.find((user) => user._id === userId)
       return user ? user.addresses.find((address) => address.isDefaultShipping) : null
     },
-    getUserPaymentMethods: (state) => (userId: string, type: PaymentMethod['type']) => {
+    getUserPaymentMethods: (state) => (userId: string, type?: PaymentMethod['type']) => {
       const user = state.users.find((user) => user._id === userId)
-      return user ? user.paymentMethods.filter((method) => method?.type === type) : null
+
+      if (type) {
+        return user ? user.paymentMethods.filter((method) => method?.type === type) : null
+      }
+
+      return user ? user.paymentMethods : null
     },
   },
   actions: {
@@ -67,14 +72,6 @@ export const useUserStore = defineStore('user', {
       }
     },
 
-    addCardByUserID(userId: string, card: CreditCard) {
-      const user = this.getUserById(userId)
-
-      if (user) {
-        user.paymentMethods.push(card)
-      }
-    },
-
     deleteUserAddressById(userId: string, addressId: string) {
       const user = this.getUserById(userId)
       if (user) {
@@ -89,6 +86,68 @@ export const useUserStore = defineStore('user', {
         if (address) {
           Object.assign(address, updatedAddress)
         }
+      }
+    },
+
+    async addPaymentMethod(userId: string, paymentMethod: PaymentMethod) {
+      try {
+        const user = this.users.find((u) => u._id === userId)
+        if (!user) {
+          throw new Error('User not found')
+        }
+
+        // Check if this payment method already exists (for GCash, check by account number)
+
+        const existingMethod = user.paymentMethods.find(
+          (pm) =>
+            pm.type === paymentMethod.type &&
+            pm.provider === paymentMethod.provider &&
+            (paymentMethod.accountNumber
+              ? pm.accountNumber === paymentMethod.accountNumber
+              : pm.lastFour === paymentMethod.lastFour),
+        )
+
+        if (existingMethod) {
+          console.log('im here')
+          throw new Error('This payment method is already saved')
+        }
+
+        // Add the new payment method
+        user.paymentMethods.push(paymentMethod)
+
+        return paymentMethod
+      } catch (error) {
+        console.error('Error adding payment method:', error)
+        throw error
+      }
+    },
+
+    addCardByUserID(userId: string, card: CreditCard) {
+      const user = this.getUserById(userId)
+
+      if (user) {
+        user.paymentMethods.push(card)
+      }
+    },
+
+    removePaymentMethod(userId: string, paymentMethodId: string) {
+      try {
+        const user = this.users.find((u) => u._id === userId)
+        if (!user || !user.paymentMethods) {
+          throw new Error('User or payment methods not found')
+        }
+
+        const index = user.paymentMethods.findIndex((pm) => pm._id === paymentMethodId)
+        if (index === -1) {
+          throw new Error('Payment method not found')
+        }
+
+        user.paymentMethods.splice(index, 1)
+
+        return true
+      } catch (error) {
+        console.error('Error removing payment method:', error)
+        throw error
       }
     },
 

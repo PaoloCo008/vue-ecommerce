@@ -4,7 +4,7 @@ import type { Order } from '@/lib/types/globals'
 import { useAuthStore } from '@/stores/AuthStore'
 import { useOrderStore } from '@/stores/OrderStore'
 import { useUserStore } from '@/stores/UserStore'
-import { ref, computed, onMounted } from 'vue'
+import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
 const route = useRoute()
@@ -22,39 +22,86 @@ const address = userStore.getUserAddressByAddressId(
   order.value?.shippingAddress as string,
 )
 
-// Main steps - keep Order Placed as first step
-const steps = ref([
-  {
-    id: 1,
-    title: 'Order Placed',
-    description: '',
-    icon: 'Document',
-    field: 'placedAt',
-  },
-  {
-    id: 2,
-    title: 'Order Paid',
-    description: '',
-    icon: 'CreditCard',
-    field: 'paidAt',
-  },
-  {
-    id: 3,
-    title: 'Order Shipped Out',
-    description: '',
-    icon: 'Truck',
-    field: 'shippedAt',
-  },
-  {
-    id: 4,
-    title: 'Order Received',
-    description: '',
-    icon: 'Box',
-    field: 'receivedAt',
-  },
-])
+// Check if order is Cash on Delivery
+const isCOD = computed(() => {
+  return order.value?.paymentMethod?.type === 'cash_on_delivery'
+})
 
-// Enhanced tracking steps with more detail and action buttons
+// Main steps - different for COD vs other payment methods
+const steps = computed(() => {
+  if (!order.value) return []
+
+  const baseSteps = isCOD.value
+    ? [
+        {
+          id: 1,
+          title: 'Order Placed',
+          description: '',
+          field: 'placedAt',
+        },
+        {
+          id: 2,
+          title: 'Order Shipped Out',
+          description: '',
+          field: 'shippedAt',
+        },
+        {
+          id: 3,
+          title: 'Order Received & Paid',
+          description: '',
+          field: 'receivedAt',
+        },
+      ]
+    : [
+        {
+          id: 1,
+          title: 'Order Placed',
+          description: '',
+          field: 'placedAt',
+        },
+        {
+          id: 2,
+          title: 'Order Paid',
+          description: '',
+          field: 'paidAt',
+        },
+        {
+          id: 3,
+          title: 'Order Shipped Out',
+          description: '',
+          field: 'shippedAt',
+        },
+        {
+          id: 4,
+          title: 'Order Received',
+          description: '',
+          field: 'receivedAt',
+        },
+      ]
+
+  // Update descriptions based on order data
+  return baseSteps.map((step) => {
+    if (step.field && order.value[step.field]) {
+      const date = order.value[step.field]
+      let description = formatDate(date)
+
+      // Add pricing info for paid step (non-COD only)
+      if (step.field === 'paidAt' && order.value.pricing && !isCOD.value) {
+        description = `${description} (${formatPrice(order.value.pricing.total)})`
+      }
+
+      // Add pricing info for received step (COD only)
+      if (step.field === 'receivedAt' && order.value.pricing && isCOD.value) {
+        description = `${description} (${formatPrice(order.value.pricing.total)} collected)`
+      }
+
+      return { ...step, description }
+    }
+    return step
+  })
+})
+
+// Enhanced tracking steps with COD logic
 const trackingSteps = computed(() => {
   if (!order.value) return []
 
@@ -62,12 +109,21 @@ const trackingSteps = computed(() => {
 
   // If delivered
   if (order.value.receivedAt) {
-    baseSteps.push({
-      title: 'Delivered',
-      description: `${formatDate(order.value.receivedAt)} - Parcel has been delivered successfully - View Proof of Delivery`,
-      status: 'success',
-      showButton: false,
-    })
+    if (isCOD.value) {
+      baseSteps.push({
+        title: 'Delivered & Payment Collected',
+        description: `${formatDate(order.value.receivedAt)} - Parcel has been delivered and payment collected successfully - View Proof of Delivery`,
+        status: 'success',
+        showButton: false,
+      })
+    } else {
+      baseSteps.push({
+        title: 'Delivered',
+        description: `${formatDate(order.value.receivedAt)} - Parcel has been delivered successfully - View Proof of Delivery`,
+        status: 'success',
+        showButton: false,
+      })
+    }
 
     baseSteps.push({
       title: 'Out for delivery',
@@ -92,15 +148,27 @@ const trackingSteps = computed(() => {
   }
   // If shipped but not delivered
   else if (order.value.shippedAt) {
-    baseSteps.push({
-      title: 'Out for delivery',
-      description: `${formatDate(order.value.shippedAt)} - Package is out for delivery to your address`,
-      status: 'process',
-      showButton: true,
-      buttonLabel: 'Mark as Received',
-      buttonAction: () => updateOrderStatus('receivedAt'),
-      buttonVariant: 'success',
-    })
+    if (isCOD.value) {
+      baseSteps.push({
+        title: 'Out for delivery',
+        description: `${formatDate(order.value.shippedAt)} - Package is out for delivery. Payment will be collected upon delivery`,
+        status: 'process',
+        showButton: true,
+        buttonLabel: 'Mark as Received & Paid',
+        buttonAction: () => updateOrderStatus('receivedAt'),
+        buttonVariant: 'success',
+      })
+    } else {
+      baseSteps.push({
+        title: 'Out for delivery',
+        description: `${formatDate(order.value.shippedAt)} - Package is out for delivery to your address`,
+        status: 'process',
+        showButton: true,
+        buttonLabel: 'Mark as Received',
+        buttonAction: () => updateOrderStatus('receivedAt'),
+        buttonVariant: 'success',
+      })
+    }
 
     baseSteps.push({
       title: 'Package departed facility',
@@ -116,8 +184,8 @@ const trackingSteps = computed(() => {
       showButton: false,
     })
   }
-  // If paid but not shipped
-  else if (order.value.paidAt) {
+  // If paid but not shipped (only for non-COD orders)
+  else if (order.value.paidAt && !isCOD.value) {
     baseSteps.push({
       title: 'Processing',
       description: `${formatDate(order.value.paidAt)} - Your order is being prepared for shipment`,
@@ -128,9 +196,21 @@ const trackingSteps = computed(() => {
       buttonVariant: 'primary',
     })
   }
+  // If placed but not shipped (for COD orders)
+  else if (order.value.placedAt && isCOD.value && !order.value.shippedAt) {
+    baseSteps.push({
+      title: 'Processing',
+      description: `${formatDate(order.value.placedAt)} - Your COD order is being prepared for shipment`,
+      status: 'process',
+      showButton: true,
+      buttonLabel: 'Ship Order',
+      buttonAction: () => updateOrderStatus('shippedAt'),
+      buttonVariant: 'primary',
+    })
+  }
 
-  // Always show initial steps
-  if (order.value.paidAt) {
+  // Show payment step only for non-COD orders
+  if (order.value.paidAt && !isCOD.value) {
     baseSteps.push({
       title: 'Payment confirmed',
       description: `${formatDate(order.value.paidAt)} - Payment has been confirmed and order is processing`,
@@ -139,44 +219,47 @@ const trackingSteps = computed(() => {
     })
   }
 
+  // Always show order placed
   if (order.value.placedAt) {
-    baseSteps.push({
-      title: 'Order placed',
-      description: `${formatDate(order.value.placedAt)} - Order has been placed successfully`,
-      status: 'finish',
-      showButton: false,
-    })
+    if (isCOD.value) {
+      baseSteps.push({
+        title: 'Order placed',
+        description: `${formatDate(order.value.placedAt)} - COD order has been placed successfully. Payment will be collected upon delivery`,
+        status: 'finish',
+        showButton: false,
+      })
+    } else {
+      baseSteps.push({
+        title: 'Order placed',
+        description: `${formatDate(order.value.placedAt)} - Order has been placed successfully`,
+        status: 'finish',
+        showButton: false,
+      })
+    }
   }
 
   return baseSteps
 })
 
-// Current step calculation with all 4 steps
+// Current step calculation with COD logic
 const currentStep = computed(() => {
   if (!order.value) return 0
 
-  if (order.value.status === 'received' || order.value.receivedAt) return 4
-  if (order.value.status === 'shipped' || order.value.shippedAt) return 3
-  if (order.value.status === 'paid' || order.value.paidAt) return 2
-  if (order.value.status === 'placed' || order.value.placedAt) return 1
+  if (isCOD.value) {
+    // COD has 3 steps: placed, shipped, received&paid
+    if (order.value.status === 'received' || order.value.receivedAt) return 3
+    if (order.value.status === 'shipped' || order.value.shippedAt) return 2
+    if (order.value.status === 'placed' || order.value.placedAt) return 1
+  } else {
+    // Regular orders have 4 steps: placed, paid, shipped, received
+    if (order.value.status === 'received' || order.value.receivedAt) return 4
+    if (order.value.status === 'shipped' || order.value.shippedAt) return 3
+    if (order.value.status === 'paid' || order.value.paidAt) return 2
+    if (order.value.status === 'placed' || order.value.placedAt) return 1
+  }
+
   return 0
 })
-
-const updateStepDescriptions = () => {
-  if (!order.value) return
-
-  steps.value.forEach((step) => {
-    if (step.field && order.value[step.field]) {
-      const date = order.value[step.field]
-      step.description = formatDate(date)
-
-      // Add pricing info for paid step
-      if (step.field === 'paidAt' && order.value.pricing) {
-        step.description = `${step.description} (${formatPrice(order.value.pricing.total)})`
-      }
-    }
-  })
-}
 
 const updateOrderStatus = async (field: string) => {
   if (!order.value) return
@@ -185,25 +268,24 @@ const updateOrderStatus = async (field: string) => {
     const updates: Partial<Order> = {}
     updates[field] = new Date()
 
-    // Update order status based on the field
+    // Update order status based on the field and payment method
     if (field === 'shippedAt') {
       updates.status = 'shipped'
     } else if (field === 'receivedAt') {
       updates.status = 'received'
+      // For COD orders, mark as paid when received
+      if (isCOD.value) {
+        updates.paidAt = new Date()
+      }
     }
 
     orderStore.updateOrder(order.value._id, updates)
-    updateStepDescriptions()
 
     console.log(`Order ${field} updated successfully`)
   } catch (error) {
     console.error(`Error updating order ${field}:`, error)
   }
 }
-
-onMounted(() => {
-  updateStepDescriptions()
-})
 </script>
 
 <template>
@@ -340,7 +422,15 @@ onMounted(() => {
         <div class="payment-method">
           <div class="price-row">
             <div class="price-label">Payment Method</div>
-            <div class="payment-method-value">[[ TBD ]]</div>
+            <div class="payment-method-value">
+              {{
+                isCOD
+                  ? 'Cash on Delivery'
+                  : order?.paymentMethod?.type === 'credit_card'
+                    ? 'Credit Card'
+                    : 'Mobile Wallet'
+              }}
+            </div>
           </div>
         </div>
       </div>
@@ -349,18 +439,24 @@ onMounted(() => {
 </template>
 
 <style scoped>
-.tracking-steps {
-  margin-top: 10px;
+/* Add COD specific styling */
+.payment-type {
+  color: #ff9800;
+  font-weight: 600;
+  font-size: 12px;
+  margin-top: 4px;
+  text-transform: uppercase;
 }
 
-.tracking-step {
-  margin-bottom: 0;
+/* All existing styles remain the same */
+.tracking-steps {
+  margin-top: 10px;
 }
 
 .step-wrapper {
   display: flex;
   align-items: flex-start;
-  gap: 15px;
+  gap: 0.75rem;
   padding-bottom: 20px;
 }
 
@@ -376,7 +472,7 @@ onMounted(() => {
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  border: 2px solid #ddd;
+  border: 2px solid #221d1d;
   background: white;
   transition: all 0.3s ease;
 }
@@ -409,23 +505,10 @@ onMounted(() => {
 .step-process .step-dot {
   background: #ff9800;
   border-color: #ff9800;
-  animation: pulse-orange 2s infinite;
 }
 
 .step-process .step-line {
   background: #ddd;
-}
-
-@keyframes pulse-orange {
-  0% {
-    box-shadow: 0 0 0 0 rgba(255, 152, 0, 0.4);
-  }
-  70% {
-    box-shadow: 0 0 0 6px rgba(255, 152, 0, 0);
-  }
-  100% {
-    box-shadow: 0 0 0 0 rgba(255, 152, 0, 0);
-  }
 }
 
 .step-content {
@@ -434,7 +517,7 @@ onMounted(() => {
 }
 
 .step-title {
-  font-size: 13px;
+  font-size: 0.75rem;
   font-weight: 600;
   color: #333;
   margin-bottom: 4px;
@@ -490,19 +573,20 @@ onMounted(() => {
   font-style: italic;
 }
 
-/* All your existing styles remain the same */
 .order-page {
   max-width: 800px;
-  margin: 0 auto;
+  margin: 1.5rem auto 0;
   padding: 20px;
   background: white;
 }
 
 .header {
   display: flex;
+  flex-direction: column;
   justify-content: space-between;
+  gap: 1rem;
   align-items: center;
-  margin-bottom: 30px;
+  margin-bottom: 1.25rem;
   padding-bottom: 20px;
 }
 
@@ -522,7 +606,7 @@ onMounted(() => {
 }
 
 .order-info {
-  text-align: right;
+  text-align: center;
   font-size: 14px;
 }
 
@@ -540,31 +624,31 @@ onMounted(() => {
 
 .progress-section {
   margin-bottom: 40px;
-  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-  padding: 40px;
+  background: #f8f9fa;
+  padding: 1.5rem;
   border-radius: 16px;
   border: 1px solid #dee2e6;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
 .desktop-steps {
-  display: block;
-}
-
-.mobile-steps {
   display: none;
 }
 
+.mobile-steps {
+  display: block;
+}
+
 .section-title {
-  font-size: 16px;
+  font-size: 1rem;
   font-weight: 600;
-  margin-bottom: 20px;
+  margin-bottom: 1rem;
   color: #333;
 }
 
 .delivery-info {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr;
   gap: 30px;
   margin-bottom: 30px;
 }
@@ -574,11 +658,11 @@ onMounted(() => {
 }
 
 .delivery-tracking {
-  grid-column: 2;
+  grid-column: 1;
 }
 
 .address-details {
-  font-size: 14px;
+  font-size: 0.75rem;
   line-height: 1.5;
   color: #666;
 }
@@ -588,9 +672,9 @@ onMounted(() => {
 }
 
 .express-info {
-  font-size: 12px;
+  font-size: 0.75rem;
   color: #999;
-  text-align: right;
+  text-align: left;
   margin-top: 10px;
 }
 
@@ -601,8 +685,8 @@ onMounted(() => {
 }
 
 .product-image {
-  width: 80px;
-  height: 80px;
+  width: 70px;
+  height: 70px;
   border-radius: 4px;
   object-fit: cover;
   flex-shrink: 0;
@@ -614,7 +698,7 @@ onMounted(() => {
 }
 
 .product-name {
-  font-size: 14px;
+  font-size: 0.75rem;
   color: #333;
   margin-bottom: 8px;
   line-height: 1.4;
@@ -674,20 +758,36 @@ onMounted(() => {
   color: #333;
 }
 
-/* Responsive Styles */
-@media (max-width: 1024px) {
+@media screen and (min-width: 750px) {
   .order-page {
-    padding: 15px;
+    margin: 0 1rem 0 0;
+  }
+
+  .header {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .order-status {
+    text-align: right;
   }
 
   .progress-section {
-    margin-bottom: 30px;
-    padding: 25px 20px;
+    padding: 40px;
   }
 
   .delivery-info {
-    grid-template-columns: 1fr;
-    gap: 20px;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .express-info {
+    margin-top: 15px;
+    text-align: right;
+  }
+
+  .address-details {
+    font-size: 0.875rem;
   }
 
   .delivery-address {
@@ -695,97 +795,21 @@ onMounted(() => {
   }
 
   .delivery-tracking {
-    grid-column: 1;
-  }
-
-  .express-info {
-    text-align: left;
+    grid-column: 2;
   }
 }
 
-@media (max-width: 768px) {
-  .order-page {
-    padding: 10px;
-  }
-
-  .header {
-    flex-direction: column;
-    gap: 15px;
-    text-align: center;
-  }
-
-  .order-info {
-    text-align: center;
+@media screen and (min-width: 1000px) {
+  .progress-section {
+    padding: 40px;
   }
 
   .desktop-steps {
-    display: none;
-  }
-
-  .mobile-steps {
     display: block;
   }
 
-  .progress-section {
-    margin-bottom: 25px;
-    background: #f8f9fa;
-    padding: 20px 15px;
-    border-radius: 8px;
-  }
-
-  .delivery-info {
-    grid-template-columns: 1fr;
-    gap: 15px;
-  }
-
-  .product-image {
-    width: 60px;
-    height: 60px;
-  }
-
-  .step-wrapper {
-    gap: 12px;
-  }
-}
-
-@media (max-width: 480px) {
-  .order-page {
-    padding: 8px;
-  }
-
-  .header {
-    margin-bottom: 20px;
-  }
-
-  .progress-section {
-    margin-bottom: 20px;
-    padding: 15px 12px;
-    border-radius: 6px;
-  }
-
-  .section-title {
-    font-size: 14px;
-    margin-bottom: 15px;
-  }
-
-  .product-name {
-    font-size: 13px;
-  }
-
-  .address-details {
-    font-size: 13px;
-  }
-
-  .step-wrapper {
-    gap: 10px;
-  }
-
-  .step-title {
-    font-size: 12px;
-  }
-
-  .step-description {
-    font-size: 11px;
+  .mobile-steps {
+    display: none;
   }
 }
 </style>

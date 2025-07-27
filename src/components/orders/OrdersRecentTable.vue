@@ -50,7 +50,7 @@ const tableOrderData = props.orders.map((order) => ({
           type="primary"
           @click="
             router.push({
-              name: 'orderdetails',
+              name: 'order-details',
               params: { orderId: orderStore.encodeOrderId(scope.row._id) },
             })
           "

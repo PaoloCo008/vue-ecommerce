@@ -33,7 +33,7 @@ const saveChanges = () => {
     receiveMarketingSMS: editProfileForm.value.receiveMarketingSMS,
   })
 
-  router.push({ name: 'myprofile', params: { id: user!._id } })
+  router.push({ name: 'my-profile', params: { id: user!._id } })
   ElMessage.success('Profile updated successfully!')
 }
 </script>
@@ -102,7 +102,7 @@ const saveChanges = () => {
 
       <!-- Save Button -->
       <el-button type="primary" class="save-button" native-type="submit"> SAVE CHANGES </el-button>
-      <el-button class="cancel-button cancel" @click="router.push({ name: 'myprofile' })"
+      <el-button class="cancel-button cancel" @click="router.push({ name: 'my-profile' })"
         >cancel</el-button
       >
     </el-form>

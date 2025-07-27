@@ -83,7 +83,7 @@ const selectedAddressId = defineModel()
           v-else
           link
           type="primary"
-          @click="router.push({ name: 'addressedit', params: { id: scope.row._id } })"
+          @click="router.push({ name: 'address-edit', params: { id: scope.row._id } })"
           class="edit-button"
         >
           EDIT

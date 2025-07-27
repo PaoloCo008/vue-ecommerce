@@ -80,7 +80,7 @@ const user = userStore.getUserById(authStore.user as string)
       </div>
 
       <div class="action-buttons">
-        <el-button class="edit-button" @click="router.push({ name: 'editprofile' })"
+        <el-button class="edit-button" @click="router.push({ name: 'edit-profile' })"
           >EDIT PROFILE</el-button
         >
         <el-button

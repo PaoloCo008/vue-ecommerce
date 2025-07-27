@@ -1,8 +1,8 @@
 export type AuthMode = 'login' | 'signup' | 'recovery'
 
 export interface AuthStore {
-  user: null | string
-  isAuthenticated: boolean
+  user: Ref<string | null>
+  isAuthenticated: Ref<boolean>
 
   authMode: AuthMode
   currentStep: number

@@ -1,3 +1,6 @@
+import { cardProviderLogos } from './constants'
+import type { CardProviders } from './types/globals'
+
 export function truncate(word: string, maxChars: number) {
   return word.length >= maxChars ? word.slice(0, maxChars) + '...' : word
 }
@@ -74,4 +77,8 @@ export function getCardProvider(cardNumber: string) {
 
 export function buildCardNumber(lastFour: string) {
   return `**** **** **** ${lastFour}`
+}
+
+export function getCardImage(provider: CardProviders): string {
+  return cardProviderLogos[provider]?.img || ''
 }

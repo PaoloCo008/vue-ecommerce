@@ -6,14 +6,10 @@ import type { Address } from '@/lib/types/globals'
 import { useUserStore } from '@/stores/UserStore'
 import { useAuthStore } from '@/stores/AuthStore'
 
-const props = defineProps<{ addresses: Address[] }>()
+const props = defineProps<{ addresses: Address[]; selectedAddressId: string | undefined }>()
 
 const userStore = useUserStore()
 const authStore = useAuthStore()
-
-const defaultShippingAddress = computed(() =>
-  userStore.getUserDefaultShippingAddressById(authStore.user as string),
-)
 
 // Emits
 const emit = defineEmits(['save', 'cancel'])
@@ -27,7 +23,7 @@ const selectedAddressId = computed(() => {
     return manuallySelectedId.value
   }
   // Otherwise, automatically use default shipping address
-  return defaultShippingAddress.value ? defaultShippingAddress.value._id : undefined
+  return props.selectedAddressId
 })
 
 const selectedAddress = computed(() => {
@@ -40,13 +36,6 @@ const selectedAddress = computed(() => {
   }
 
   return null
-})
-
-onUpdated(() => {
-  console.log('updated')
-  console.log(selectedAddress.value)
-  console.log(selectedAddressId.value)
-  console.log(defaultShippingAddress.value)
 })
 
 // Fixed selectAddress function
@@ -82,7 +71,13 @@ const handleCancel = () => {
               <span class="contact-name">{{ address.fullName }}</span>
               <!-- Radio Check Icon -->
               <div class="radio-check">
-                <div class="radio-circle" v-if="address._id !== selectedAddressId"></div>
+                <el-radio
+                  v-if="address._id !== selectedAddressId"
+                  :model-value="false"
+                  :value="true"
+                  size="large"
+                  @click.stop="selectAddress(address._id)"
+                />
                 <el-icon v-if="address._id === selectedAddressId" :size="18" color="#17a2b8">
                   <Check />
                 </el-icon>

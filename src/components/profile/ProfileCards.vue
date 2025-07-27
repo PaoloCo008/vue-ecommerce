@@ -5,7 +5,7 @@ import CardAddModal from '../cards/CardAddModal.vue'
 import { useUserStore } from '@/stores/UserStore'
 import { useAuthStore } from '@/stores/AuthStore'
 import { cardProviderLogos } from '@/lib/constants'
-import type { CreditCard } from '@/lib/types/globals'
+import type { CreditCard, MobileWallet } from '@/lib/types/globals'
 import { buildCardNumber } from '@/lib/helpers'
 
 const userStore = useUserStore()
@@ -23,23 +23,21 @@ const creditCards = computed(() =>
     })),
 )
 
-console.log(creditCards.value)
-
 const digitalWallets = computed(() =>
-  userStore.getUserPaymentMethods(authStore.user as string, 'mobile_wallet'),
+  userStore
+    .getUserPaymentMethods(authStore.user as string, 'mobile_wallet')
+    .map((digitalWallet: MobileWallet) => ({
+      logo: '/gcash-img.webp',
+      provider: 'GCash',
+      number: digitalWallet.accountNumber,
+      accountName: digitalWallet.accountName,
+      id: digitalWallet._id,
+    })),
 )
 
 // Methods
-const deleteCard = (cardId: string) => {
-  userStore.deleteCardFromUser(authStore.user as string, cardId)
-}
-
-const addCreditCard = () => {
-  console.log('Add credit card functionality would be implemented here')
-}
-
-const addDigitalWallet = () => {
-  console.log('Add digital wallet functionality would be implemented here')
+const deleteMethod = (methodId: string) => {
+  userStore.removePaymentMethod(authStore.user as string, methodId)
 }
 </script>
 
@@ -68,7 +66,7 @@ const addDigitalWallet = () => {
             </template>
           </el-table-column>
 
-          <el-table-column label="Expiry Date" width="120">
+          <el-table-column label="Expiry Date" width="180">
             <template #default="scope">
               <span class="card-expiry">Expires {{ scope.row.expiry }}</span>
             </template>
@@ -80,7 +78,7 @@ const addDigitalWallet = () => {
                 type="text"
                 size="small"
                 class="delete-button"
-                @click="deleteCard(scope.row.id)"
+                @click="deleteMethod(scope.row.id)"
               >
                 Delete
               </el-button>
@@ -104,20 +102,20 @@ const addDigitalWallet = () => {
           header-row-class-name="table-header"
           row-class-name="table-row"
         >
-          <el-table-column label="Card Number" min-width="200">
+          <el-table-column label="Account Number" min-width="200">
             <template #default="scope">
               <div class="card-info-row">
-                <div class="card-logo">
-                  {{ scope.row.logo }}
+                <div>
+                  <img :src="scope.row.logo" :alt="scope.row.provider" class="card-logo gcash" />
                 </div>
                 <span class="card-number">{{ scope.row.number }}</span>
               </div>
             </template>
           </el-table-column>
 
-          <el-table-column label="Expiry Date" width="120">
+          <el-table-column label="Account Name" width="180">
             <template #default="scope">
-              <span class="card-expiry">{{ scope.row.expiry }}</span>
+              <span class="card-expiry">{{ scope.row.accountName }}</span>
             </template>
           </el-table-column>
 
@@ -127,7 +125,7 @@ const addDigitalWallet = () => {
                 type="text"
                 size="small"
                 class="delete-button"
-                @click="deleteCard(scope.row.id, 'digital')"
+                @click="deleteMethod(scope.row.id)"
               >
                 Delete
               </el-button>
@@ -263,5 +261,10 @@ const addDigitalWallet = () => {
 
 .el-table .el-table__row:last-child td.el-table__cell {
   border-bottom: none;
+}
+
+.gcash {
+  width: 30px;
+  height: 30px;
 }
 </style>

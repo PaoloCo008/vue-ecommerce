@@ -43,7 +43,7 @@ function startCountdown() {
       ElNotification({
         title: 'Oops!',
         message: `Looks like we don't have the api for that yet! Here is your OTP: ${generatedOtp.value}`,
-        duration: 0,
+        duration: 15000,
       })
     }
 

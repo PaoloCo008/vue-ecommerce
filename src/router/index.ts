@@ -83,11 +83,11 @@ const router = createRouter({
                   path: 'profile',
                   children: [
                     { path: '', name: 'profile', component: ProfileManage },
-                    { path: 'edit', name: 'editprofile', component: ProfileEditForm },
-                    { path: 'my', name: 'myprofile', component: ProfileMy },
+                    { path: 'edit', name: 'edit-profile', component: ProfileEditForm },
+                    { path: 'my', name: 'my-profile', component: ProfileMy },
                     {
                       path: 'payment-options',
-                      name: 'paymentoptions',
+                      name: 'payment-options',
                       component: ProfileCards,
                     },
                     {
@@ -97,7 +97,7 @@ const router = createRouter({
                     },
                     {
                       path: 'orders/:orderId',
-                      name: 'orderdetails',
+                      name: 'order-details',
                       component: OrderDetailsPage,
                     },
                     {
@@ -118,18 +118,18 @@ const router = createRouter({
                     { path: 'book', name: 'address', component: ProfileAddress },
                     {
                       path: 'book/edit/:type',
-                      name: 'addresstypeedit',
+                      name: 'address-type-edit',
                       component: ChangeDefaultAddressPage,
                     },
                     {
                       path: 'create',
-                      name: 'addresscreate',
+                      name: 'address-create',
                       component: AddressForm,
                       meta: { operation: 'create' },
                     },
                     {
                       path: 'edit/:id',
-                      name: 'addressedit',
+                      name: 'address-edit',
                       component: AddressForm,
                       meta: { operation: 'edit' },
                     },

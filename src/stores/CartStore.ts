@@ -14,6 +14,7 @@ export const useCartStore = defineStore('cart', {
     guestCart: useLocalStorage<CartItem[]>('guestCart', []),
     selectedCartItems: [] as CartItem[],
   }),
+
   getters: {
     getCartByUserId: (state) => (userId: string) =>
       state.carts.find((cart) => cart.userId === userId),
@@ -64,6 +65,7 @@ export const useCartStore = defineStore('cart', {
       }, DEFAULT_SHIPPING_FEE)
     },
   },
+
   actions: {
     createCart(userId: string) {
       const newCart: Cart = {

@@ -15,22 +15,19 @@ const authStore = useAuthStore()
 const orderStore = useOrderStore()
 
 const orders = orderStore.getOrdersByUserId(authStore.user as string)
-
-console.log(orders)
 </script>
 
 <template>
   <ProfileContentLayout page-title="My Orders">
     <div class="my-orders-container">
-      <!-- Order Status Tabs -->
-      <el-tabs v-model="activeTab" class="order-tabs">
+      <!-- <el-tabs v-model="activeTab" class="order-tabs">
         <el-tab-pane label="All" name="all"></el-tab-pane>
         <el-tab-pane label="To pay" name="to-pay"></el-tab-pane>
         <el-tab-pane label="To ship" name="to-ship"></el-tab-pane>
         <el-tab-pane label="To receive" name="to-receive"></el-tab-pane>
       </el-tabs>
 
-      <!-- Search Bar -->
+
       <div class="search-container">
         <el-input
           v-model="searchQuery"
@@ -42,12 +39,12 @@ console.log(orders)
             <el-icon><Search /></el-icon>
           </template>
         </el-input>
-      </div>
+      </div> -->
 
       <!-- Orders List -->
       <div class="orders-list" v-if="!!orders.length">
         <RouterLink
-          :to="{ name: 'orderdetails', params: { orderId: orderStore.encodeOrderId(order._id) } }"
+          :to="{ name: 'order-details', params: { orderId: orderStore.encodeOrderId(order._id) } }"
           v-for="order in orders"
           :key="order._id"
           class="order-link"

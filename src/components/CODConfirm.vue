@@ -1,3 +1,7 @@
+<script setup lang="ts">
+const emit = defineEmits<{ (e: 'goBack'): void; (e: 'confirmed'): void }>()
+</script>
+
 <template>
   <div class="delivery-confirmation">
     <!-- Cash on Delivery Info -->
@@ -57,43 +61,10 @@
     </div>
 
     <!-- Confirm Button -->
-    <button class="confirm-button" @click="handleConfirmSelection">Confirm Selection</button>
+    <el-button class="confirm-button" @click="$emit('confirmed')">Confirm Selection</el-button>
+    <el-button class="cancel-button" @click="$emit('goBack')">Cancel</el-button>
   </div>
 </template>
-
-<script setup>
-import { ref } from 'vue'
-
-// You can add reactive data here if needed
-const isConfirmed = ref(false)
-
-// Method to handle confirmation
-const handleConfirmSelection = () => {
-  isConfirmed.value = true
-  console.log('Selection confirmed')
-  // Add your confirmation logic here
-}
-
-// Static delivery instructions data
-const deliveryInstructions = ref([
-  {
-    id: 1,
-    text: 'You may pay in cash to our courier upon receiving your parcel at the doorstep',
-  },
-  {
-    id: 2,
-    text: "Before agreeing to receive the parcel, check if your delivery status has been updated to 'Out for Delivery'",
-  },
-  {
-    id: 3,
-    text: 'Before receiving, confirm that the airway bill shows that the parcel is from Lazada',
-  },
-  {
-    id: 4,
-    text: 'Before you make payment to the courier, confirm your order number, sender information and tracking number on the parcel',
-  },
-])
-</script>
 
 <style scoped>
 .delivery-confirmation {
@@ -166,5 +137,23 @@ const deliveryInstructions = ref([
 .confirm-button:focus {
   outline: none;
   box-shadow: 0 0 0 3px rgba(29, 180, 209, 0.3);
+}
+
+.cancel-button {
+  margin: 0;
+  background-color: #e0e0e0;
+  border-color: unset;
+  color: #666;
+  padding: 12px 24px;
+  border-radius: 6px;
+  font-weight: 500;
+  text-transform: capitalize;
+  width: 100%;
+  box-shadow: none;
+}
+
+.cancel-button:hover {
+  background-color: #d0d0d0;
+  border-color: #d0d0d0;
 }
 </style>

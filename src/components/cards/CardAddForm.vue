@@ -96,8 +96,11 @@ const rules = {
   ],
 }
 
-// Emits
-const emit = defineEmits(['submit', 'cancel'])
+const emit = defineEmits<{
+  (e: 'cardAdded', card: CreditCard): void
+  (e: 'goBack'): void
+  (e: 'cancel'): void
+}>()
 
 // Methods
 const formatCardNumber = (value: string) => {
@@ -143,7 +146,14 @@ const handleSubmit = async () => {
         cvv: form.cvv,
       }
 
-      userStore.addCardByUserID(authStore.user as string, newCard)
+      if (props.openedFrom === 'checkout') {
+        if (save.value) {
+          userStore.addPaymentMethod(authStore.user as string, newCard)
+        }
+        emit('cardAdded', newCard)
+      } else {
+        userStore.addPaymentMethod(authStore.user as string, newCard)
+      }
 
       isSubmitting.value = false
     }
@@ -154,7 +164,11 @@ const handleSubmit = async () => {
 }
 
 const handleCancel = () => {
-  emit('cancel')
+  if (props.openedFrom === 'checkout') {
+    emit('goBack')
+  } else {
+    emit('cancel')
+  }
 }
 
 // Reset form method

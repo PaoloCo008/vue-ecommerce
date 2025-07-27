@@ -67,6 +67,18 @@ export interface Image {
 
 type OrderStatus = 'pending' | 'placed' | 'paid' | 'shipped' | 'received'
 
+// Add this interface to your types file
+export interface PaymentMethodDisplay {
+  id: string
+  label: string
+  type: string
+  src?: string
+  icon?: string
+  number?: string | null
+  paymentMethodData?: PaymentMethod
+}
+
+// Update your Order interface to include the new fields
 export interface Order {
   _id: string
   userId: User['_id']
@@ -80,8 +92,11 @@ export interface Order {
   receivedAt?: Date
   pricing: Pricing
   shippingAddress: Address['_id']
-  paymentMethod: PaymentMethod
+  paymentMethod: PaymentMethod | null // Made nullable for pending orders
   shippedBy: ShippingCompany
+  // New fields for persisting checkout state
+  availablePaymentMethods?: PaymentMethodDisplay[]
+  selectedPaymentMethodId?: string | null
 }
 
 export interface Pricing {

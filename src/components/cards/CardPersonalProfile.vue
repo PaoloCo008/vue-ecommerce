@@ -10,15 +10,15 @@ defineProps<{ name: string; email: string }>()
     <template #header>
       <div class="card-header">
         <span class="header-title">Personal Profile</span>
-        <RouterLink :to="{ name: 'editprofile', params: { id: 1 } }">EDIT</RouterLink>
+        <RouterLink :to="{ name: 'edit-profile', params: { id: 1 } }">EDIT</RouterLink>
       </div>
     </template>
     <div class="profile-content">
       <p class="user-name">{{ name }}</p>
       <p class="user-email">{{ hideEmail(email) }}</p>
       <div class="preferences">
-        <el-checkbox v-model="marketingSMS" disabled> Receive marketing SMS </el-checkbox>
-        <el-checkbox v-model="marketingEmails" disabled> Receive marketing emails </el-checkbox>
+        <el-checkbox disabled> Receive marketing SMS </el-checkbox>
+        <el-checkbox disabled> Receive marketing emails </el-checkbox>
       </div>
     </div>
   </el-card>

@@ -30,7 +30,7 @@ const orders = orderStore.getRecentOrders
           <template #header>
             <div class="card-header">
               <span class="header-title">Personal Profile</span>
-              <RouterLink :to="{ name: 'editprofile' }">EDIT</RouterLink>
+              <RouterLink :to="{ name: 'edit-profile' }">EDIT</RouterLink>
             </div>
           </template>
           <div class="profile-content">

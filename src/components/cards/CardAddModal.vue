@@ -12,7 +12,9 @@ import CardAddForm from './CardAddForm.vue'
       </el-button>
     </template>
 
-    <CardAddForm opened-from="payment-options" />
+    <template #default="props">
+      <CardAddForm opened-from="payment-options" @cancel="props.handleCloseDrawer" />
+    </template>
   </AppDrawer>
 </template>
 
