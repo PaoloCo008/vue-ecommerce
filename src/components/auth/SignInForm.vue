@@ -63,7 +63,6 @@ const handleLogin = async () => {
       setTimeout(() => {
         loading.value = false
         authStore.login({
-          userId: userStore.getUserByEmail(loginForm.email)!._id,
           email: loginForm.email,
           password: loginForm.password,
         })

@@ -1,16 +1,16 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { formatPrice } from '@/lib/helpers'
 import TextExpander from '@/components/TextExpander.vue'
-import Carousel from '@/components/Carousel.vue'
 import { useProductStore } from '@/stores/ProductStore'
 import type { AuthMode } from '@/lib/types/stores'
 import { useAuthStore } from '@/stores/AuthStore'
 import AppModal from '@/components/app/AppModal.vue'
 import AuthTransitionWrapper from '@/components/auth/AuthTransitionWrapper.vue'
-import { useRouter } from 'vue-router'
 import { useCartStore } from '@/stores/CartStore'
 import { useUserStore } from '@/stores/UserStore'
+import ProductCarousel from '@/components/product/ProductCarousel.vue'
+import { useRoute, useRouter } from 'vue-router'
 
 const dialogStyle = {
   width: '100%',
@@ -24,9 +24,16 @@ const productStore = useProductStore()
 const cartStore = useCartStore()
 const authStore = useAuthStore()
 const userStore = useUserStore()
-const router = useRouter()
+const route = useRoute()
 
-const product = productStore.getProductById(history.state.productId)
+const slug = computed(() => route.params.slug as string)
+
+const searchParam = computed(() => slug.value.split('-'))
+
+const product = computed(() =>
+  productStore.getProductById(searchParam.value.slice(-1)[0] as string),
+)
+
 const userDefaultShippingAddressId = computed(
   () => userStore.getUserDefaultShippingAddressById(authStore.user as string)?._id,
 )
@@ -35,11 +42,11 @@ function handleBuyClick(openFn: () => void, authMode: AuthMode) {
   if (authStore.isAuthenticated) {
     const item = {
       _id: crypto.randomUUID(),
-      productId: history.state.productId,
+      productId: product.value?._id,
       quantity: quantity.value,
-      image: productStore.getProductPrimaryImageById(history.state.productId),
-      price: product?.price as number,
-      name: product?.name as string,
+      image: productStore.getProductPrimaryImageById(product.value?._id as string),
+      price: product.value?.price as number,
+      name: product.value?.name as string,
     }
     cartStore.proceedToCheckout(userDefaultShippingAddressId.value as string, 'product', item)
   } else {
@@ -51,11 +58,11 @@ function handleBuyClick(openFn: () => void, authMode: AuthMode) {
 function handleAddClick() {
   cartStore.addToCart({
     _id: crypto.randomUUID(),
-    productId: history.state.productId,
+    productId: product.value?._id as string,
     quantity: quantity.value,
-    image: productStore.getProductPrimaryImageById(history.state.productId),
-    price: product?.price as number,
-    name: product?.name as string,
+    image: productStore.getProductPrimaryImageById(product.value?._id as string),
+    price: product.value?.price as number,
+    name: product.value?.name as string,
   })
 }
 </script>
@@ -66,7 +73,7 @@ function handleAddClick() {
       <div class="product-grid">
         <!-- Carousel -->
         <div class="carousel">
-          <Carousel />
+          <ProductCarousel />
         </div>
 
         <!-- Body -->

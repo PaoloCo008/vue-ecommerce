@@ -12,9 +12,9 @@ import { useAuthStore } from '@/stores/AuthStore'
 import { formatPrice } from '@/lib/helpers'
 import { useOrderStore } from '@/stores/OrderStore'
 import { useRoute } from 'vue-router'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { ElMessageBox } from 'element-plus'
 import type { PaymentMethod, PaymentMethodDisplay } from '@/lib/types/globals'
-import GCashPaymentModal from '@/components/GCashPaymentModal.vue'
+import PaymentGCashModal from '@/components/payment/PaymentGCashModal.vue'
 
 const userStore = useUserStore()
 const authStore = useAuthStore()
@@ -332,7 +332,7 @@ const dialogStyle = {
         >
       </div>
 
-      <GCashPaymentModal
+      <PaymentGCashModal
         v-model="showGCashModal"
         :user-id="authStore.user"
         @confirm="handleGCashConfirm"

@@ -6,6 +6,7 @@ import type { AuthMode, AuthStore } from '@/lib/types/stores'
 import { defineStore } from 'pinia'
 import { useUserStore } from './UserStore'
 import type { NewAddressForm } from '@/lib/types/forms'
+import { useCartStore } from './CartStore'
 
 const loginInitialState = {
   email: '',
@@ -117,7 +118,8 @@ export const useAuthStore = defineStore('auth', {
       this.currentStep += 1
     },
 
-    authorize() {
+    authorize(userId: string) {
+      this.user = userId
       this.isAuthenticated = true
     },
 
@@ -126,8 +128,7 @@ export const useAuthStore = defineStore('auth', {
       this.user = null
     },
 
-    login({ userId, email, password }: Login) {
-      this.user = userId
+    login({ email, password }: Login) {
       this.loginData.email = email
       this.loginData.password = password
 
@@ -136,7 +137,7 @@ export const useAuthStore = defineStore('auth', {
 
     registerUser(formAddressData?: NewAddressForm) {
       const userStore = useUserStore()
-      
+
       const newUser: User = {
         ...this.signupData,
         _id: crypto.randomUUID(),
@@ -170,8 +171,7 @@ export const useAuthStore = defineStore('auth', {
 
       userStore.createUser(newUser)
 
-      this.authorize()
-      this.user = newUser._id
+      this.authorize(newUser._id)
     },
 
     goToRecovery() {
@@ -194,10 +194,11 @@ export const useAuthStore = defineStore('auth', {
     changeUserPassword(password: string) {
       const userStore = useUserStore()
 
-      const user = userStore.getUserById(this.user as string)
+      const user = userStore.getUserByEmail(this.loginData.email)
 
       if (user) {
         user.password = password
+        this.authorize(user._id)
       }
     },
   },

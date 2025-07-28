@@ -8,6 +8,8 @@ import router from '@/router'
 import { compareAsc } from 'date-fns'
 import { getCardImage } from '@/lib/helpers'
 import { useUserStore } from './UserStore'
+import { useRoute } from 'vue-router'
+import { ElLoading, ElMessage, ElMessageBox } from 'element-plus'
 
 // Add interface for display payment methods
 interface PaymentMethodDisplay {
@@ -77,10 +79,61 @@ export const useOrderStore = defineStore('order', {
             new Date(a.placedAt || a.createdAt).getTime(),
         )
     },
+
+    getUserFilteredOrders(state) {
+      return (userId: string, filterQuery?: string, searchQuery?: string) => {
+        const actualSearchQuery = searchQuery || ''
+        const actualFilterQuery = filterQuery
+
+        let searchQueries = [...new Set(actualSearchQuery?.split(' ') || [])]
+
+        if (searchQueries.length > 1) {
+          searchQueries = searchQueries.filter((query, i, arr) => {
+            const regex = new RegExp(`^${query}`, 'gim')
+            if (arr.filter((q) => q !== query).some((el: string) => regex.test(el))) return false
+            return true
+          })
+        }
+
+        let filteredUserOrders = [...state.orders.filter((order) => order.userId === userId)]
+
+        if (actualFilterQuery && actualFilterQuery !== 'all') {
+          filteredUserOrders = filteredUserOrders.filter((o) => {
+            if (o.paymentMethod?.type === 'cash_on_delivery') {
+              if (actualFilterQuery === 'to-ship') {
+                return o.paymentMethod.type === 'cash_on_delivery' && o.status === 'placed'
+              } else if (actualFilterQuery === 'to-receive') {
+                return o.paymentMethod.type === 'cash_on_delivery' && o.status === 'shipped'
+              }
+            } else {
+              if (actualFilterQuery === 'to-ship') {
+                return o.status === 'paid'
+              } else if (actualFilterQuery === 'to-receive') {
+                return o.status === 'shipped'
+              }
+            }
+            return false
+          })
+        }
+
+        if (actualSearchQuery) {
+          filteredUserOrders = filteredUserOrders.filter((order) => {
+            return searchQueries.some((query) => {
+              const regex = new RegExp(query, 'gi')
+              return (
+                regex.test(order.orderNumber) ||
+                order.items.some((item) => regex.test(item.name || ''))
+              )
+            })
+          })
+        }
+
+        return filteredUserOrders
+      }
+    },
   },
 
   actions: {
-    // Helper method to get default payment methods for a user
     getDefaultPaymentMethods(userId: string) {
       const paymentMethodOptions = {
         cash_on_delivery: {
@@ -274,17 +327,30 @@ export const useOrderStore = defineStore('order', {
       }
     },
 
-    completePendingOrder(orderId: string, finalUpdates?: Partial<Order>) {
+    async completePendingOrder(orderId: string, finalUpdates?: Partial<Order>) {
       const cartStore = useCartStore()
-      const pendingOrder = this.getPendingOrderById(orderId)
 
-      if (pendingOrder) {
+      // Method 1: Using Element Plus Loading Service (Recommended)
+      const loading = ElLoading.service({
+        lock: true,
+        text: 'Processing your order...',
+        background: 'rgba(0, 0, 0, 0.7)',
+      })
+
+      try {
+        const pendingOrder = this.getPendingOrderById(orderId)
+
+        if (!pendingOrder) {
+          throw new Error('Pending order not found')
+        }
+
+        // Update loading text based on payment method
+        const isCOD = pendingOrder.selectedPaymentMethodId === 'cash_on_delivery'
+        loading.setText(isCOD ? 'Placing your order...' : 'Processing payment...')
+
         // Create a clean order object without checkout-specific fields
         const { availablePaymentMethods, selectedPaymentMethodId, ...cleanPendingOrder } =
           pendingOrder
-
-        // Check if it's a Cash on Delivery order
-        const isCOD = selectedPaymentMethodId === 'cash_on_delivery'
 
         let completedOrder: Order
 
@@ -295,7 +361,6 @@ export const useOrderStore = defineStore('order', {
             ...finalUpdates,
             status: 'placed' as OrderStatus,
             placedAt: new Date(),
-            // Do not set paidAt for COD orders - payment happens on delivery
             paidAt: undefined,
           }
         } else {
@@ -309,6 +374,12 @@ export const useOrderStore = defineStore('order', {
           }
         }
 
+        // Simulate processing time
+        await new Promise((resolve) => setTimeout(resolve, 2000))
+
+        // Update loading text for final steps
+        loading.setText('Finalizing order...')
+
         const productIds = completedOrder.items.map((item) => item.productId)
 
         productIds.forEach((productId) => {
@@ -319,9 +390,43 @@ export const useOrderStore = defineStore('order', {
         this.orders.push(completedOrder)
         this.removePendingOrder(orderId)
 
-        router.push({ name: 'orders' })
+        // Show success message
+        ElMessage.success({
+          message: 'Order completed successfully!',
+          duration: 3000,
+          showClose: true,
+        })
+
+        // Navigate after showing success
+        setTimeout(() => {
+          router.replace({ name: 'orders' })
+        }, 1000)
 
         return completedOrder
+      } catch (error) {
+        console.error('Error completing order:', error)
+
+        // Show error message
+        ElMessage.error({
+          message: 'Failed to complete order. Please try again.',
+          duration: 5000,
+          showClose: true,
+        })
+
+        // Optionally show detailed error dialog
+        ElMessageBox.alert(
+          'There was an issue processing your order. Please check your connection and try again.',
+          'Order Processing Error',
+          {
+            confirmButtonText: 'OK',
+            type: 'error',
+          },
+        )
+
+        throw error
+      } finally {
+        // Always close loading
+        loading.close()
       }
     },
 

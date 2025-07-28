@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, Transition } from 'vue'
 import SignInForm from './SignInForm.vue'
 import SignUpForm from './SignUpForm.vue'
 import RecoveryForm from './RecoveryForm.vue'
@@ -9,60 +9,32 @@ import AddressModal from '../address/AddressModal.vue'
 import type { AuthStages } from '@/lib/types/globals'
 import { useAuthStore } from '@/stores/AuthStore'
 
-const { operation } = defineProps<{ operation?: AuthStages }>()
-
-const state = ref<AuthStages>(operation)
+defineProps<{ closeModal?: () => void }>()
 
 const authStore = useAuthStore()
 </script>
 
 <template>
-  <TransitionGroup name="forms" tag="div" class="transition-wrapper">
-    <!-- Sign In Form -->
-    <SignInForm v-if="authStore.isInMethodFlowPosition('login')" @to-recovery="state = 'recover'" />
-
-    <!-- Sign Up Form -->
-    <SignUpForm v-if="authStore.isInMethodFlowPosition('signup')" @to-phone="state = 'phone'" />
-
-    <!-- Address Modal -->
-    <AddressModal v-if="authStore.isInMethodFlowPosition('address')" />
-
-    <!-- Phone Form -->
-    <PhoneForm v-if="authStore.isInMethodFlowPosition('phone')" @confirm="state = 'otp'" />
-
-    <!-- OTP Form -->
+  <Transition name="forms" mode="out-in">
+    <SignInForm v-if="authStore.isInMethodFlowPosition('login')" key="login" />
+    <SignUpForm v-else-if="authStore.isInMethodFlowPosition('signup')" key="signup" />
+    <AddressModal v-else-if="authStore.isInMethodFlowPosition('address')" key="address" />
+    <PhoneForm v-else-if="authStore.isInMethodFlowPosition('phone')" key="phone" />
     <AuthOTP
-      v-if="authStore.isInMethodFlowPosition('otp')"
-      @confirm-sign-up="state = 'address'"
-      @change-number="state = 'phone'"
-      @back="state = 'login'"
+      v-else-if="authStore.isInMethodFlowPosition('otp')"
+      key="otp"
+      @on-reroute-to-reset="closeModal"
     />
-
-    <!-- Recovery Form -->
-    <RecoveryForm
-      v-if="authStore.isInMethodFlowPosition('recover')"
-      @back="state = 'login'"
-      @confirm="state = 'otp'"
-    />
-  </TransitionGroup>
+    <RecoveryForm v-else-if="authStore.isInMethodFlowPosition('recover')" key="recover" />
+  </Transition>
 </template>
 
 <style scoped>
-.transition-wrapper {
-  position: relative;
-  width: 100%;
-  background-color: #fff;
-  margin: 0 auto;
-  height: 100%;
-}
-
 .forms-enter-active,
 .forms-leave-active {
-  transition: all 0.6s ease-out;
-  position: absolute;
-  width: 100%;
-  top: 0;
-  left: 0;
+  transition:
+    transform 0.6s ease-out,
+    opacity 0.6s ease-out;
 }
 
 .forms-enter-from,
@@ -71,9 +43,8 @@ const authStore = useAuthStore()
   transform: translateY(100%);
 }
 
-.forms-leave-from,
-.forms-enter-to {
-  transition-delay: 0.6s;
+.forms-enter-to,
+.forms-leave-from {
   opacity: 1;
   transform: translateY(0);
 }

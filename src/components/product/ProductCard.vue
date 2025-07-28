@@ -14,8 +14,7 @@ const productPrimaryImage = productStore.getProductPrimaryImageById(props.produc
 function handleProductClick() {
   router.push({
     name: 'product',
-    params: { slug: props.product.slug },
-    state: { productId: props.product._id },
+    params: { slug: `${props.product.slug}-${props.product._id}` },
   })
 }
 </script>

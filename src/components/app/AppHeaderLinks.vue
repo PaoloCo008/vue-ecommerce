@@ -33,6 +33,16 @@ function handleClick(openFn: () => void, authMode: AuthMode) {
 
 function handleLogout() {
   authStore.logout()
+
+  const currentRoute = route
+  const publicRoutes = ['homepage', 'product']
+
+  if (!publicRoutes.includes(currentRoute.name as string)) {
+    router.push({
+      name: 'login',
+      query: { redirect: currentRoute.fullPath },
+    })
+  }
 }
 </script>
 
@@ -79,7 +89,9 @@ function handleLogout() {
           <el-button @click="handleClick(props.onTriggerClick, 'login')" text>Login</el-button>
         </template>
 
-        <AuthTransitionWrapper operation="logIn" />
+        <template #default="props">
+          <AuthTransitionWrapper :close-modal="props.closeModal" />
+        </template>
       </AppModal>
 
       <AppModal :dialog-style="dialogStyle">
@@ -89,7 +101,7 @@ function handleLogout() {
           >
         </template>
 
-        <AuthTransitionWrapper operation="signUp" />
+        <AuthTransitionWrapper />
       </AppModal>
     </template>
   </div>

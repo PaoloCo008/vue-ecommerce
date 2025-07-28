@@ -2,9 +2,9 @@
   <el-dialog
     v-model="visible"
     title="GCash Payment Details"
-    width="500px"
     :close-on-click-modal="false"
     :close-on-press-escape="false"
+    :style="{ maxWidth: '500px', width: '100%' }"
     class="gcash-modal"
   >
     <div class="modal-content">
@@ -44,31 +44,21 @@
           </el-form-item>
 
           <div class="save-option">
-            <el-checkbox v-model="formData.saveForLater" class="save-checkbox">
+            <div class="form-checkbox">
+              <el-checkbox v-model="formData.saveForLater" class="save-checkbox"> </el-checkbox>
               <span class="save-text">Save this GCash account for future payments</span>
-            </el-checkbox>
-            <p class="save-description">
-              Your payment details will be securely stored and encrypted for convenience in future
-              transactions.
-            </p>
+            </div>
+          </div>
+
+          <div class="form-buttons">
+            <el-button @click="handleCancel" class="cancel-btn"> Cancel </el-button>
+            <el-button type="primary" @click="handleConfirm" :loading="loading" class="confirm-btn">
+              {{ loading ? 'Processing...' : 'Confirm Payment' }}
+            </el-button>
           </div>
         </el-form>
       </div>
-
-      <div class="security-notice">
-        <el-icon class="security-icon"><Lock /></el-icon>
-        <span>Your payment information is encrypted and secure</span>
-      </div>
     </div>
-
-    <template #footer>
-      <div class="modal-footer">
-        <el-button @click="handleCancel" class="cancel-btn"> Cancel </el-button>
-        <el-button type="primary" @click="handleConfirm" :loading="loading" class="confirm-btn">
-          {{ loading ? 'Processing...' : 'Confirm Payment' }}
-        </el-button>
-      </div>
-    </template>
   </el-dialog>
 </template>
 
@@ -203,6 +193,12 @@ const handleConfirm = async () => {
 </script>
 
 <style scoped>
+.form-checkbox {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
 .gcash-modal :deep(.el-dialog) {
   border-radius: 12px;
   overflow: hidden;
@@ -240,10 +236,6 @@ const handleConfirm = async () => {
   width: auto;
 }
 
-.form-section {
-  margin-bottom: 24px;
-}
-
 .gcash-form :deep(.el-form-item__label) {
   font-weight: 600;
   color: #333;
@@ -279,37 +271,12 @@ const handleConfirm = async () => {
   font-size: 14px;
 }
 
-.save-description {
-  margin: 8px 0 0 24px;
-  font-size: 12px;
-  color: #666;
-  line-height: 1.4;
-}
-
-.security-notice {
+.form-buttons {
   display: flex;
-  align-items: center;
-  justify-content: center;
+  flex-direction: column;
   gap: 8px;
-  padding: 12px;
-  background: #e8f5e8;
-  border: 1px solid #c3e6c3;
-  border-radius: 6px;
-  color: #2d5a2d;
-  font-size: 13px;
-}
-
-.security-icon {
-  color: #52c41a;
-}
-
-.modal-footer {
-  display: flex;
-  gap: 12px;
   justify-content: flex-end;
-  padding: 16px 24px;
-  background: #f8f9fa;
-  margin: 0 -24px -24px -24px;
+  padding: 16px 0;
 }
 
 .cancel-btn {
@@ -328,36 +295,10 @@ const handleConfirm = async () => {
   background: linear-gradient(135deg, #00d4ff 0%, #0099cc 100%);
   border: none;
   font-weight: 600;
+  margin: 0;
 }
 
 .confirm-btn:hover {
   background: linear-gradient(135deg, #0099cc 0%, #007aa3 100%);
-}
-
-/* Responsive */
-@media (max-width: 600px) {
-  .gcash-modal :deep(.el-dialog) {
-    width: 95% !important;
-    margin: 5vh auto;
-  }
-
-  .modal-content {
-    padding: 16px;
-  }
-
-  .modal-footer {
-    flex-direction: column;
-    gap: 8px;
-  }
-
-  .cancel-btn,
-  .confirm-btn {
-    width: 100%;
-    order: 2;
-  }
-
-  .confirm-btn {
-    order: 1;
-  }
 }
 </style>

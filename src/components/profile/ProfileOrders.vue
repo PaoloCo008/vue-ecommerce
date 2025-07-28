@@ -1,37 +1,48 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { Search } from '@element-plus/icons-vue'
 import ProfileContentLayout from '@/layouts/ProfileContentLayout.vue'
 import { formatPrice } from '@/lib/helpers'
 import { useAuthStore } from '@/stores/AuthStore'
 import { useOrderStore } from '@/stores/OrderStore'
 import { useRouter } from 'vue-router'
+import useSearchParams from '@/composables/useSearchParams'
 
-const activeTab = ref('all')
-const searchQuery = ref('')
 const router = useRouter()
 
 const authStore = useAuthStore()
 const orderStore = useOrderStore()
 
-const orders = orderStore.getOrdersByUserId(authStore.user as string)
+const filter = useSearchParams('filter', 'all', 'orders')
+const query = useSearchParams('search', '', 'orders', { debounce: true })
+
+const orders = computed(() =>
+  orderStore.getUserFilteredOrders(
+    authStore.user as string,
+    filter.value as string,
+    query.value as string,
+  ),
+)
+
+function handleClick(tabName: string) {
+  filter.value = tabName
+}
 </script>
 
 <template>
   <ProfileContentLayout page-title="My Orders">
     <div class="my-orders-container">
-      <!-- <el-tabs v-model="activeTab" class="order-tabs">
+      <el-tabs v-model="filter" class="order-tabs" @tab-change="handleClick">
         <el-tab-pane label="All" name="all"></el-tab-pane>
         <el-tab-pane label="To pay" name="to-pay"></el-tab-pane>
         <el-tab-pane label="To ship" name="to-ship"></el-tab-pane>
         <el-tab-pane label="To receive" name="to-receive"></el-tab-pane>
       </el-tabs>
 
-
       <div class="search-container">
         <el-input
-          v-model="searchQuery"
-          placeholder="Search by seller name, order ID or product name"
+          v-model="query"
+          placeholder="Search by order ID or product name"
           class="search-input"
           clearable
         >
@@ -39,7 +50,7 @@ const orders = orderStore.getOrdersByUserId(authStore.user as string)
             <el-icon><Search /></el-icon>
           </template>
         </el-input>
-      </div> -->
+      </div>
 
       <!-- Orders List -->
       <div class="orders-list" v-if="!!orders.length">

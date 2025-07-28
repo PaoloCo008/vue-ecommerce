@@ -8,8 +8,11 @@ import { createApp } from 'vue'
 import App from './App.vue'
 import router from './router'
 import { createPinia } from 'pinia'
+import { routerPlugin } from './plugins/router-plugin'
 
 const pinia = createPinia()
+pinia.use(routerPlugin)
+
 const app = createApp(App)
 
 for (const [key, component] of Object.entries(ElementPlusIconsVue)) {

@@ -11,15 +11,16 @@ import TheProfileView from '@/views/TheProfileView.vue'
 import { createRouter, createWebHistory } from 'vue-router'
 import AuthPage from '@/views/AuthPage.vue'
 import ProfileOrders from '@/components/profile/ProfileOrders.vue'
-import CheckoutPage from '@/views/CheckoutPage.vue'
+import CheckoutPage from '@/components/payment/CheckoutPage.vue'
 import OrderDetailsPage from '@/views/OrderDetailsPage.vue'
 import ProfileEditForm from '@/components/profile/ProfileEditForm.vue'
 import ChangeDefaultAddressPage from '@/views/ChangeDefaultAddressPage.vue'
 import ProfilePasswordResetForm from '@/components/profile/ProfilePasswordResetForm.vue'
 import UserVerification from '@/views/UserVerification.vue'
-import VerificationForm from '@/components/VerificationForm.vue'
-import VerificationMethods from '@/components/VerificationMethods.vue'
 import ProfileEmailOrPhoneChangeForm from '@/components/profile/ProfileEmailOrPhoneChangeForm.vue'
+import AuthVerificationMethods from '@/components/auth/AuthVerificationMethods.vue'
+import AuthVerificationForm from '@/components/auth/AuthVerificationForm.vue'
+import { useAuthStore } from '@/stores/AuthStore'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -42,8 +43,14 @@ const router = createRouter({
           path: '/cart',
           name: 'cart',
           component: CartPage,
+          meta: { requiresAuth: true },
         },
-        { path: '/login-signup', name: 'login', component: AuthPage, meta: { operation: 'login' } },
+        {
+          path: '/login-signup',
+          name: 'login',
+          component: AuthPage,
+          meta: { operation: 'login' },
+        },
         {
           path: '/login-signup',
           name: 'signup',
@@ -54,10 +61,11 @@ const router = createRouter({
           path: '/checkout/:pendingOrderId',
           name: 'checkout',
           component: CheckoutPage,
-          meta: { operation: 'create' },
+          meta: { operation: 'create', requiresAuth: true },
         },
         {
           path: '/user',
+          meta: { requiresAuth: true }, // This will protect all nested routes
           children: [
             {
               path: '/verification',
@@ -66,12 +74,12 @@ const router = createRouter({
                 {
                   path: '',
                   name: 'verification-methods',
-                  component: VerificationMethods,
+                  component: AuthVerificationMethods,
                 },
                 {
                   path: '',
                   name: 'verification-form',
-                  component: VerificationForm,
+                  component: AuthVerificationForm,
                 },
               ],
             },
@@ -103,6 +111,11 @@ const router = createRouter({
                     {
                       path: 'password-reset',
                       name: 'password-reset',
+                      component: ProfilePasswordResetForm,
+                    },
+                    {
+                      path: 'password-reset',
+                      name: 'password-reset-from-otp',
                       component: ProfilePasswordResetForm,
                     },
                     {
@@ -142,6 +155,25 @@ const router = createRouter({
       ],
     },
   ],
+})
+
+router.beforeEach((to, from, next) => {
+  const authStore = useAuthStore()
+
+  const requiresAuth = to.matched.some((record) => record.meta.requiresAuth)
+
+  if (to.name === 'password-reset-from-otp') {
+    next()
+  }
+
+  if (requiresAuth && !authStore.isAuthenticated) {
+    next({
+      name: 'login',
+      query: { redirect: to.fullPath },
+    })
+  } else {
+    next()
+  }
 })
 
 export default router

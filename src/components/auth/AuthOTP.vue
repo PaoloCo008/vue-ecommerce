@@ -1,14 +1,18 @@
 <script setup lang="ts">
-import { computed, inject, ref, onMounted, onUnmounted, nextTick } from 'vue'
+import { computed, ref, onMounted, onUnmounted, nextTick } from 'vue'
 import ModalTemplate from '../ModalTemplate.vue'
 import { useAuthStore } from '@/stores/AuthStore'
 import { useUserStore } from '@/stores/UserStore'
 import { ElMessage, ElNotification } from 'element-plus'
 import { useRoute, useRouter } from 'vue-router'
 import { formatPhilippinePhone, generateOtp } from '@/lib/helpers'
+import { useCartStore } from '@/stores/CartStore'
+
+const emit = defineEmits<{ (e: 'onRerouteToReset'): void }>()
 
 const authStore = useAuthStore()
 const userStore = useUserStore()
+const cartStore = useCartStore()
 const router = useRouter()
 const route = useRoute()
 
@@ -140,14 +144,20 @@ function handleConfirm() {
       router.push({ name: 'profile' })
     }
   } else if (mode === 'login') {
-    authStore.authorize()
+    authStore.authorize(
+      userStore.getUserByEmail(authStore.loginData.email as string)?._id as string,
+    )
+
+    cartStore.mergeGuestCartToUserCart(authStore.user)
+
     ElMessage.success('Login successful')
 
     if (route.meta.operation === 'login') {
       router.push({ name: 'homepage' })
     }
   } else {
-    router.push({ name: 'password-reset' })
+    emit('onRerouteToReset')
+    router.push({ name: 'password-reset-from-otp' })
   }
 }
 

@@ -10,6 +10,7 @@ export const useProductStore = defineStore('product', {
   getters: {
     getProductPrimaryImageById: (state) => (productId: string) => {
       const product = state.products.find((product) => product._id === productId)
+
       return product!.images.find((img) => img.isPrimary)!.url
     },
     getProductById: (state) => (productId: string) => {

@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import { ref, defineEmits, computed } from 'vue'
 import { ArrowRight, Plus } from '@element-plus/icons-vue'
-import CODConfirm from '../CODConfirm.vue'
 import CardAddForm from './CardAddForm.vue'
 import type { CreditCard, PaymentMethodDisplay } from '@/lib/types/globals'
 import { getCardImage } from '@/lib/helpers'
 import { useUserStore } from '@/stores/UserStore'
 import { useAuthStore } from '@/stores/AuthStore'
 import CardSelect from './CardSelect.vue'
+import PaymentCODConfirm from '../payment/PaymentCODConfirm.vue'
 
 // Emits
 const emit = defineEmits(['methodSelected', 'cardAdded'])
@@ -208,7 +208,7 @@ const handleCardSelectCancel = () => {
   </div>
 
   <!-- COD Confirmation -->
-  <CODConfirm
+  <PaymentCODConfirm
     v-else-if="selectedMethod === 'cod'"
     @go-back="handleGoBack"
     @confirmed="() => selectMethod('cod')"
