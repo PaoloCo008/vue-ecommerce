@@ -157,7 +157,7 @@ const deleteMethod = (methodId: string) => {
 }
 
 .section-title {
-  font-size: 18px;
+  font-size: 1.125rem;
   font-weight: 600;
   color: #333;
   margin-bottom: 20px;
@@ -181,18 +181,18 @@ const deleteMethod = (methodId: string) => {
 }
 
 .card-number {
-  font-size: 14px;
+  font-size: 0.875rem;
   color: #333;
 }
 
 .card-expiry {
-  font-size: 12px;
+  font-size: 0.75rem;
   color: #666;
 }
 
 .delete-button {
   color: #f56c6c !important;
-  font-size: 14px;
+  font-size: 0.875rem;
 }
 
 .delete-button:hover {
@@ -214,7 +214,7 @@ const deleteMethod = (methodId: string) => {
   background: transparent;
   border: none;
   color: #999;
-  font-size: 12px;
+  font-size: 0.75rem;
   text-transform: uppercase;
   letter-spacing: 0.5px;
   font-weight: 500;

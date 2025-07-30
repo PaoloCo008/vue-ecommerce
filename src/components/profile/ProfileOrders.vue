@@ -2,7 +2,7 @@
 import { computed, ref } from 'vue'
 import { Search } from '@element-plus/icons-vue'
 import ProfileContentLayout from '@/layouts/ProfileContentLayout.vue'
-import { formatPrice } from '@/lib/helpers'
+import { encodeOrderId, formatPrice } from '@/lib/helpers'
 import { useAuthStore } from '@/stores/AuthStore'
 import { useOrderStore } from '@/stores/OrderStore'
 import { useRouter } from 'vue-router'
@@ -55,7 +55,7 @@ function handleClick(tabName: string) {
       <!-- Orders List -->
       <div class="orders-list" v-if="!!orders.length">
         <RouterLink
-          :to="{ name: 'order-details', params: { orderId: orderStore.encodeOrderId(order._id) } }"
+          :to="{ name: 'order-details', params: { orderId: encodeOrderId(order._id) } }"
           v-for="order in orders"
           :key="order._id"
           class="order-link"
@@ -154,19 +154,19 @@ function handleClick(tabName: string) {
 }
 
 .store-icon {
-  font-size: 16px;
+  font-size: 1rem;
   color: #666;
 }
 
 .order-number {
   font-weight: 500;
   color: #333;
-  font-size: 14px;
+  font-size: 0.875rem;
 }
 
 .order-status {
   color: #666;
-  font-size: 14px;
+  font-size: 0.875rem;
   font-weight: 500;
   text-transform: capitalize;
 }
@@ -198,7 +198,7 @@ function handleClick(tabName: string) {
 }
 
 .product-title {
-  font-size: 14px;
+  font-size: 0.875rem;
   font-weight: 400;
   color: #333;
   margin: 0 0 8px 0;
@@ -210,7 +210,7 @@ function handleClick(tabName: string) {
 }
 
 .product-variant {
-  font-size: 13px;
+  font-size: 0.8125rem;
   color: #999;
   margin: 0 0 8px 0;
 }
@@ -224,20 +224,20 @@ function handleClick(tabName: string) {
   padding: 2px 8px;
   background-color: #e8f4fd;
   color: #1890ff;
-  font-size: 12px;
+  font-size: 0.75rem;
   border-radius: 4px;
   border: 1px solid #bae7ff;
 }
 
 .product-price {
-  font-size: 16px;
+  font-size: 1rem;
   font-weight: 500;
   color: #333;
   flex-shrink: 0;
 }
 
 .product-quantity {
-  font-size: 14px;
+  font-size: 0.875rem;
   color: #666;
   flex-shrink: 0;
   min-width: 60px;
@@ -264,7 +264,7 @@ function handleClick(tabName: string) {
 }
 
 :deep(.el-tabs__item) {
-  font-size: 14px;
+  font-size: 0.875rem;
   color: #666;
   font-weight: 400;
   padding: 0 0.75rem;
@@ -296,7 +296,7 @@ function handleClick(tabName: string) {
 }
 
 :deep(.el-input__inner) {
-  font-size: 14px;
+  font-size: 0.875rem;
   color: #333;
 }
 

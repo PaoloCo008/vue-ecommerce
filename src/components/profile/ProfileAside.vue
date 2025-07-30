@@ -58,7 +58,7 @@ a {
 }
 
 .sub-menu {
-  font-size: 14px;
+  font-size: 0.875rem;
   color: #666;
   padding-left: 40px !important;
 }

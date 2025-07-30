@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { formatPrice } from '@/lib/helpers'
+import { encodeOrderId, formatPrice } from '@/lib/helpers'
 import type { Order } from '@/lib/types/globals'
 import { format } from 'date-fns'
 import { useRouter } from 'vue-router'
@@ -51,7 +51,7 @@ const tableOrderData = props.orders.map((order) => ({
           @click="
             router.push({
               name: 'order-details',
-              params: { orderId: orderStore.encodeOrderId(scope.row._id) },
+              params: { orderId: encodeOrderId(scope.row._id) },
             })
           "
           >MANAGE</el-button
@@ -83,7 +83,7 @@ const tableOrderData = props.orders.map((order) => ({
 
 .additional-items {
   color: #666;
-  font-size: 14px;
+  font-size: 0.875rem;
   margin-left: 8px;
 }
 </style>

@@ -33,7 +33,7 @@ defineProps<{ label: string; address: Address }>()
 }
 
 .address-label {
-  font-size: 12px;
+  font-size: 0.75rem;
   color: #999;
   font-weight: 600;
   margin: 0 0 10px 0;

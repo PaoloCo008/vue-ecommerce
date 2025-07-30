@@ -135,7 +135,7 @@ const user = userStore.getUserById(authStore.user as string)
 }
 
 .marketing-checkbox {
-  font-size: 14px;
+  font-size: 0.875rem;
   color: #666;
   margin-top: 8px;
 }
@@ -143,7 +143,7 @@ const user = userStore.getUserById(authStore.user as string)
 .change-link {
   margin-left: 4px;
   padding: 0;
-  font-size: 14px;
+  font-size: 0.875rem;
   text-decoration: none;
 }
 
@@ -155,7 +155,7 @@ const user = userStore.getUserById(authStore.user as string)
   color: white;
   font-weight: 600;
   padding: 1.25rem 0;
-  font-size: 14px;
+  font-size: 0.875rem;
   border-radius: unset;
   margin-top: 20px;
 }
@@ -175,7 +175,7 @@ const user = userStore.getUserById(authStore.user as string)
   border: 1px solid #ddd;
   border-radius: 4px;
   padding: 8px 12px;
-  font-size: 14px;
+  font-size: 0.875rem;
 }
 
 :deep(.el-input.is-disabled .el-input__inner) {
@@ -185,7 +185,7 @@ const user = userStore.getUserById(authStore.user as string)
 }
 
 :deep(.el-checkbox__label) {
-  font-size: 14px;
+  font-size: 0.875rem;
   color: #666;
 }
 

@@ -258,7 +258,7 @@ const handleCardSelectCancel = () => {
 }
 
 .section-title {
-  font-size: 14px;
+  font-size: 0.875rem;
   font-weight: 600;
   color: #303133;
   margin: 0 0 8px 0;
@@ -338,14 +338,14 @@ const handleCardSelectCancel = () => {
 }
 
 .method-name {
-  font-size: 14px;
+  font-size: 0.875rem;
   font-weight: 600;
   color: #303133;
   line-height: 1.4;
 }
 
 .method-description {
-  font-size: 12px;
+  font-size: 0.75rem;
   color: #909399;
   line-height: 1.4;
 }
@@ -383,7 +383,7 @@ const handleCardSelectCancel = () => {
 
 .add-card-btn {
   height: 32px;
-  font-size: 12px;
+  font-size: 0.75rem;
   font-weight: 600;
   padding: 0 12px;
 }
@@ -401,16 +401,16 @@ const handleCardSelectCancel = () => {
   }
 
   .method-name {
-    font-size: 15px;
+    font-size: 0.9375rem;
   }
 
   .method-description {
-    font-size: 13px;
+    font-size: 0.8125rem;
   }
 
   .add-card-btn {
     height: 34px;
-    font-size: 13px;
+    font-size: 0.8125rem;
     padding: 0 14px;
   }
 }
@@ -426,7 +426,7 @@ const handleCardSelectCancel = () => {
   }
 
   .section-title {
-    font-size: 15px;
+    font-size: 0.9375rem;
     margin-bottom: 12px;
     padding: 0 20px;
   }
@@ -443,11 +443,11 @@ const handleCardSelectCancel = () => {
   }
 
   .method-name {
-    font-size: 15px;
+    font-size: 0.9375rem;
   }
 
   .method-description {
-    font-size: 13px;
+    font-size: 0.8125rem;
   }
 
   .method-extras {
@@ -460,7 +460,7 @@ const handleCardSelectCancel = () => {
 
   .add-card-btn {
     height: 36px;
-    font-size: 13px;
+    font-size: 0.8125rem;
     padding: 0 16px;
   }
 }
@@ -476,7 +476,7 @@ const handleCardSelectCancel = () => {
   }
 
   .section-title {
-    font-size: 16px;
+    font-size: 1rem;
     margin-bottom: 16px;
     padding: 0 24px;
   }
@@ -493,11 +493,11 @@ const handleCardSelectCancel = () => {
   }
 
   .method-name {
-    font-size: 16px;
+    font-size: 1rem;
   }
 
   .method-description {
-    font-size: 14px;
+    font-size: 0.875rem;
   }
 
   .card-section-header {
@@ -506,7 +506,7 @@ const handleCardSelectCancel = () => {
 
   .add-card-btn {
     height: 38px;
-    font-size: 14px;
+    font-size: 0.875rem;
     padding: 0 18px;
   }
 }
@@ -522,7 +522,7 @@ const handleCardSelectCancel = () => {
   }
 
   .section-title {
-    font-size: 17px;
+    font-size: 1.0625rem;
     margin-bottom: 20px;
     padding: 0 28px;
   }
@@ -539,11 +539,11 @@ const handleCardSelectCancel = () => {
   }
 
   .method-name {
-    font-size: 17px;
+    font-size: 1.0625rem;
   }
 
   .method-description {
-    font-size: 15px;
+    font-size: 0.9375rem;
   }
 
   .card-section-header {
@@ -552,7 +552,7 @@ const handleCardSelectCancel = () => {
 
   .add-card-btn {
     height: 40px;
-    font-size: 14px;
+    font-size: 0.875rem;
     padding: 0 20px;
   }
 }

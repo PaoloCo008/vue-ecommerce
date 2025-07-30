@@ -106,7 +106,7 @@ defineExpose({
 
 <style scoped>
 .description {
-  font-size: 14px;
+  font-size: 0.875rem;
   color: #666666;
   margin-bottom: 30px;
   line-height: 1.4;
@@ -128,7 +128,7 @@ defineExpose({
 }
 
 .input-field :deep(.el-input__inner) {
-  font-size: 14px;
+  font-size: 0.875rem;
 }
 
 .input-field :deep(.el-input__wrapper:focus) {

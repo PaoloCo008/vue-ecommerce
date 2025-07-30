@@ -64,8 +64,8 @@ const rules = {
   mobileNumber: [
     { required: true, message: 'Please enter your phone number', trigger: 'blur' },
     {
-      pattern: /^9\d{9}$/,
-      message: 'Please enter a valid PH mobile number (10 digits)',
+      pattern: /^09\d{9}$/,
+      message: 'Please enter a valid PH mobile number (11 digits)',
       trigger: 'blur',
     },
   ],
@@ -183,7 +183,9 @@ async function loadProvinceData() {
     provinceData.value = [
       ...data.sort((a: Province, b: Province) => a.province_name.localeCompare(b.province_name)),
     ]
-  } catch (error) {}
+  } catch {
+    return
+  }
 }
 
 async function loadDistrictData() {
@@ -205,7 +207,9 @@ async function loadDistrictData() {
         return provinceCode === district.province_code
       })
       .sort((a: District, b: District) => a.city_name.localeCompare(b.city_name))
-  } catch (error) {}
+  } catch {
+    return
+  }
 }
 
 async function loadWardData() {
@@ -224,7 +228,9 @@ async function loadWardData() {
         return districtCode === ward.city_code
       })
       .sort((a: Ward, b: Ward) => a.brgy_name.localeCompare(b.brgy_name))
-  } catch (error) {}
+  } catch {
+    return
+  }
 }
 
 onMounted(async () => {
@@ -425,7 +431,7 @@ onMounted(async () => {
   padding: 12px 24px;
   border-radius: 6px;
   font-weight: 600;
-  font-size: 14px;
+  font-size: 0.875rem;
   margin: 0;
   text-transform: uppercase;
 }

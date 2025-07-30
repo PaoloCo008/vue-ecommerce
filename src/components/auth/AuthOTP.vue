@@ -250,7 +250,7 @@ onUnmounted(() => {
 }
 
 .otp-title {
-  font-size: 18px;
+  font-size: 0.125rem;
   font-weight: 600;
   color: #333333;
   margin: 0;
@@ -279,7 +279,7 @@ onUnmounted(() => {
 }
 
 .description {
-  font-size: 14px;
+  font-size: 0.875rem;
   color: #666666;
   margin-bottom: 20px;
   line-height: 1.4;
@@ -293,7 +293,7 @@ onUnmounted(() => {
 }
 
 .label {
-  font-size: 14px;
+  font-size: 0.875rem;
   color: #999999;
 }
 
@@ -305,14 +305,14 @@ onUnmounted(() => {
 }
 
 .info-state {
-  font-size: 14px;
+  font-size: 0.875rem;
   color: #333333;
   font-weight: 500;
 }
 
 .change-number-btn {
   padding: 0;
-  font-size: 14px;
+  font-size: 0.875rem;
 }
 
 .otp-input-container {
@@ -330,7 +330,7 @@ onUnmounted(() => {
   text-align: center;
   border-radius: 8px;
   border: 2px solid #e4e7ed;
-  font-size: 18px;
+  font-size: 1.125rem;
   font-weight: 600;
   color: #333333;
   transition: border-color 0.2s;
@@ -356,7 +356,7 @@ onUnmounted(() => {
 }
 
 .resend-text {
-  font-size: 14px;
+  font-size: 0.875rem;
   color: #999999;
 }
 
@@ -368,7 +368,7 @@ onUnmounted(() => {
 .resend-btn {
   padding: 0;
   height: auto;
-  font-size: 14px;
+  font-size: 0.875rem;
   color: #409eff;
 }
 

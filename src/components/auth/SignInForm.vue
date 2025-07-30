@@ -151,7 +151,7 @@ const handleLogin = async () => {
 
 .form-input :deep(.el-input__inner) {
   padding: 1.5rem 0;
-  font-size: 14px;
+  font-size: 0.875rem;
   color: #6b7280;
 }
 
@@ -162,7 +162,7 @@ const handleLogin = async () => {
 
 .forgot-password .el-link {
   color: #fff;
-  font-size: 14px;
+  font-size: 0.875rem;
   text-decoration: none;
 }
 
@@ -173,7 +173,7 @@ const handleLogin = async () => {
   border-color: #f97316;
   border-radius: 8px;
   font-weight: 600;
-  font-size: 16px;
+  font-size: 1rem;
   letter-spacing: 0.5px;
 }
 
@@ -184,7 +184,7 @@ const handleLogin = async () => {
 
 .signup-link {
   text-align: center;
-  font-size: 14px;
+  font-size: 0.875rem;
 }
 
 .el-button {

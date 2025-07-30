@@ -38,7 +38,7 @@ export const users: User[] = [
       {
         _id: 'address3',
         fullName: 'Ana Reyes',
-        mobileNumber: '+63 945 555 0123',
+        mobileNumber: '0945555123',
         address: '789 Mabini Road, Subdivision Phase 2',
         unitNumber: 'Block 12 Lot 5',
         province: 'Cavite',

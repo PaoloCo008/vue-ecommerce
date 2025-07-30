@@ -84,7 +84,7 @@ const verificationFor = computed(() => route.query.for as string)
 }
 
 .description {
-  font-size: 16px;
+  font-size: 1rem;
   color: #666;
   line-height: 1.5;
   margin: 0 0 16px 0;
@@ -92,7 +92,7 @@ const verificationFor = computed(() => route.query.for as string)
 }
 
 .instruction {
-  font-size: 16px;
+  font-size: 1rem;
   color: #666;
   margin: 0 0 32px 0;
 }
@@ -114,7 +114,7 @@ const verificationFor = computed(() => route.query.for as string)
   background: white;
   cursor: pointer;
   transition: all 0.2s ease;
-  font-size: 16px;
+  font-size: 1rem;
   color: #666;
   text-align: left;
 }

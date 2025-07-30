@@ -79,7 +79,7 @@ const addresses = userStore.getUserAddressesById(authStore.user as string)
 }
 
 .page-title {
-  font-size: 24px;
+  font-size: 1.5rem;
   font-weight: 600;
   color: #333;
   margin: 0;
@@ -93,7 +93,7 @@ const addresses = userStore.getUserAddressesById(authStore.user as string)
 }
 
 .action-link {
-  font-size: 14px;
+  font-size: 0.875rem;
   padding: 0;
   color: #20b2aa;
   text-decoration: none;
@@ -111,7 +111,7 @@ const addresses = userStore.getUserAddressesById(authStore.user as string)
   background-color: #ff6b35;
   color: white;
   border: none;
-  font-size: 11px;
+  font-size: 0.6875rem;
   font-weight: 600;
   padding: 2px 6px;
   border-radius: 3px;
@@ -119,17 +119,17 @@ const addresses = userStore.getUserAddressesById(authStore.user as string)
 
 .address-text {
   color: #333;
-  font-size: 14px;
+  font-size: 0.875rem;
 }
 
 .postcode-cell {
   color: #666;
-  font-size: 14px;
+  font-size: 0.875rem;
 }
 
 .phone-cell {
   color: #333;
-  font-size: 14px;
+  font-size: 0.875rem;
 }
 
 .status-cell {
@@ -145,7 +145,7 @@ const addresses = userStore.getUserAddressesById(authStore.user as string)
 }
 
 .status-label {
-  font-size: 12px;
+  font-size: 0.75rem;
   color: #666;
   background-color: #f5f5f5;
   padding: 2px 6px;
@@ -153,7 +153,7 @@ const addresses = userStore.getUserAddressesById(authStore.user as string)
 }
 
 .edit-button {
-  font-size: 14px;
+  font-size: 0.875rem;
   font-weight: 600;
   color: #20b2aa;
   padding: 0;
@@ -175,7 +175,7 @@ const addresses = userStore.getUserAddressesById(authStore.user as string)
   color: white;
   font-weight: 600;
   padding: 12px 24px;
-  font-size: 14px;
+  font-size: 0.875rem;
   border-radius: 4px;
 }
 
@@ -192,7 +192,7 @@ const addresses = userStore.getUserAddressesById(authStore.user as string)
   background-color: #f8f9fa;
   color: #666;
   font-weight: 600;
-  font-size: 14px;
+  font-size: 0.875rem;
   padding: 12px 0;
 }
 

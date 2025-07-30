@@ -7,6 +7,7 @@ import { useProductStore } from './ProductStore'
 import { DEFAULT_SHIPPING_FEE } from '@/lib/constants'
 import { useOrderStore } from './OrderStore'
 import router from '@/router'
+import { encodeOrderId } from '../lib/helpers'
 
 export const useCartStore = defineStore('cart', {
   state: () => ({
@@ -83,8 +84,6 @@ export const useCartStore = defineStore('cart', {
 
       const userCart = this.getCartByUserId(userId)
 
-      console.log(userCart)
-
       if (userCart) {
         this.guestCart.forEach((item) => {
           const existingItem = userCart.items.find(
@@ -102,6 +101,8 @@ export const useCartStore = defineStore('cart', {
 
     updateUserCartItemQuantityByProductId(userId: string, productId: string, quantity: number) {
       const userCart = this.getCartByUserId(userId)
+
+      if (!userCart) return
 
       const existingItem = userCart?.items.find((cartItem) => cartItem.productId === productId)
 
@@ -141,17 +142,19 @@ export const useCartStore = defineStore('cart', {
     removeItemFromUserCart(userId: string, itemId: string) {
       const userCart = this.getCartByUserId(userId)
 
-      const existingItem = userCart?.items.find((cartItem) => cartItem._id === itemId)
+      if (!userCart) return
 
-      console.log(userCart)
+      const existingItem = userCart?.items.find((cartItem) => cartItem.productId === itemId)
 
       if (existingItem) {
-        userCart.items = userCart?.items.filter((item) => item._id !== itemId)
+        userCart.items = userCart?.items.filter((item) => item._id !== existingItem._id)
       }
     },
 
     removeSelectedItemsFromUserCart(userId: string) {
       const userCart = this.getCartByUserId(userId)
+
+      if (!userCart) return
 
       const selectedProductIds = this.selectedCartItems.map((item) => item.productId)
 
@@ -159,8 +162,6 @@ export const useCartStore = defineStore('cart', {
         const itemId = userCart?.items.findIndex((cartItem) => cartItem.productId === id)
 
         const selectedId = this.selectedCartItems.findIndex((cartItem) => cartItem.productId === id)
-
-        console.log({ itemId, selectedId })
 
         userCart?.items.splice(itemId, 1)
         this.selectedCartItems.splice(selectedId, 1)
@@ -233,7 +234,7 @@ export const useCartStore = defineStore('cart', {
 
         router.push({
           name: 'checkout',
-          params: { pendingOrderId: orderStore.encodeOrderId(pendingOrderId as string) },
+          params: { pendingOrderId: encodeOrderId(pendingOrderId as string) },
         })
       }
     },

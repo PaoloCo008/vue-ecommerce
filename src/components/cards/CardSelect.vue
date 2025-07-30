@@ -212,7 +212,7 @@ const handleCancel = () => {
 .provider-name {
   font-weight: 600;
   color: #303133;
-  font-size: 13px;
+  font-size: 0.8125rem;
   letter-spacing: 0.5px;
 }
 
@@ -233,7 +233,7 @@ const handleCancel = () => {
 
 .card-number {
   font-family: 'Courier New', monospace;
-  font-size: 16px;
+  font-size: 1rem;
   font-weight: 600;
   color: #303133;
   letter-spacing: 1px;
@@ -248,7 +248,7 @@ const handleCancel = () => {
 
 .card-name {
   color: #606266;
-  font-size: 13px;
+  font-size: 0.8125rem;
   font-weight: 500;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -261,7 +261,7 @@ const handleCancel = () => {
 
 .expiration {
   color: #909399;
-  font-size: 12px;
+  font-size: 0.75rem;
   font-weight: 500;
   flex-shrink: 0;
 }
@@ -277,7 +277,7 @@ const handleCancel = () => {
 
 .no-cards p {
   color: #909399;
-  font-size: 14px;
+  font-size: 0.875rem;
   margin: 0;
 }
 
@@ -300,7 +300,7 @@ const handleCancel = () => {
   border: 1px solid #dcdfe6;
   color: #606266;
   font-weight: 500;
-  font-size: 13px;
+  font-size: 0.8125rem;
 }
 
 .cancel-btn:hover,
@@ -317,7 +317,7 @@ const handleCancel = () => {
   border-color: #17a2b8;
   font-weight: 600;
   letter-spacing: 0.5px;
-  font-size: 13px;
+  font-size: 0.8125rem;
 }
 
 .save-btn:hover:not(:disabled),
@@ -344,15 +344,15 @@ const handleCancel = () => {
   }
 
   .provider-name {
-    font-size: 14px;
+    font-size: 0.875rem;
   }
 
   .card-number {
-    font-size: 17px;
+    font-size: 1.0625rem;
   }
 
   .card-name {
-    font-size: 13px;
+    font-size: 0.8125rem;
   }
 }
 
@@ -373,11 +373,11 @@ const handleCancel = () => {
   }
 
   .provider-name {
-    font-size: 14px;
+    font-size: 0.875rem;
   }
 
   .card-number {
-    font-size: 18px;
+    font-size: 1.125rem;
   }
 
   .card-meta {
@@ -385,11 +385,11 @@ const handleCancel = () => {
   }
 
   .card-name {
-    font-size: 14px;
+    font-size: 0.875rem;
   }
 
   .expiration {
-    font-size: 13px;
+    font-size: 0.8125rem;
   }
 
   .action-buttons {
@@ -400,7 +400,7 @@ const handleCancel = () => {
   .cancel-btn,
   .save-btn {
     height: 44px;
-    font-size: 14px;
+    font-size: 0.875rem;
   }
 }
 
@@ -429,7 +429,7 @@ const handleCancel = () => {
   }
 
   .provider-name {
-    font-size: 15px;
+    font-size: 0.9375rem;
   }
 
   .radio-check {
@@ -442,15 +442,15 @@ const handleCancel = () => {
   }
 
   .card-number {
-    font-size: 19px;
+    font-size: 1.1875rem;
   }
 
   .card-name {
-    font-size: 14px;
+    font-size: 0.875rem;
   }
 
   .expiration {
-    font-size: 13px;
+    font-size: 0.8125rem;
   }
 
   .action-buttons {
@@ -461,7 +461,7 @@ const handleCancel = () => {
   .cancel-btn,
   .save-btn {
     height: 48px;
-    font-size: 15px;
+    font-size: 0.9375rem;
   }
 }
 
@@ -490,7 +490,7 @@ const handleCancel = () => {
   }
 
   .provider-name {
-    font-size: 16px;
+    font-size: 1rem;
   }
 
   .radio-check {
@@ -503,7 +503,7 @@ const handleCancel = () => {
   }
 
   .card-number {
-    font-size: 20px;
+    font-size: 1.25rem;
   }
 
   .card-meta {
@@ -511,11 +511,11 @@ const handleCancel = () => {
   }
 
   .card-name {
-    font-size: 15px;
+    font-size: 0.9375rem;
   }
 
   .expiration {
-    font-size: 14px;
+    font-size: 0.875rem;
   }
 
   .action-buttons {
@@ -525,7 +525,7 @@ const handleCancel = () => {
   .cancel-btn,
   .save-btn {
     height: 52px;
-    font-size: 16px;
+    font-size: 1rem;
   }
 }
 </style>

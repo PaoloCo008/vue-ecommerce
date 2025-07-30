@@ -6,10 +6,13 @@ import { useProductStore } from './ProductStore'
 import { useCartStore } from './CartStore'
 import router from '@/router'
 import { compareAsc } from 'date-fns'
-import { getCardImage } from '@/lib/helpers'
+import {
+  convertPaymentMethodToDisplay,
+  generateOrderNumber,
+  generateTimestampTracking,
+} from '@/lib/helpers'
 import { useUserStore } from './UserStore'
-import { useRoute } from 'vue-router'
-import { ElLoading, ElMessage, ElMessageBox } from 'element-plus'
+import { ElLoading, ElMessage } from 'element-plus'
 
 // Add interface for display payment methods
 interface PaymentMethodDisplay {
@@ -49,12 +52,14 @@ export const useOrderStore = defineStore('order', {
         return pendingOrder?.items.map((item) => {
           const product = productStore.getProductById(item.productId)
 
+          if (!product) return
+
           return {
-            _id: product?._id,
-            name: product?.name,
-            price: product?.price * item.quantity,
+            _id: product._id,
+            name: product.name,
+            price: product.price * item.quantity,
             quantity: item.quantity,
-            image: productStore.getProductPrimaryImageById(product?._id as string),
+            image: productStore.getProductPrimaryImageById(product._id as string),
           }
         })
       }
@@ -131,138 +136,105 @@ export const useOrderStore = defineStore('order', {
         return filteredUserOrders
       }
     },
-  },
 
-  actions: {
-    getDefaultPaymentMethods(userId: string) {
-      const paymentMethodOptions = {
-        cash_on_delivery: {
-          id: 'cash_on_delivery',
-          label: 'Cash on Delivery',
-          type: 'Cash on Delivery',
-          src: 'https://img.lazcdn.com/g/tps/tfs/TB1ZP8kM1T2gK0jSZFvXXXnFXXa-96-96.png_2200x2200q75.png_.webp',
-          number: null,
-        },
-        gcash: {
-          id: 'gcash',
-          label: 'GCash e-Wallet',
-          type: 'GCash e-Wallet',
-          src: '/gcash-img.webp',
-          number: null,
-        },
-      }
+    getDefaultPaymentMethods() {
+      return (userId: string) => {
+        const paymentMethodOptions = {
+          cash_on_delivery: {
+            id: 'cash_on_delivery',
+            label: 'Cash on Delivery',
+            type: 'Cash on Delivery',
+            src: 'https://img.lazcdn.com/g/tps/tfs/TB1ZP8kM1T2gK0jSZFvXXXa-96-96.png_2200x2200q75.png_.webp',
+            number: null,
+          },
+          gcash: {
+            id: 'gcash',
+            label: 'GCash e-Wallet',
+            type: 'GCash e-Wallet',
+            src: '/gcash-img.webp',
+            number: null,
+          },
+        }
 
-      // Get user's last two payment methods from order history
-      const lastPaymentMethods = this.getUserLastPaymentMethods(userId)
+        // Get user's last two payment methods from order history
+        const lastPaymentMethods = this.getUserLastPaymentMethods(userId)
 
-      if (lastPaymentMethods.length >= 2) {
-        return lastPaymentMethods
-      } else if (lastPaymentMethods.length === 1) {
-        const defaultMethod =
-          lastPaymentMethods[0].id === 'cash_on_delivery' ? 'gcash' : 'cash_on_delivery'
-        return [lastPaymentMethods[0], paymentMethodOptions[defaultMethod]]
-      } else {
+        if (!lastPaymentMethods || lastPaymentMethods.length === 0) {
+          return [paymentMethodOptions.cash_on_delivery, paymentMethodOptions.gcash]
+        } else if (lastPaymentMethods.length >= 2) {
+          return lastPaymentMethods
+        } else if (lastPaymentMethods.length === 1) {
+          const defaultMethod =
+            lastPaymentMethods[0].id === 'cash_on_delivery'
+              ? paymentMethodOptions.gcash
+              : paymentMethodOptions.cash_on_delivery
+          return [lastPaymentMethods[0], defaultMethod]
+        }
+
         return [paymentMethodOptions.cash_on_delivery, paymentMethodOptions.gcash]
       }
     },
 
-    getUserLastPaymentMethods(userId: string) {
-      const userStore = useUserStore()
-      const userOrders = this.getUserOrderHistory(userId)
-      const userSavedPaymentMethods = userStore.getUserPaymentMethods(userId)
+    getUserLastPaymentMethods() {
+      return (userId: string) => {
+        const userStore = useUserStore()
+        const userOrders = this.getUserOrderHistory(userId)
+        const userSavedPaymentMethods = userStore.getUserPaymentMethods(userId)
 
-      if (userOrders.length === 0 || userSavedPaymentMethods.length === 0) return []
+        if (!userOrders || !userSavedPaymentMethods) return []
 
-      const usedMethods = []
-      const seenMethodIds = new Set()
+        if (userOrders.length === 0 || userSavedPaymentMethods.length === 0) return []
 
-      // Go through order history from most recent to oldest
-      for (const order of userOrders) {
-        if (order.paymentMethod && usedMethods.length < 2) {
-          // Check if this payment method exists in user's saved payment methods
-          const savedMethod = userSavedPaymentMethods.find((savedPM) => {
-            // For different payment method types, check different identifiers
-            switch (order.paymentMethod.type) {
-              case 'cash_on_delivery':
-                return savedPM.type === 'cash_on_delivery'
-              case 'mobile_wallet':
-                return (
-                  savedPM.type === 'mobile_wallet' &&
-                  savedPM.provider === order.paymentMethod.provider &&
-                  savedPM.accountNumber === order.paymentMethod.accountNumber
-                )
-              case 'credit_card':
-                return (
-                  savedPM.type === 'credit_card' &&
-                  savedPM.provider === order.paymentMethod.provider &&
-                  savedPM.lastFour === order.paymentMethod.lastFour
-                )
-              default:
-                return savedPM._id === order.paymentMethod._id
-            }
-          })
+        const usedMethods = []
+        const seenMethodIds = new Set()
 
-          // If the payment method from order exists in saved methods and we haven't seen it yet
-          if (savedMethod && !seenMethodIds.has(savedMethod._id)) {
-            seenMethodIds.add(savedMethod._id)
-            const displayMethod = this.convertPaymentMethodToDisplay(savedMethod)
-            if (displayMethod) {
-              usedMethods.push(displayMethod)
+        for (const order of userOrders) {
+          if (order.paymentMethod && usedMethods.length < 2) {
+            const savedMethod = userSavedPaymentMethods.find((savedPM) => {
+              switch (order.paymentMethod?.type) {
+                case 'cash_on_delivery':
+                  return savedPM.type === 'cash_on_delivery'
+                case 'mobile_wallet':
+                  return (
+                    savedPM.type === 'mobile_wallet' &&
+                    savedPM.provider === order.paymentMethod.provider &&
+                    savedPM.accountNumber === order.paymentMethod.accountNumber
+                  )
+                case 'credit_card':
+                  return (
+                    savedPM.type === 'credit_card' &&
+                    savedPM.provider === order.paymentMethod.provider &&
+                    savedPM.lastFour === order.paymentMethod.lastFour
+                  )
+              }
+            })
+
+            if (savedMethod && !seenMethodIds.has(savedMethod._id)) {
+              seenMethodIds.add(savedMethod._id)
+              const displayMethod = convertPaymentMethodToDisplay(savedMethod)
+              if (displayMethod) {
+                usedMethods.push(displayMethod)
+              }
             }
           }
         }
+
+        return usedMethods
       }
-
-      return usedMethods
     },
+  },
 
-    convertPaymentMethodToDisplay(paymentMethod: PaymentMethod): PaymentMethodDisplay | null {
-      switch (paymentMethod.type) {
-        case 'cash_on_delivery':
-          return {
-            id: 'cash_on_delivery',
-            label: 'Cash on Delivery',
-            type: 'Cash on Delivery',
-            src: 'https://img.lazcdn.com/g/tps/tfs/TB1ZP8kM1T2gK0jSZFvXXXnFXXa-96-96.png_2200x2200q75.png_.webp',
-            number: null,
-            paymentMethodData: paymentMethod,
-          }
-        case 'mobile_wallet':
-          if (paymentMethod.provider === 'gcash') {
-            return {
-              id: `gcash_${paymentMethod._id}`,
-              label: 'GCash e-Wallet',
-              type: 'GCash e-Wallet',
-              src: '/gcash-img.webp',
-              number: null,
-              paymentMethodData: paymentMethod,
-            }
-          }
-          break
-        case 'credit_card':
-          return {
-            id: `card_${paymentMethod._id}`,
-            label: `${paymentMethod.provider.toUpperCase()} ***********${paymentMethod.lastFour}`,
-            type: 'Credit/Debit Card',
-            src: getCardImage(paymentMethod.provider),
-            number: `${paymentMethod.provider.toUpperCase()} ***********${paymentMethod.lastFour}`,
-            paymentMethodData: paymentMethod,
-          }
-      }
-      return null
-    },
-
+  actions: {
     createPendingOrder(selectedItems: CartItem[], addressId: string) {
       const authStore = useAuthStore()
       const userId = authStore.user as string
 
-      // Get default payment methods for this user
       const defaultPaymentMethods = this.getDefaultPaymentMethods(userId)
 
       const newPendingOrder: Order = {
         _id: crypto.randomUUID(),
         userId,
-        orderNumber: this.generateOrderNumber(),
+        orderNumber: generateOrderNumber(),
         status: 'pending' as OrderStatus,
         items: selectedItems,
         createdAt: new Date(),
@@ -277,13 +249,12 @@ export const useOrderStore = defineStore('order', {
         },
         shippingAddress: addressId,
         paymentMethod: null,
-        // Add these new fields to persist state
         availablePaymentMethods: defaultPaymentMethods,
         selectedPaymentMethodId: defaultPaymentMethods[0]?.id || null,
         shippedBy: {
           method: 'standard',
           carrier: 'J10 Express',
-          trackingNumber: this.generateTimestampTracking(),
+          trackingNumber: generateTimestampTracking(),
         },
       }
 
@@ -298,13 +269,11 @@ export const useOrderStore = defineStore('order', {
         const order = this.pendingOrders[orderIndex]
         let updatedMethods = [...(order.availablePaymentMethods || [])]
 
-        // Remove existing method if it exists
         const existingIndex = updatedMethods.findIndex((method) => method.id === newMethod.id)
         if (existingIndex !== -1) {
           updatedMethods.splice(existingIndex, 1)
         }
 
-        // Add new method to front and keep only 2 methods max
         updatedMethods.unshift(newMethod)
         updatedMethods = updatedMethods.slice(0, 2)
 
@@ -330,7 +299,6 @@ export const useOrderStore = defineStore('order', {
     async completePendingOrder(orderId: string, finalUpdates?: Partial<Order>) {
       const cartStore = useCartStore()
 
-      // Method 1: Using Element Plus Loading Service (Recommended)
       const loading = ElLoading.service({
         lock: true,
         text: 'Processing your order...',
@@ -340,22 +308,19 @@ export const useOrderStore = defineStore('order', {
       try {
         const pendingOrder = this.getPendingOrderById(orderId)
 
-        if (!pendingOrder) {
-          throw new Error('Pending order not found')
-        }
+        if (!pendingOrder) return
 
-        // Update loading text based on payment method
         const isCOD = pendingOrder.selectedPaymentMethodId === 'cash_on_delivery'
         loading.setText(isCOD ? 'Placing your order...' : 'Processing payment...')
 
-        // Create a clean order object without checkout-specific fields
         const { availablePaymentMethods, selectedPaymentMethodId, ...cleanPendingOrder } =
           pendingOrder
+        void availablePaymentMethods
+        void selectedPaymentMethodId
 
         let completedOrder: Order
 
         if (isCOD) {
-          // For COD orders: only set placedAt, no paidAt, status remains 'placed'
           completedOrder = {
             ...cleanPendingOrder,
             ...finalUpdates,
@@ -364,7 +329,6 @@ export const useOrderStore = defineStore('order', {
             paidAt: undefined,
           }
         } else {
-          // For other payment methods: set both placedAt and paidAt, status is 'paid'
           completedOrder = {
             ...cleanPendingOrder,
             ...finalUpdates,
@@ -374,11 +338,11 @@ export const useOrderStore = defineStore('order', {
           }
         }
 
-        // Simulate processing time
         await new Promise((resolve) => setTimeout(resolve, 2000))
 
-        // Update loading text for final steps
         loading.setText('Finalizing order...')
+
+        await new Promise((resolve) => setTimeout(resolve, 2000))
 
         const productIds = completedOrder.items.map((item) => item.productId)
 
@@ -390,42 +354,20 @@ export const useOrderStore = defineStore('order', {
         this.orders.push(completedOrder)
         this.removePendingOrder(orderId)
 
-        // Show success message
-        ElMessage.success({
-          message: 'Order completed successfully!',
-          duration: 3000,
-          showClose: true,
-        })
+        router.replace({ name: 'orders' })
 
-        // Navigate after showing success
         setTimeout(() => {
-          router.replace({ name: 'orders' })
+          ElMessage.success({
+            message: 'Order successfully placed!',
+            duration: 3000,
+            showClose: true,
+          })
         }, 1000)
 
         return completedOrder
-      } catch (error) {
-        console.error('Error completing order:', error)
-
-        // Show error message
-        ElMessage.error({
-          message: 'Failed to complete order. Please try again.',
-          duration: 5000,
-          showClose: true,
-        })
-
-        // Optionally show detailed error dialog
-        ElMessageBox.alert(
-          'There was an issue processing your order. Please check your connection and try again.',
-          'Order Processing Error',
-          {
-            confirmButtonText: 'OK',
-            type: 'error',
-          },
-        )
-
-        throw error
+      } catch {
+        return
       } finally {
-        // Always close loading
         loading.close()
       }
     },
@@ -453,7 +395,6 @@ export const useOrderStore = defineStore('order', {
       const afterCount = this.pendingOrders.length
       const removedCount = beforeCount - afterCount
 
-      console.log(`Cleanup removed ${removedCount} expired pending orders`)
       return { beforeCount, afterCount, removedCount }
     },
 
@@ -473,61 +414,10 @@ export const useOrderStore = defineStore('order', {
           ...(updates.paidAt && { paidAt: new Date(updates.paidAt) }),
           ...(updates.placedAt && { placedAt: new Date(updates.placedAt) }),
         }
-
-        console.log(`Order ${orderId} updated successfully`, this.orders[orderIndex])
         return this.orders[orderIndex]
       } else {
-        console.error(`Order ${orderId} not found`)
         return null
       }
-    },
-
-    encodeOrderId(orderId: string) {
-      const reversed = orderId.split('').reverse().join('')
-      const withTimestamp = `${reversed}_${Date.now().toString(36)}`
-      const encoded = btoa(withTimestamp)
-      const random = Math.random().toString(36).substring(2, 6)
-      return `${random}${encoded.replace(/[+/=]/g, '')}${random}`
-    },
-
-    decodeOrderId(encodedId: string) {
-      try {
-        const cleanEncoded = encodedId.substring(4, encodedId.length - 4)
-        const decoded = atob(cleanEncoded)
-        const parts = decoded.split('_')
-
-        if (parts.length >= 2) {
-          return parts[0].split('').reverse().join('')
-        }
-        return null
-      } catch (error) {
-        return null
-      }
-    },
-
-    generateOrderNumber() {
-      const timestamp = Date.now().toString().slice(-6)
-      const random = Math.random().toString(36).substring(2, 5).toUpperCase()
-      return `ORD-${timestamp}-${random}`
-    },
-
-    generateTimestampTracking() {
-      const now = Date.now()
-      const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
-      const numbers = '0123456789'
-      const timeStr = now.toString().slice(-6)
-
-      let randomLetters = ''
-      for (let i = 0; i < 3; i++) {
-        randomLetters += letters.charAt(Math.floor(Math.random() * letters.length))
-      }
-
-      let randomNumbers = ''
-      for (let i = 0; i < 3; i++) {
-        randomNumbers += numbers.charAt(Math.floor(Math.random() * numbers.length))
-      }
-
-      return `TRK${timeStr}${randomLetters}${randomNumbers}`
     },
   },
 })

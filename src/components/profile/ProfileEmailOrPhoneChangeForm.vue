@@ -242,7 +242,7 @@ const changeMethodValue = async () => {
 }
 
 .message {
-  font-size: 16px;
+  font-size: 1rem;
   color: #333;
   line-height: 1.5;
   margin-bottom: 32px;
@@ -285,7 +285,7 @@ const changeMethodValue = async () => {
   right: 8px;
   top: 50%;
   transform: translateY(-50%);
-  font-size: 12px;
+  font-size: 0.75rem;
   font-weight: 600;
   padding: 4px 8px;
   height: auto;

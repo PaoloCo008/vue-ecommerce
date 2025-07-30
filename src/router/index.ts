@@ -21,6 +21,7 @@ import ProfileEmailOrPhoneChangeForm from '@/components/profile/ProfileEmailOrPh
 import AuthVerificationMethods from '@/components/auth/AuthVerificationMethods.vue'
 import AuthVerificationForm from '@/components/auth/AuthVerificationForm.vue'
 import { useAuthStore } from '@/stores/AuthStore'
+import NotFound from '@/components/NotFound.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -151,6 +152,11 @@ const router = createRouter({
               ],
             },
           ],
+        },
+        {
+          path: '/:pathMatch(.*)*',
+          name: 'not-found',
+          component: NotFound,
         },
       ],
     },

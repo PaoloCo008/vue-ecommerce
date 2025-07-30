@@ -9,7 +9,7 @@ import CardPaymentMethod from '@/components/cards/CardPaymentMethod.vue'
 
 import { useUserStore } from '@/stores/UserStore'
 import { useAuthStore } from '@/stores/AuthStore'
-import { formatPrice } from '@/lib/helpers'
+import { decodeOrderId, formatPrice } from '@/lib/helpers'
 import { useOrderStore } from '@/stores/OrderStore'
 import { useRoute } from 'vue-router'
 import { ElMessageBox } from 'element-plus'
@@ -21,7 +21,7 @@ const authStore = useAuthStore()
 const orderStore = useOrderStore()
 const route = useRoute()
 
-const orderId = orderStore.decodeOrderId(route.params.pendingOrderId as string)
+const orderId = decodeOrderId(route.params.pendingOrderId as string)
 const pendingOrder = orderStore.getPendingOrderById(orderId as string)
 
 const addresses = userStore.getUserAddressesById(authStore.user as string)
@@ -427,7 +427,7 @@ const dialogStyle = {
   font-weight: 600;
   margin-bottom: 8px;
   color: #333;
-  font-size: 14px;
+  font-size: 0.875rem;
 }
 
 .address-badge {
@@ -438,7 +438,7 @@ const dialogStyle = {
 
 .address-text {
   color: #666;
-  font-size: 14px;
+  font-size: 0.875rem;
 }
 
 .package-header {
@@ -450,7 +450,7 @@ const dialogStyle = {
 
 .package-header h4 {
   margin: 0;
-  font-size: 14px;
+  font-size: 0.875rem;
   color: #333;
   font-weight: 600;
 }
@@ -460,7 +460,7 @@ const dialogStyle = {
 }
 
 .delivery-title {
-  font-size: 14px;
+  font-size: 0.875rem;
   color: #333;
   margin-bottom: 12px;
   font-weight: 500;
@@ -539,7 +539,7 @@ const dialogStyle = {
 }
 
 .product-color {
-  font-size: 12px;
+  font-size: 0.75rem;
   color: #666;
   margin-bottom: 8px;
   text-align: center;
@@ -559,13 +559,13 @@ const dialogStyle = {
 }
 
 .current-price {
-  font-size: 16px;
+  font-size: 1rem;
   font-weight: 600;
   color: #ff4d4f;
 }
 
 .product-quantity {
-  font-size: 14px;
+  font-size: 0.875rem;
   color: #666;
   align-self: flex-end;
 }
@@ -611,7 +611,7 @@ const dialogStyle = {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 10px;
+  font-size: 0.625rem;
   font-weight: bold;
   color: white;
   flex-shrink: 0;
@@ -623,7 +623,7 @@ const dialogStyle = {
 
 .visa-icon {
   background: #1a1f71;
-  font-size: 8px;
+  font-size: 0.5rem;
 }
 
 .payment-details {
@@ -651,7 +651,7 @@ const dialogStyle = {
 
 .payment-checkmark {
   color: #52c41a;
-  font-size: 16px;
+  font-size: 1rem;
   font-weight: bold;
   flex-shrink: 0;
 }
@@ -681,27 +681,27 @@ const dialogStyle = {
   display: flex;
   justify-content: space-between;
   margin-bottom: 12px;
-  font-size: 14px;
+  font-size: 0.875rem;
   color: #666;
 }
 
 .summary-divider {
   height: 1px;
   background: #e8e8e8;
-  margin: 16px 0;
+  margin: 1rem 0;
 }
 
 .summary-total {
   display: flex;
   justify-content: space-between;
-  font-size: 16px;
+  font-size: 1rem;
   font-weight: 600;
   color: #333;
 }
 
 .total-amount {
   color: #ff4d4f;
-  font-size: 18px;
+  font-size: 1.125rem;
   font-weight: 700;
 }
 
@@ -710,7 +710,7 @@ const dialogStyle = {
   height: 48px;
   background: #ff6b35;
   border-color: #ff6b35;
-  font-size: 16px;
+  font-size: 1rem;
   font-weight: 600;
   margin-top: 16px;
   text-transform: uppercase;

@@ -86,7 +86,7 @@ const isEditting = computed(() => route.meta.operation === 'edit')
   padding: 12px 24px;
   border-radius: 6px;
   font-weight: 600;
-  font-size: 14px;
+  font-size: 0.875rem;
   margin: 0;
   text-transform: uppercase;
 }

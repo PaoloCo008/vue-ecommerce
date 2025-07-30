@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { formatDate, formatPrice } from '@/lib/helpers'
+import { decodeOrderId, formatDate, formatPrice } from '@/lib/helpers'
 import type { Order } from '@/lib/types/globals'
 import { useAuthStore } from '@/stores/AuthStore'
 import { useOrderStore } from '@/stores/OrderStore'
@@ -14,7 +14,7 @@ const userStore = useUserStore()
 const authStore = useAuthStore()
 
 const order = computed(() =>
-  orderStore.getOrderById(orderStore.decodeOrderId(route.params.orderId as string) as string),
+  orderStore.getOrderById(decodeOrderId(route.params.orderId as string) as string),
 )
 
 const address = userStore.getUserAddressByAddressId(
@@ -443,7 +443,7 @@ const updateOrderStatus = async (field: string) => {
 .payment-type {
   color: #ff9800;
   font-weight: 600;
-  font-size: 12px;
+  font-size: 0.75rem;
   margin-top: 4px;
   text-transform: uppercase;
 }
@@ -524,7 +524,7 @@ const updateOrderStatus = async (field: string) => {
 }
 
 .step-description {
-  font-size: 12px;
+  font-size: 0.75rem;
   color: #666;
   line-height: 1.4;
   margin-bottom: 8px;
@@ -536,7 +536,7 @@ const updateOrderStatus = async (field: string) => {
 
 .btn-sm {
   padding: 8px 16px;
-  font-size: 12px;
+  font-size: 0.75rem;
   border-radius: 4px;
   border: none;
   font-weight: 600;
@@ -568,7 +568,7 @@ const updateOrderStatus = async (field: string) => {
 
 .action-hint {
   margin: 6px 0 0 0;
-  font-size: 10px;
+  font-size: 0.625rem;
   color: #999;
   font-style: italic;
 }
@@ -595,7 +595,7 @@ const updateOrderStatus = async (field: string) => {
   align-items: center;
   gap: 8px;
   color: #666;
-  font-size: 14px;
+  font-size: 0.875rem;
   cursor: pointer;
   border: none;
   background: none;
@@ -607,7 +607,7 @@ const updateOrderStatus = async (field: string) => {
 
 .order-info {
   text-align: center;
-  font-size: 14px;
+  font-size: 0.875rem;
 }
 
 .order-id {
@@ -705,7 +705,7 @@ const updateOrderStatus = async (field: string) => {
 }
 
 .product-quantity {
-  font-size: 14px;
+  font-size: 0.875rem;
   color: #666;
 }
 
@@ -718,7 +718,7 @@ const updateOrderStatus = async (field: string) => {
   display: flex;
   justify-content: space-between;
   margin-bottom: 10px;
-  font-size: 14px;
+  font-size: 0.875rem;
 }
 
 .price-label {
@@ -731,7 +731,7 @@ const updateOrderStatus = async (field: string) => {
 
 .price-total {
   font-weight: 600;
-  font-size: 16px;
+  font-size: 1rem;
   color: #ee4d2d;
   border-top: 1px solid #eee;
   padding-top: 10px;
@@ -743,7 +743,7 @@ const updateOrderStatus = async (field: string) => {
   color: white;
   padding: 2px 6px;
   border-radius: 3px;
-  font-size: 11px;
+  font-size: 0.6875rem;
   margin-right: 8px;
 }
 

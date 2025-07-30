@@ -214,12 +214,12 @@ const handleConfirm = async () => {
 .gcash-modal :deep(.el-dialog__title) {
   color: white;
   font-weight: 600;
-  font-size: 18px;
+  font-size: 1.125rem;
 }
 
 .gcash-modal :deep(.el-dialog__headerbtn .el-dialog__close) {
   color: white;
-  font-size: 20px;
+  font-size: 1.25rem;
 }
 
 .modal-content {
@@ -268,7 +268,7 @@ const handleConfirm = async () => {
 }
 
 .save-text {
-  font-size: 14px;
+  font-size: 0.875rem;
 }
 
 .form-buttons {

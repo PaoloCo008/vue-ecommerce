@@ -99,7 +99,7 @@ const handleConfirm = () => {
 }
 
 .instruction-text {
-  font-size: 14px;
+  font-size: 0.875rem;
   line-height: 1.6;
   color: #303133;
   text-align: left;
@@ -116,7 +116,7 @@ const handleConfirm = () => {
   background: #17a2b8;
   border-color: #17a2b8;
   font-weight: 600;
-  font-size: 15px;
+  font-size: 0.9375rem;
   border-radius: 8px;
 }
 
@@ -142,12 +142,12 @@ const handleConfirm = () => {
   }
 
   .instruction-text {
-    font-size: 14px;
+    font-size: 0.875rem;
   }
 
   .confirm-btn {
     height: 46px;
-    font-size: 15px;
+    font-size: 0.9375rem;
   }
 }
 
@@ -176,7 +176,7 @@ const handleConfirm = () => {
   }
 
   .instruction-text {
-    font-size: 15px;
+    font-size: 0.9375rem;
     line-height: 1.7;
   }
 
@@ -186,7 +186,7 @@ const handleConfirm = () => {
 
   .confirm-btn {
     height: 48px;
-    font-size: 16px;
+    font-size: 1rem;
   }
 }
 
@@ -217,7 +217,7 @@ const handleConfirm = () => {
   }
 
   .instruction-text {
-    font-size: 16px;
+    font-size: 1rem;
     line-height: 1.8;
   }
 
@@ -227,7 +227,7 @@ const handleConfirm = () => {
 
   .confirm-btn {
     height: 52px;
-    font-size: 17px;
+    font-size: 1.0625rem;
     max-width: 300px;
     margin: 0 auto;
     display: block;
@@ -260,7 +260,7 @@ const handleConfirm = () => {
   }
 
   .instruction-text {
-    font-size: 17px;
+    font-size: 1.0625rem;
     line-height: 1.8;
   }
 
@@ -270,7 +270,7 @@ const handleConfirm = () => {
 
   .confirm-btn {
     height: 56px;
-    font-size: 18px;
+    font-size: 1.125rem;
     max-width: 320px;
   }
 }
@@ -283,13 +283,13 @@ const handleConfirm = () => {
   }
 
   .instruction-text {
-    font-size: 18px;
+    font-size: 1.125rem;
     line-height: 1.9;
   }
 
   .confirm-btn {
     height: 60px;
-    font-size: 19px;
+    font-size: 1.1875rem;
     max-width: 350px;
   }
 }

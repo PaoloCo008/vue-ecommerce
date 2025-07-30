@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { useRouter } from 'vue-router'
 import AppAddressTag from '../app/AppAddressTag.vue'
-import { buildAddressLine } from '@/lib/helpers'
+import { buildAddressLine, formatPhilippinePhone } from '@/lib/helpers'
 import type { Address } from '@/lib/types/globals'
 
 defineProps<{ addresses: Address[]; selecting?: boolean }>()
@@ -52,7 +52,7 @@ const selectedAddressId = defineModel()
 
     <el-table-column prop="mobileNumber" label="Phone Number" width="125">
       <template #default="scope">
-        <div class="phone-cell">{{ scope.row.mobileNumber }}</div>
+        <div class="phone-cell">{{ formatPhilippinePhone(scope.row.mobileNumber) }}</div>
       </template>
     </el-table-column>
 

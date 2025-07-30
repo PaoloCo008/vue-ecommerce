@@ -140,7 +140,7 @@ const handleSearchButton = () => {
   }
 
   .search-input :deep(.el-input__inner) {
-    font-size: 14px;
+    font-size: 0.875rem;
     color: #333;
   }
 
@@ -201,7 +201,7 @@ const handleSearchButton = () => {
 }
 
 /* .product-category {
-  font-size: 12px;
+  font-size: 0.75rem;
   color: #666;
 } */
 </style>

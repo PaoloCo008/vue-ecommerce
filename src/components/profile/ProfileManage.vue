@@ -151,7 +151,7 @@ a:active {
 }
 
 .user-name {
-  font-size: 16px;
+  font-size: 1rem;
   font-weight: 600;
   color: #333;
   margin: 0 0 8px 0;
@@ -204,7 +204,7 @@ a:active {
   color: white;
   font-weight: 600;
   padding: 12px 24px;
-  font-size: 14px;
+  font-size: 0.875rem;
   border-radius: 4px;
 }
 

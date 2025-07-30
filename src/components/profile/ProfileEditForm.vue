@@ -135,7 +135,7 @@ const saveChanges = () => {
 }
 
 .marketing-checkbox {
-  font-size: 14px;
+  font-size: 0.875rem;
   color: #666;
   margin-top: 8px;
 }
@@ -143,7 +143,7 @@ const saveChanges = () => {
 .change-link {
   margin-left: 4px;
   padding: 0;
-  font-size: 14px;
+  font-size: 0.875rem;
   text-decoration: none;
 }
 
@@ -172,7 +172,7 @@ const saveChanges = () => {
   color: white;
   font-weight: 600;
   padding: 1.25rem 0;
-  font-size: 14px;
+  font-size: 0.875rem;
   border-radius: unset;
 }
 
@@ -209,7 +209,7 @@ const saveChanges = () => {
 :deep(.el-input__inner) {
   border-radius: 4px;
   padding: 1.125rem 0;
-  font-size: 14px;
+  font-size: 0.875rem;
 }
 
 :deep(.el-form-item__content) {
@@ -222,7 +222,7 @@ const saveChanges = () => {
   border: 1px solid #ddd;
   border-radius: 4px;
   padding: 8px 12px;
-  font-size: 14px;
+  font-size: 0.875rem;
 }
 
 :deep(.el-input.is-disabled .el-input__inner) {
@@ -232,7 +232,7 @@ const saveChanges = () => {
 }
 
 :deep(.el-checkbox__label) {
-  font-size: 14px;
+  font-size: 0.875rem;
   color: #666;
 }
 

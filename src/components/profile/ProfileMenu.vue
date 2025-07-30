@@ -8,7 +8,7 @@ import ProfileAside from './ProfileAside.vue'
     <AppDrawer>
       <template #trigger="props">
         <button class="sidebar-button" @click="props.handleOpenDrawer">
-          <i class="el-icon mr-2" style="font-size: 20px"
+          <i class="el-icon mr-2" style="font-size: 1.25rem"
             ><svg
               width="20"
               height="20"

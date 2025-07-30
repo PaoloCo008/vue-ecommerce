@@ -5,6 +5,7 @@ import AppAddressTag from '../app/AppAddressTag.vue'
 import type { Address } from '@/lib/types/globals'
 import { useUserStore } from '@/stores/UserStore'
 import { useAuthStore } from '@/stores/AuthStore'
+import { formatPhilippinePhone } from '../../lib/helpers'
 
 const props = defineProps<{ addresses: Address[]; selectedAddressId: string | undefined }>()
 
@@ -24,18 +25,6 @@ const selectedAddressId = computed(() => {
   }
   // Otherwise, automatically use default shipping address
   return props.selectedAddressId
-})
-
-const selectedAddress = computed(() => {
-  if (selectedAddressId.value) {
-    console.log('hello')
-    return userStore.getUserAddressByAddressId(
-      authStore.user as string,
-      selectedAddressId.value as string,
-    )
-  }
-
-  return null
 })
 
 // Fixed selectAddress function
@@ -83,7 +72,7 @@ const handleCancel = () => {
                 </el-icon>
               </div>
             </div>
-            <span class="phone">{{ address.mobileNumber }}</span>
+            <span class="phone">{{ formatPhilippinePhone(address.mobileNumber) }}</span>
           </div>
 
           <!-- Address Details -->
@@ -142,7 +131,7 @@ const handleCancel = () => {
 }
 
 .title {
-  font-size: 16px;
+  font-size: 1rem;
   font-weight: 600;
   margin: 0;
   color: #303133;
@@ -225,12 +214,12 @@ const handleCancel = () => {
 .contact-name {
   font-weight: 600;
   color: #303133;
-  font-size: 14px;
+  font-size: 0.875rem;
 }
 
 .phone {
   color: #606266;
-  font-size: 13px;
+  font-size: 0.8125rem;
 }
 
 .address-details {
@@ -249,19 +238,19 @@ const handleCancel = () => {
   flex-shrink: 0;
   font-weight: 600;
   letter-spacing: 0.5px;
-  font-size: 10px;
+  font-size: 0.625rem;
 }
 
 .street {
   color: #303133;
-  font-size: 13px;
+  font-size: 0.8125rem;
   line-height: 1.4;
   flex: 1;
 }
 
 .location-info {
   color: #909399;
-  font-size: 12px;
+  font-size: 0.75rem;
   line-height: 1.4;
 }
 
@@ -272,7 +261,7 @@ const handleCancel = () => {
 }
 
 .status-tag {
-  font-size: 11px;
+  font-size: 0.6875rem;
   font-weight: 500;
   align-self: flex-start;
 }
@@ -296,7 +285,7 @@ const handleCancel = () => {
   border: 1px solid #dcdfe6;
   color: #606266;
   font-weight: 500;
-  font-size: 13px;
+  font-size: 0.8125rem;
 }
 
 .cancel-btn:hover,
@@ -313,7 +302,7 @@ const handleCancel = () => {
   border-color: #17a2b8;
   font-weight: 600;
   letter-spacing: 0.5px;
-  font-size: 13px;
+  font-size: 0.8125rem;
 }
 
 .save-btn:hover,
@@ -330,15 +319,15 @@ const handleCancel = () => {
   }
 
   .contact-name {
-    font-size: 15px;
+    font-size: 0.9375rem;
   }
 
   .phone {
-    font-size: 13px;
+    font-size: 0.8125rem;
   }
 
   .street {
-    font-size: 13px;
+    font-size: 0.8125rem;
   }
 }
 
@@ -349,7 +338,7 @@ const handleCancel = () => {
   }
 
   .title {
-    font-size: 17px;
+    font-size: 0.0625rem;
   }
 
   .address-list {
@@ -377,20 +366,20 @@ const handleCancel = () => {
   }
 
   .contact-name {
-    font-size: 15px;
+    font-size: 0.9375rem;
   }
 
   .phone {
-    font-size: 13px;
+    font-size: 0.8125rem;
     text-align: right;
   }
 
   .street {
-    font-size: 14px;
+    font-size: 0.875rem;
   }
 
   .location-info {
-    font-size: 12px;
+    font-size: 0.75rem;
   }
 
   .status-tags {
@@ -406,7 +395,7 @@ const handleCancel = () => {
   .cancel-btn,
   .save-btn {
     height: 44px;
-    font-size: 14px;
+    font-size: 0.875rem;
   }
 }
 
@@ -417,7 +406,7 @@ const handleCancel = () => {
   }
 
   .title {
-    font-size: 18px;
+    font-size: 1.125rem;
   }
 
   .address-list {
@@ -446,11 +435,11 @@ const handleCancel = () => {
   }
 
   .contact-name {
-    font-size: 16px;
+    font-size: 1rem;
   }
 
   .phone {
-    font-size: 14px;
+    font-size: 0.875ren;
   }
 
   .address-line {
@@ -459,11 +448,11 @@ const handleCancel = () => {
   }
 
   .street {
-    font-size: 14px;
+    font-size: 0.875rem;
   }
 
   .location-info {
-    font-size: 13px;
+    font-size: 0.8125rem;
   }
 
   .status-tags {
@@ -471,7 +460,7 @@ const handleCancel = () => {
   }
 
   .status-tag {
-    font-size: 12px;
+    font-size: 0.75rem;
   }
 
   .action-buttons {
@@ -482,7 +471,7 @@ const handleCancel = () => {
   .cancel-btn,
   .save-btn {
     height: 48px;
-    font-size: 15px;
+    font-size: 0.9375rem;
   }
 }
 
@@ -526,7 +515,7 @@ const handleCancel = () => {
   .cancel-btn,
   .save-btn {
     height: 52px;
-    font-size: 16px;
+    font-size: 1rem;
   }
 }
 </style>

@@ -21,13 +21,13 @@ import CardAddForm from './CardAddForm.vue'
 <style scoped>
 .add-icon {
   margin-right: 8px;
-  font-size: 16px;
+  font-size: 1rem;
   font-weight: bold;
 }
 
 .add-card-button {
   color: #409eff !important;
-  font-size: 14px;
+  font-size: 0.875rem;
   padding: 8px 0 !important;
 }
 

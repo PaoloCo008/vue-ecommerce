@@ -368,7 +368,7 @@ defineExpose({
 
 .card-input :deep(.el-input__inner) {
   height: 48px;
-  font-size: 16px;
+  font-size: 1rem;
   padding: 0 0.5rem;
 }
 
@@ -440,7 +440,7 @@ defineExpose({
 /* Form item styling */
 :deep(.el-form-item__label) {
   color: #606266;
-  font-size: 14px;
+  font-size: 0.875rem;
   font-weight: 500;
   margin-bottom: 8px;
   line-height: 1.4;
@@ -452,7 +452,7 @@ defineExpose({
 
 :deep(.el-form-item__error) {
   color: #f56c6c;
-  font-size: 12px;
+  font-size: 0.75rem;
   margin-top: 4px;
 }
 

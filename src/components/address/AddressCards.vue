@@ -104,7 +104,7 @@ const selectedAddressId = defineModel()
 }
 
 .name {
-  font-size: 18px;
+  font-size: 1.125rem;
   font-weight: 600;
   color: #303133;
 }
@@ -124,7 +124,7 @@ const selectedAddressId = defineModel()
 .section-icon {
   margin-top: 2px;
   color: #909399;
-  font-size: 16px;
+  font-size: 1rem;
 }
 
 .section-content {
@@ -133,21 +133,21 @@ const selectedAddressId = defineModel()
 
 .address-text {
   margin: 0;
-  font-size: 14px;
+  font-size: 0.875rem;
   color: #606266;
   line-height: 1.4;
 }
 
 .postcode {
   margin: 4px 0 0 0;
-  font-size: 13px;
+  font-size: 0.8125rem;
   color: #909399;
   line-height: 1.4;
 }
 
 .phone-text {
   margin: 0;
-  font-size: 14px;
+  font-size: 0.875rem;
   color: #606266;
   font-weight: 500;
 }
@@ -157,12 +157,5 @@ const selectedAddressId = defineModel()
   gap: 8px;
   flex-wrap: wrap;
   margin-top: 8px;
-}
-
-/* Responsive design */
-@media (max-width: 768px) {
-  /* .address-actions {
-    flex-direction: column;
-  } */
 }
 </style>

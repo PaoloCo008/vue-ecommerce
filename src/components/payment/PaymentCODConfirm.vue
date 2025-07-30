@@ -92,7 +92,7 @@ const emit = defineEmits<{ (e: 'goBack'): void; (e: 'confirmed'): void }>()
 .info-text {
   margin: 0;
   color: #333;
-  font-size: 14px;
+  font-size: 0.875rem;
   line-height: 1.4;
 }
 
@@ -119,7 +119,7 @@ const emit = defineEmits<{ (e: 'goBack'): void; (e: 'confirmed'): void }>()
   border: none;
   padding: 12px 24px;
   border-radius: 4px;
-  font-size: 16px;
+  font-size: 1rem;
   font-weight: 500;
   cursor: pointer;
   margin-top: 24px;

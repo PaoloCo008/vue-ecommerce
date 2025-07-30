@@ -15,8 +15,8 @@ const rules = {
   mobileNumber: [
     { required: true, message: 'Please enter your phone number', trigger: 'blur' },
     {
-      pattern: /^9\d{9}$/,
-      message: 'Please enter a valid PH mobile number (10 digits)',
+      pattern: /^09\d{9}$/,
+      message: 'Please enter a valid PH mobile number (11 digits)',
       trigger: 'blur',
     },
   ],
@@ -100,7 +100,7 @@ const handleRegister = async () => {
 }
 
 .tab-text {
-  font-size: 16px;
+  font-size: 1rem;
   font-weight: 500;
   cursor: pointer;
 }
@@ -142,7 +142,7 @@ const handleRegister = async () => {
   align-items: center;
   height: fit-content;
   padding: 12px 16px;
-  font-size: 14px;
+  font-size: 0.875rem;
   font-weight: 500;
   color: #666666;
   white-space: nowrap;
@@ -156,7 +156,7 @@ const handleRegister = async () => {
   border: none;
   outline: none;
   padding: 14px 16px;
-  font-size: 14px;
+  font-size: 0.875rem;
   color: #333333;
   background: transparent;
   border: 1px solid #e5e5e5;
