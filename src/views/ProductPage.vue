@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, ref } from 'vue'
 import { formatPrice } from '@/lib/helpers'
 import TextExpander from '@/components/TextExpander.vue'
 import { useProductStore } from '@/stores/ProductStore'
@@ -10,7 +10,7 @@ import AuthTransitionWrapper from '@/components/auth/AuthTransitionWrapper.vue'
 import { useCartStore } from '@/stores/CartStore'
 import { useUserStore } from '@/stores/UserStore'
 import ProductCarousel from '@/components/product/ProductCarousel.vue'
-import { useRoute, useRouter } from 'vue-router'
+import { useRoute } from 'vue-router'
 
 const dialogStyle = {
   width: '100%',
@@ -73,7 +73,7 @@ function handleAddClick() {
       <div class="product-grid">
         <!-- Carousel -->
         <div class="carousel">
-          <ProductCarousel />
+          <ProductCarousel :product autoplay loop :autoplay-interval="10000" />
         </div>
 
         <!-- Body -->
@@ -81,7 +81,7 @@ function handleAddClick() {
           <div class="product-title">
             <TextExpander :text="product.name" :max-chars="60" :breakpoint="765" :font-size="18" />
           </div>
-          <p class="product-price">{{ formatPrice(product?.price) }}</p>
+          <p class="product-price">{{ formatPrice(product?.price as number) }}</p>
           <div>
             <span>Quantity</span>
             <el-input-number v-model="quantity" :min="1" />
@@ -110,10 +110,10 @@ function handleAddClick() {
 
     <!-- description -->
     <div class="product-description">
-      <p class="description-header">Product details of {{ product.name }}</p>
+      <p class="description-header">Product details of {{ product?.name }}</p>
 
       <div class="description-body">
-        {{ product.description }}
+        {{ product?.description }}
       </div>
     </div>
   </div>

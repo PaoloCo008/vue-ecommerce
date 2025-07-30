@@ -1,100 +1,63 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue'
+import type { Product } from '@/lib/types/globals'
 
-// Sample images for testing
-const sampleImages = [
-  {
-    src: 'https://picsum.photos/600/400?random=1',
-    thumb: 'https://picsum.photos/80/60?random=1',
-    alt: 'Beautiful Mountain Landscape',
-  },
-  {
-    src: 'https://picsum.photos/600/400?random=2',
-    thumb: 'https://picsum.photos/80/60?random=2',
-    alt: 'Urban City Skyline',
-  },
-  {
-    src: 'https://picsum.photos/600/400?random=3',
-    thumb: 'https://picsum.photos/80/60?random=3',
-    alt: 'Peaceful Ocean Waves',
-  },
-  {
-    src: 'https://picsum.photos/600/400?random=4',
-    thumb: 'https://picsum.photos/80/60?random=4',
-    alt: 'Autumn Forest Path',
-  },
-  {
-    src: 'https://picsum.photos/600/400?random=5',
-    thumb: 'https://picsum.photos/80/60?random=5',
-    alt: 'Snow Mountain Peak',
-  },
-  {
-    src: 'https://picsum.photos/600/400?random=6',
-    thumb: 'https://picsum.photos/80/60?random=6',
-    alt: 'Desert Sunset',
-  },
-]
+const props = defineProps<{
+  product?: Product
+  loop?: boolean
+  autoplay?: boolean
+  autoplayInterval?: number
+}>()
 
-// Props
-const props = defineProps({
-  images: {
-    type: Array,
-    default: () => [],
-  },
-  loop: {
-    type: Boolean,
-    default: true,
-  },
-  autoplay: {
-    type: Boolean,
-    default: false,
-  },
-  autoplayInterval: {
-    type: Number,
-    default: 3000,
-  },
-})
+const { loop = true, autoplay = false, autoplayInterval = 3000 } = props
 
-// Use sample images if no images provided
+const transformProductImages = (product: Product) => {
+  const sortedImages = [...product.images].sort((a, b) => {
+    if (a.isPrimary && !b.isPrimary) return -1
+    if (!a.isPrimary && b.isPrimary) return 1
+    return 0
+  })
+
+  return sortedImages.map((img) => ({
+    src: img.url,
+    thumb: img.url,
+    alt: img.alt,
+    isPrimary: img.isPrimary,
+  }))
+}
+
 const displayImages = computed(() => {
-  return props.images.length > 0 ? props.images : sampleImages
+  const transformed = transformProductImages(props.product as Product)
+  return transformed
 })
 
-// Emits
-const emit = defineEmits(['change'])
-
-// Reactive data
 const currentIndex = ref(0)
-let autoplayTimer = null
+let autoplayTimer: number | null = null
 
-// Methods
-const goToImage = (index) => {
+const goToImage = (index: number) => {
   currentIndex.value = index
-  emit('change', index)
 }
 
 const nextImage = () => {
-  if (props.loop) {
+  if (loop) {
     currentIndex.value = (currentIndex.value + 1) % displayImages.value.length
   } else if (currentIndex.value < displayImages.value.length - 1) {
     currentIndex.value++
   }
-  emit('change', currentIndex.value)
 }
 
 const previousImage = () => {
-  if (props.loop) {
+  if (loop) {
     currentIndex.value =
       currentIndex.value === 0 ? displayImages.value.length - 1 : currentIndex.value - 1
   } else if (currentIndex.value > 0) {
     currentIndex.value--
   }
-  emit('change', currentIndex.value)
 }
 
 const startAutoplay = () => {
-  if (props.autoplay) {
-    autoplayTimer = setInterval(nextImage, props.autoplayInterval)
+  if (autoplay) {
+    autoplayTimer = setInterval(nextImage, autoplayInterval)
   }
 }
 
@@ -105,8 +68,7 @@ const stopAutoplay = () => {
   }
 }
 
-// Keyboard navigation
-const handleKeydown = (event) => {
+const handleKeydown = (event: KeyboardEvent) => {
   if (event.key === 'ArrowLeft') {
     previousImage()
   } else if (event.key === 'ArrowRight') {
@@ -114,7 +76,6 @@ const handleKeydown = (event) => {
   }
 }
 
-// Lifecycle
 onMounted(() => {
   startAutoplay()
   document.addEventListener('keydown', handleKeydown)
@@ -123,14 +84,6 @@ onMounted(() => {
 onUnmounted(() => {
   stopAutoplay()
   document.removeEventListener('keydown', handleKeydown)
-})
-
-// Expose methods
-defineExpose({
-  goToImage,
-  nextImage,
-  previousImage,
-  getCurrentIndex: () => currentIndex.value,
 })
 </script>
 
@@ -164,14 +117,8 @@ defineExpose({
           <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" />
         </svg>
       </button>
-
-      <!-- Image Title Overlay -->
-      <div class="image-overlay" v-if="displayImages[currentIndex].alt">
-        <p class="image-title">{{ displayImages[currentIndex].alt }}</p>
-      </div>
     </div>
 
-    <!-- Thumbnail Strip -->
     <div class="thumbnail-strip">
       <button
         v-for="(image, index) in displayImages"
@@ -253,23 +200,6 @@ defineExpose({
   right: 8px;
 }
 
-.image-overlay {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background: linear-gradient(transparent, rgba(0, 0, 0, 0.7));
-  color: white;
-  padding: 8px 12px;
-}
-
-.image-title {
-  margin: 0;
-  font-size: 0.85rem;
-  font-weight: 600;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
-}
-
 .thumbnail-strip {
   display: flex;
   gap: 6px;
@@ -316,7 +246,6 @@ defineExpose({
   display: block;
 }
 
-/* Tablet styles */
 @media (min-width: 765px) {
   .product-carousel {
     min-height: 250px;
@@ -347,6 +276,24 @@ defineExpose({
     font-size: 0.9rem;
   }
 
+  .product-overlay {
+    top: 16px;
+    left: 16px;
+    padding: 10px 14px;
+  }
+
+  .product-name {
+    font-size: 1rem;
+  }
+
+  .product-price {
+    font-size: 1.2rem;
+  }
+
+  .stock-indicator {
+    font-size: 0.8rem;
+  }
+
   .thumbnail-strip {
     gap: 8px;
     padding: 14px;
@@ -358,7 +305,6 @@ defineExpose({
   }
 }
 
-/* Desktop styles */
 @media (min-width: 1024px) {
   .product-carousel {
     min-height: 300px;
@@ -394,6 +340,24 @@ defineExpose({
     font-size: 1rem;
   }
 
+  .product-overlay {
+    top: 20px;
+    left: 20px;
+    padding: 12px 16px;
+  }
+
+  .product-name {
+    font-size: 1.1rem;
+  }
+
+  .product-price {
+    font-size: 1.3rem;
+  }
+
+  .stock-indicator {
+    font-size: 0.85rem;
+  }
+
   .thumbnail-strip {
     gap: 10px;
     padding: 16px;
@@ -405,7 +369,6 @@ defineExpose({
   }
 }
 
-/* Large desktop */
 @media (min-width: 1200px) {
   .thumbnail-image {
     width: 75px;
@@ -418,7 +381,6 @@ defineExpose({
   }
 }
 
-/* Small mobile adjustments */
 @media (max-width: 480px) {
   .product-carousel {
     min-height: 180px;
@@ -453,6 +415,24 @@ defineExpose({
 
   .image-title {
     font-size: 0.75rem;
+  }
+
+  .product-overlay {
+    top: 8px;
+    left: 8px;
+    padding: 6px 10px;
+  }
+
+  .product-name {
+    font-size: 0.8rem;
+  }
+
+  .product-price {
+    font-size: 1rem;
+  }
+
+  .stock-indicator {
+    font-size: 0.7rem;
   }
 
   .thumbnail-strip {
