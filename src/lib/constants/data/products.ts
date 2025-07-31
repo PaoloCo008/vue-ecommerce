@@ -18,6 +18,26 @@ export const sampleProducts: Product[] = [
         alt: 'Wireless headphones side profile',
         isPrimary: false,
       },
+      {
+        url: 'https://picsum.photos/600/400?random=2',
+        alt: 'Wireless headphones side profile',
+        isPrimary: false,
+      },
+      {
+        url: 'https://picsum.photos/600/400?random=2',
+        alt: 'Wireless headphones side profile',
+        isPrimary: false,
+      },
+      {
+        url: 'https://picsum.photos/600/400?random=2',
+        alt: 'Wireless headphones side profile',
+        isPrimary: false,
+      },
+      {
+        url: 'https://picsum.photos/600/400?random=2',
+        alt: 'Wireless headphones side profile',
+        isPrimary: false,
+      },
     ],
     price: 199.99,
     inventory: {

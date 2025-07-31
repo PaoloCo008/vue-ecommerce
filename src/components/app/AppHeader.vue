@@ -5,6 +5,7 @@ import AppHeaderLinks from './AppHeaderLinks.vue'
 import { useCartStore } from '@/stores/CartStore'
 import { useAuthStore } from '@/stores/AuthStore'
 import { computed } from 'vue'
+import AppNav from './AppNav.vue'
 
 const cartStore = useCartStore()
 const authStore = useAuthStore()
@@ -19,7 +20,7 @@ const itemsInCart = computed(() => {
 </script>
 
 <template>
-  <el-header>
+  <!-- <el-header>
     <div class="header-links__wrapper">
       <AppHeaderLinks />
     </div>
@@ -53,7 +54,8 @@ const itemsInCart = computed(() => {
         </RouterLink>
       </div>
     </div>
-  </el-header>
+  </el-header> -->
+  <AppNav />
 </template>
 
 <style scoped>
@@ -80,8 +82,7 @@ const itemsInCart = computed(() => {
   display: flex;
   flex-direction: column;
   align-items: center;
-  width: 100vw;
-  position: fixed;
+  width: 100%;
   z-index: 999;
   top: 0;
   left: 0;
