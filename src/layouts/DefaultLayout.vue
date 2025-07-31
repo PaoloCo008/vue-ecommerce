@@ -12,8 +12,8 @@ import AppHeader from '@/components/app/AppHeader.vue'
 
 <style scoped>
 .wrapper {
-  margin: 145px auto 0 auto;
+  /* margin: 145px auto 0 auto; */
   width: 100%;
-  max-width: 1200px;
+  /* max-width: 1200px; */
 }
 </style>
