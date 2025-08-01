@@ -1,19 +1,29 @@
 <script setup lang="ts">
+import AppFooter from '@/components/app/AppFooter.vue'
 import AppHeader from '@/components/app/AppHeader.vue'
 </script>
 
 <template>
-  <AppHeader />
+  <div class="default-layout">
+    <AppHeader />
 
-  <div class="wrapper">
-    <RouterView />
+    <div class="wrapper">
+      <RouterView />
+    </div>
+
+    <AppFooter />
   </div>
 </template>
 
 <style scoped>
 .wrapper {
-  /* margin: 145px auto 0 auto; */
   width: 100%;
-  /* max-width: 1200px; */
+}
+
+.default-layout {
+  display: grid;
+  grid-template-rows: auto;
+  height: 100vh;
+  gap: 3rem;
 }
 </style>

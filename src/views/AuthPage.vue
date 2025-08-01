@@ -17,13 +17,11 @@ watchEffect(() => {
 </script>
 
 <template>
-  <Teleport to="body">
-    <div class="page-wrapper">
-      <div class="container" :style="{ overflow: step === 4 ? 'scroll' : 'hidden' }">
-        <AuthWrapper :key="route.meta.operation as AuthMode" />
-      </div>
+  <div class="page-wrapper">
+    <div class="container" :style="{ overflow: step === 4 ? 'scroll' : 'hidden' }">
+      <AuthWrapper :key="route.meta.operation as AuthMode" />
     </div>
-  </Teleport>
+  </div>
 </template>
 
 <style scoped>

@@ -1,45 +1,62 @@
 <template>
-  <div class="slideshow-container">
-    <!-- Main slide content -->
-    <div class="slide-wrapper">
-      <div class="slide" :style="{ backgroundImage: `url(${currentSlide.image})` }">
-        <!-- <div class="slide-content">
-          <h1 class="slide-title">{{ currentSlide.title }}</h1>
-          <h2 class="slide-subtitle">{{ currentSlide.subtitle }}</h2>
-          <p class="slide-description">{{ currentSlide.description }}</p>
-        </div> -->
-      </div>
-    </div>
-
-    <!-- Navigation controls -->
-    <div class="navigation">
-      <!-- Left arrow -->
-      <button class="nav-button nav-left" @click="previousSlide" :disabled="currentIndex === 0">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-          <path
-            d="M15 18L9 12L15 6"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          />
-        </svg>
-      </button>
-
-      <!-- Slide indicators -->
-      <div class="slide-indicators">
-        <span class="current-slide">{{ String(currentIndex + 1).padStart(2, '0') }}</span>
-        <span class="separator">/</span>
-        <span class="total-slides">{{ String(slides.length).padStart(2, '0') }}</span>
+  <div class="landing-page">
+    <!-- Slideshow -->
+    <div class="slideshow-container">
+      <!-- Main slide content -->
+      <div class="slide-wrapper">
+        <div class="slide" :style="{ backgroundImage: `url(${currentSlide.image})` }">
+          <!-- <div class="slide-content">
+            <h1 class="slide-title">{{ currentSlide.title }}</h1>
+            <h2 class="slide-subtitle">{{ currentSlide.subtitle }}</h2>
+            <p class="slide-description">{{ currentSlide.description }}</p>
+          </div> -->
+        </div>
       </div>
 
-      <!-- Right arrow -->
-      <button
-        class="nav-button nav-right"
-        @click="nextSlide"
-        :disabled="currentIndex === slides.length - 1"
-      >
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+      <!-- Navigation controls -->
+      <div class="navigation">
+        <!-- Left arrow -->
+        <button class="nav-button nav-left" @click="previousSlide" :disabled="currentIndex === 0">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+            <path
+              d="M15 18L9 12L15 6"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+        </button>
+
+        <!-- Slide indicators -->
+        <div class="slide-indicators">
+          <span class="current-slide">{{ String(currentIndex + 1).padStart(2, '0') }}</span>
+          <span class="separator">/</span>
+          <span class="total-slides">{{ String(slides.length).padStart(2, '0') }}</span>
+        </div>
+
+        <!-- Right arrow -->
+        <button
+          class="nav-button nav-right"
+          @click="nextSlide"
+          :disabled="currentIndex === slides.length - 1"
+        >
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+            <path
+              d="M9 18L15 12L9 6"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+        </button>
+      </div>
+
+      <!-- Shop button -->
+      <button class="shop-button">
+        SHOP
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
           <path
             d="M9 18L15 12L9 6"
             stroke="currentColor"
@@ -51,23 +68,59 @@
       </button>
     </div>
 
-    <!-- Shop button -->
-    <button class="shop-button">
-      SHOP
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-        <path
-          d="M9 18L15 12L9 6"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
+    <!-- Collection Tabs -->
+    <sections class="feature-section">
+      <div class="feature-section-tabs">
+        <div class="active-tab">Best Sellers</div>
+        <div>New Arrivals</div>
+        <div>Features Items</div>
+      </div>
+      <Swiper class="mobile-feature-products" />
+      <ProductList class="desktop-feature-products" />
+      <button class="feature-section-button">View All</button>
+    </sections>
+
+    <!-- Category Section -->
+    <section class="categories-section">
+      <div class="category">
+        <img
+          class="category-img"
+          src="https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=400&h=500&fit=crop"
+          alt="test"
         />
-      </svg>
-    </button>
+        <p>Tees</p>
+      </div>
+      <div class="category">
+        <img
+          class="category-img"
+          src="https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=400&h=500&fit=crop"
+          alt="test"
+        />
+        <p>Hoodies</p>
+      </div>
+      <div class="category">
+        <img
+          class="category-img"
+          src="https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=400&h=500&fit=crop"
+          alt="test"
+        />
+        <p>Longsleeves</p>
+      </div>
+      <div class="category">
+        <img
+          class="category-img"
+          src="https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=400&h=500&fit=crop"
+          alt="test"
+        />
+        <p>Bottoms</p>
+      </div>
+    </section>
   </div>
 </template>
 
 <script setup lang="ts">
+import ProductList from '@/components/product/ProductList.vue'
+import Swiper from '@/components/Swiper.vue'
 import { ref, computed } from 'vue'
 
 interface Slide {
@@ -139,6 +192,69 @@ const previousSlide = (): void => {
 </script>
 
 <style scoped>
+.categories-section {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+  text-transform: uppercase;
+  padding: 0.5rem;
+}
+
+.category {
+  display: grid;
+  gap: 1rem;
+}
+
+.category-img {
+  height: 100%;
+  max-height: 800px;
+  width: 100%;
+  vertical-align: top;
+  object-fit: cover;
+}
+
+.desktop-feature-products {
+  display: none;
+}
+
+.feature-section {
+  display: grid;
+  place-items: center;
+  text-transform: uppercase;
+  gap: 1rem;
+}
+
+.feature-section-tabs {
+  display: flex;
+  gap: 3rem;
+  justify-self: start;
+  margin-left: 1rem;
+  margin-bottom: 2rem;
+}
+
+.active-tab {
+  border-bottom: 1px solid #000;
+  padding-bottom: 1rem;
+}
+
+.feature-section-button {
+  border: none;
+  background-color: #000;
+  color: #fff;
+  padding: 0.875rem 5rem;
+  text-transform: inherit;
+  cursor: pointer;
+}
+
+.landing-page {
+  display: grid;
+  gap: 5rem;
+}
+
+.feature-tabs {
+  height: 100vh;
+}
+
 .slideshow-container {
   position: relative;
   width: 100%;
@@ -287,6 +403,32 @@ const previousSlide = (): void => {
 .shop-button:hover {
   background: rgba(255, 255, 255, 0.1);
   transform: translateX(5px);
+}
+
+@media screen and (min-width: 750px) {
+  .desktop-feature-products {
+    display: grid;
+  }
+
+  .mobile-feature-products {
+    display: none;
+  }
+
+  .feature-section-tabs {
+    justify-self: center;
+  }
+}
+
+@media screen and (min-width: 765px) {
+  .categories-section {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media screen and (min-width: 1024px) {
+  .categories-section {
+    grid-template-columns: repeat(4, 1fr);
+  }
 }
 
 /* Responsive adjustments */

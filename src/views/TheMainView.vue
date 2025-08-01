@@ -5,5 +5,4 @@ import LandingPage from './LandingPage.vue'
 
 <template>
   <LandingPage />
-  <ProductList />
 </template>
