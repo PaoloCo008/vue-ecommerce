@@ -37,7 +37,7 @@ const isAllSelected = computed({
 // Indeterminate state for Select All
 const isIndeterminate = computed(() => {
   const selectedCount = cartStore.getSelectedItemsCount
-  const totalCount = cartStore.getCartLength(authStore.user as string)
+  const totalCount = cartStore.getUserCartItemsCount(authStore.user as string)
   return selectedCount > 0 && selectedCount < totalCount
 })
 

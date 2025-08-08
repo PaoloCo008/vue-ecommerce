@@ -20,14 +20,14 @@ export const useCartStore = defineStore('cart', {
     getCartByUserId: (state) => (userId: string) =>
       state.carts.find((cart) => cart.userId === userId),
 
-    getGuestCartLength: (state) => state.guestCart.length,
+    getGuestCartItems: (state) => state.guestCart.reduce((acc, item) => item.quantity + acc, 0),
 
-    getCartLength() {
+    getUserCartItemsCount() {
       return (userId: string) => {
         const userCart = this.getCartByUserId(userId)
 
         if (userCart) {
-          return userCart.items.length
+          return userCart.items.reduce((acc, item) => item.quantity + acc, 0)
         }
       }
     },
@@ -99,15 +99,39 @@ export const useCartStore = defineStore('cart', {
       }
     },
 
-    updateUserCartItemQuantityByProductId(userId: string, productId: string, quantity: number) {
-      const userCart = this.getCartByUserId(userId)
+    updateCartItemQuantityByProductId(productId: string, quantity: number) {
+      const authStore = useAuthStore()
 
-      if (!userCart) return
+      if (authStore.isAuthenticated) {
+        const userId = authStore.user as string
+        const userCart = this.getCartByUserId(userId)
 
-      const existingItem = userCart?.items.find((cartItem) => cartItem.productId === productId)
+        if (!userCart) return
 
-      if (existingItem) {
-        existingItem.quantity = quantity
+        const existingItem = userCart.items.find((cartItem) => cartItem.productId === productId)
+
+        if (quantity === 0) {
+          this.removeItemFromUserCart(userId, productId)
+          this.removeItemFromSelection(productId)
+          return
+        }
+
+        if (existingItem) {
+          existingItem.quantity = quantity
+        }
+      } else {
+        // Handle guest cart
+        const existingItem = this.guestCart.find((cartItem) => cartItem.productId === productId)
+
+        if (quantity === 0) {
+          this.guestCart = this.guestCart.filter((item) => item.productId !== productId)
+          this.removeItemFromSelection(productId)
+          return
+        }
+
+        if (existingItem) {
+          existingItem.quantity = quantity
+        }
       }
     },
 

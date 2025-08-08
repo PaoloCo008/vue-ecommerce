@@ -1,3 +1,85 @@
+<script setup lang="ts">
+import ProductList from '@/components/product/ProductList.vue'
+import Swiper from '@/components/Swiper.vue'
+import { useProductStore } from '@/stores/ProductStore'
+import { ref, computed } from 'vue'
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
+const productStore = useProductStore()
+
+interface Slide {
+  id: number
+  title: string
+  subtitle: string
+  description: string
+  image: string
+}
+
+// Sample slides data
+const slides = ref<Slide[]>([
+  {
+    id: 1,
+    title: 'SUMMER',
+    subtitle: 'SALE',
+    description: 'Our favourite styles and colours are now up to 50% off for our Summer Sale.',
+    image:
+      'https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=1200&h=800&fit=crop&crop=center',
+  },
+  {
+    id: 2,
+    title: 'OUTDOOR',
+    subtitle: 'COLLECTION',
+    description: 'Discover our premium outdoor gear designed for your next adventure.',
+    image:
+      'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=1200&h=800&fit=crop&crop=center',
+  },
+  {
+    id: 3,
+    title: 'BEACH',
+    subtitle: 'ESSENTIALS',
+    description: 'Everything you need for the perfect beach day and summer vibes.',
+    image:
+      'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1200&h=800&fit=crop&crop=center',
+  },
+])
+
+const currentIndex = ref<number>(0)
+
+const activeTab = ref('best-sellers')
+
+const featuredProducts = computed(() => productStore.getProductsByFeature(activeTab.value))
+
+const currentSlide = computed<Slide>(() => slides.value[currentIndex.value])
+
+const nextSlide = (): void => {
+  if (currentIndex.value < slides.value.length - 1) {
+    currentIndex.value++
+  }
+}
+
+const previousSlide = (): void => {
+  if (currentIndex.value > 0) {
+    currentIndex.value--
+  }
+}
+
+// Optional: Auto-play functionality
+// const autoPlay = () => {
+//   setInterval(() => {
+//     if (currentIndex.value === slides.value.length - 1) {
+//       currentIndex.value = 0
+//     } else {
+//       nextSlide()
+//     }
+//   }, 5000)
+// }
+
+// onMounted(() => {
+//   autoPlay()
+// })
+</script>
+
 <template>
   <div class="landing-page">
     <!-- Slideshow -->
@@ -54,7 +136,10 @@
       </div>
 
       <!-- Shop button -->
-      <button class="shop-button">
+      <button
+        class="shop-button"
+        @click="router.push({ name: 'category', params: { category: 'all' } })"
+      >
         SHOP
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
           <path
@@ -71,18 +156,51 @@
     <!-- Collection Tabs -->
     <sections class="feature-section">
       <div class="feature-section-tabs">
-        <div class="active-tab">Best Sellers</div>
-        <div>New Arrivals</div>
-        <div>Features Items</div>
+        <div
+          :class="{ 'active-tab': activeTab === 'best-sellers' }"
+          class="tab"
+          @click="activeTab = 'best-sellers'"
+        >
+          Best Sellers
+        </div>
+        <div
+          :class="{ 'active-tab': activeTab === 'new-arrivals' }"
+          class="tab"
+          @click="activeTab = 'new-arrivals'"
+        >
+          New Arrivals
+        </div>
+        <div
+          :class="{ 'active-tab': activeTab === 'featured-items' }"
+          class="tab"
+          @click="activeTab = 'featured-items'"
+        >
+          Featured Items
+        </div>
       </div>
-      <Swiper class="mobile-feature-products" />
-      <ProductList class="desktop-feature-products" />
-      <button class="feature-section-button">View All</button>
+      <Swiper :featuredProducts class="mobile-feature-products" />
+      <ProductList :featuredProducts class="desktop-feature-products" />
+      <button
+        class="feature-section-button"
+        @click="
+          router.push({
+            name: 'category',
+            params: {
+              category: activeTab,
+            },
+          })
+        "
+      >
+        View All
+      </button>
     </sections>
 
     <!-- Category Section -->
     <section class="categories-section">
-      <div class="category">
+      <div
+        class="category"
+        @click="router.push({ name: 'category', params: { category: 'tees' } })"
+      >
         <img
           class="category-img"
           src="https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=400&h=500&fit=crop"
@@ -90,7 +208,10 @@
         />
         <p>Tees</p>
       </div>
-      <div class="category">
+      <div
+        class="category"
+        @click="router.push({ name: 'category', params: { category: 'hoodies' } })"
+      >
         <img
           class="category-img"
           src="https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=400&h=500&fit=crop"
@@ -98,7 +219,10 @@
         />
         <p>Hoodies</p>
       </div>
-      <div class="category">
+      <div
+        class="category"
+        @click="router.push({ name: 'category', params: { category: 'longsleeves' } })"
+      >
         <img
           class="category-img"
           src="https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=400&h=500&fit=crop"
@@ -106,7 +230,10 @@
         />
         <p>Longsleeves</p>
       </div>
-      <div class="category">
+      <div
+        class="category"
+        @click="router.push({ name: 'category', params: { category: 'bottoms' } })"
+      >
         <img
           class="category-img"
           src="https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=400&h=500&fit=crop"
@@ -118,80 +245,24 @@
   </div>
 </template>
 
-<script setup lang="ts">
-import ProductList from '@/components/product/ProductList.vue'
-import Swiper from '@/components/Swiper.vue'
-import { ref, computed } from 'vue'
-
-interface Slide {
-  id: number
-  title: string
-  subtitle: string
-  description: string
-  image: string
-}
-
-// Sample slides data
-const slides = ref<Slide[]>([
-  {
-    id: 1,
-    title: 'SUMMER',
-    subtitle: 'SALE',
-    description: 'Our favourite styles and colours are now up to 50% off for our Summer Sale.',
-    image:
-      'https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=1200&h=800&fit=crop&crop=center',
-  },
-  {
-    id: 2,
-    title: 'OUTDOOR',
-    subtitle: 'COLLECTION',
-    description: 'Discover our premium outdoor gear designed for your next adventure.',
-    image:
-      'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=1200&h=800&fit=crop&crop=center',
-  },
-  {
-    id: 3,
-    title: 'BEACH',
-    subtitle: 'ESSENTIALS',
-    description: 'Everything you need for the perfect beach day and summer vibes.',
-    image:
-      'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1200&h=800&fit=crop&crop=center',
-  },
-])
-
-const currentIndex = ref<number>(0)
-
-const currentSlide = computed<Slide>(() => slides.value[currentIndex.value])
-
-const nextSlide = (): void => {
-  if (currentIndex.value < slides.value.length - 1) {
-    currentIndex.value++
-  }
-}
-
-const previousSlide = (): void => {
-  if (currentIndex.value > 0) {
-    currentIndex.value--
-  }
-}
-
-// Optional: Auto-play functionality
-// const autoPlay = () => {
-//   setInterval(() => {
-//     if (currentIndex.value === slides.value.length - 1) {
-//       currentIndex.value = 0
-//     } else {
-//       nextSlide()
-//     }
-//   }, 5000)
-// }
-
-// onMounted(() => {
-//   autoPlay()
-// })
-</script>
-
 <style scoped>
+.category:hover p {
+  text-decoration: underline;
+}
+
+.category p {
+  transition: text-decoration 0.2s ease;
+}
+
+.category:hover p {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.tab {
+  cursor: pointer;
+}
+
 .categories-section {
   display: grid;
   grid-template-columns: 1fr;
@@ -203,6 +274,7 @@ const previousSlide = (): void => {
 .category {
   display: grid;
   gap: 1rem;
+  cursor: pointer;
 }
 
 .category-img {
@@ -332,34 +404,35 @@ const previousSlide = (): void => {
 
 .navigation {
   position: absolute;
-  bottom: 4rem;
-  left: 4rem;
+  bottom: 1rem;
+  left: 0.5rem;
   display: flex;
   align-items: center;
-  gap: 2rem;
+  gap: 0.25rem;
   z-index: 3;
 }
 
 .nav-button {
-  background: rgba(255, 255, 255, 0.2);
-  border: 2px solid rgba(255, 255, 255, 0.5);
+  background: transparent;
+  /* border: 2px solid rgba(255, 255, 255, 0.5); */
   color: white;
   width: 50px;
   height: 50px;
-  border-radius: 50%;
+  /* border-radius: 50%; */
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   transition: all 0.3s ease;
-  backdrop-filter: blur(10px);
+  /* backdrop-filter: blur(10px); */
+  border: none;
 }
 
-.nav-button:hover:not(:disabled) {
+/* .nav-button:hover:not(:disabled) {
   background: rgba(255, 255, 255, 0.3);
   border-color: rgba(255, 255, 255, 0.8);
   transform: scale(1.05);
-}
+} */
 
 .nav-button:disabled {
   opacity: 0.5;
@@ -382,12 +455,12 @@ const previousSlide = (): void => {
 
 .shop-button {
   position: absolute;
-  bottom: 4rem;
-  right: 4rem;
+  bottom: 1rem;
+  right: 1rem;
   background: transparent;
   border: 2px solid rgba(255, 255, 255, 0.8);
   color: white;
-  padding: 1rem 2rem;
+  padding: 0.75rem 1.25rem;
   font-size: 1rem;
   font-weight: 600;
   letter-spacing: 0.1em;
@@ -423,20 +496,9 @@ const previousSlide = (): void => {
   .categories-section {
     grid-template-columns: repeat(2, 1fr);
   }
-}
-
-@media screen and (min-width: 1024px) {
-  .categories-section {
-    grid-template-columns: repeat(4, 1fr);
-  }
-}
-
-/* Responsive adjustments */
-@media (max-width: 768px) {
   .navigation {
     bottom: 2rem;
     left: 2rem;
-    gap: 1rem;
   }
 
   .nav-button {
@@ -447,7 +509,7 @@ const previousSlide = (): void => {
   .shop-button {
     bottom: 2rem;
     right: 2rem;
-    padding: 0.8rem 1.5rem;
+    /* padding: 0.8rem 1.5rem; */
     font-size: 0.9rem;
   }
 
@@ -460,15 +522,19 @@ const previousSlide = (): void => {
   }
 }
 
-@media (max-width: 480px) {
+@media screen and (min-width: 1024px) {
+  .categories-section {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
   .navigation {
-    bottom: 1rem;
-    left: 1rem;
+    bottom: 4rem;
+    left: 4rem;
   }
 
   .shop-button {
-    bottom: 1rem;
-    right: 1rem;
+    bottom: 3rem;
+    right: 3rem;
   }
 }
 </style>

@@ -12,9 +12,9 @@ const authStore = useAuthStore()
 
 const itemsInCart = computed(() => {
   if (authStore.isAuthenticated) {
-    return cartStore.getCartLength(authStore.user as string)
+    return cartStore.getUserCartItemsCount(authStore.user as string)
   } else {
-    return cartStore.getGuestCartLength
+    return cartStore.getGuestCartItems
   }
 })
 </script>

@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import type { Product } from '@/lib/types/globals'
-import { formatPrice, truncate } from '../../lib/helpers'
+import { formatPrice, formatProductSlug, truncate } from '../../lib/helpers'
 import { useProductStore } from '@/stores/ProductStore'
 import { useRouter } from 'vue-router'
 
@@ -14,7 +14,7 @@ const productPrimaryImage = productStore.getProductPrimaryImageById(props.produc
 function handleProductClick() {
   router.push({
     name: 'product',
-    params: { slug: `${props.product.slug}-${props.product._id}` },
+    params: { slug: formatProductSlug(props.product.slug, props.product._id) },
   })
 }
 </script>

@@ -1,6 +1,5 @@
 import AddressForm from '@/components/profile/ProfileAddressForm.vue'
 import CartPage from '@/views/CartPage.vue'
-import ProductPage from '@/views/ProductPage.vue'
 import ProfileAddress from '@/views/AddressPage.vue'
 import ProfileCards from '@/components/profile/ProfileCards.vue'
 import ProfileManage from '@/components/profile/ProfileManage.vue'
@@ -22,6 +21,8 @@ import AuthVerificationMethods from '@/components/auth/AuthVerificationMethods.v
 import AuthVerificationForm from '@/components/auth/AuthVerificationForm.vue'
 import { useAuthStore } from '@/stores/AuthStore'
 import NotFound from '@/components/NotFound.vue'
+import ProductCategoryPage from '@/components/ProductCategoryPage.vue'
+import ProductPage from '@/components/ProductPage.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -39,6 +40,11 @@ const router = createRouter({
           path: '/products/:slug',
           name: 'product',
           component: ProductPage,
+        },
+        {
+          path: '/category/:category',
+          name: 'category',
+          component: ProductCategoryPage,
         },
         {
           path: '/cart',
@@ -66,7 +72,7 @@ const router = createRouter({
         },
         {
           path: '/user',
-          meta: { requiresAuth: true }, // This will protect all nested routes
+          meta: { requiresAuth: true },
           children: [
             {
               path: '/verification',

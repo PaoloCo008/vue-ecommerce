@@ -1,118 +1,20 @@
-<template>
-  <div class="product-swiper">
-    <div
-      ref="containerRef"
-      class="swiper-container"
-      @touchstart="handleTouchStart"
-      @touchmove="handleTouchMove"
-      @touchend="handleTouchEnd"
-      @mousedown="handleMouseDown"
-      @mousemove="handleMouseMove"
-      @mouseup="handleMouseUp"
-      @mouseleave="handleMouseUp"
-    >
-      <div
-        class="swiper-wrapper"
-        :style="{
-          transform: `translateX(${translateX}px)`,
-          transition: isDragging ? 'none' : 'transform 0.3s ease-out',
-        }"
-      >
-        <div
-          v-for="(product, index) in products"
-          :key="product.id"
-          class="product-card"
-          :style="{
-            width: `${cardWidth}px`,
-            marginRight: index === products.length - 1 ? '0px' : `${cardGap}px`,
-          }"
-        >
-          <div class="product-image-container">
-            <img :src="product.image" :alt="product.name" class="product-image" draggable="false" />
-          </div>
-
-          <div class="product-info">
-            <h3 class="product-name">{{ product.name }}</h3>
-            <div class="product-pricing">
-              <span class="price">${{ product.price }}</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</template>
-
 <script setup lang="ts">
+import type { Product } from '@/lib/types/globals'
+import { useProductStore } from '@/stores/ProductStore'
 import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
 
+const productStore = useProductStore()
+
 // Props
-const props = defineProps({
-  products: {
-    type: Array,
-    default: () => [
-      {
-        id: 1,
-        name: 'Oversized Hoodie That Has A Long Name For The Sake Of Testing',
-        price: 89,
-        originalPrice: 129,
-        image: 'https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=400&h=500&fit=crop',
-        badge: 'Sale',
-        colors: ['#000000', '#666666', '#ffffff'],
-      },
-      {
-        id: 2,
-        name: 'Graphic Tee',
-        price: 45,
-        image: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=500&fit=crop',
-        colors: ['#000000', '#ff6b6b', '#4ecdc4'],
-      },
-      {
-        id: 3,
-        name: 'Denim Jacket',
-        price: 120,
-        image: 'https://images.unsplash.com/photo-1544022613-e87ca75a784a?w=400&h=500&fit=crop',
-        badge: 'New',
-        colors: ['#4a90e2', '#2c3e50'],
-      },
-      {
-        id: 4,
-        name: 'Cargo Pants',
-        price: 75,
-        originalPrice: 95,
-        image: 'https://images.unsplash.com/photo-1473966968600-fa801b869a1a?w=400&h=500&fit=crop',
-        colors: ['#8b4513', '#556b2f', '#000000'],
-      },
-      {
-        id: 5,
-        name: 'Sneakers',
-        price: 150,
-        image: 'https://images.unsplash.com/photo-1549298916-b41d501d3772?w=400&h=500&fit=crop',
-        badge: 'Limited',
-        colors: ['#ffffff', '#000000', '#ff6b6b'],
-      },
-      {
-        id: 6,
-        name: 'Beanie',
-        price: 25,
-        image: 'https://images.unsplash.com/photo-1576871337622-98d48d1cf531?w=400&h=500&fit=crop',
-        colors: ['#000000', '#8b4513', '#2c3e50'],
-      },
-    ],
-  },
-  cardGap: {
-    type: Number,
-    default: 16,
-  },
-  containerPadding: {
-    type: Number,
-    default: 20,
-  },
-  peekAmount: {
-    type: Number,
-    default: 60,
-  },
-})
+const props = withDefaults(
+  defineProps<{
+    featuredProducts: Product[]
+    cardGap?: number
+    containerPadding?: number
+    peekAmount?: number
+  }>(),
+  { featuredProducts: () => [], cardGap: 16, containerPadding: 20, peekAmount: 50 },
+)
 
 // Template refs
 const containerRef = ref(null)
@@ -130,17 +32,17 @@ const itemsPerView = ref(1.2) // Show 1 full card + 20% of next
 const currentPage = computed(() => Math.floor(currentIndex.value / itemsPerView.value))
 
 const maxIndex = computed(() => {
-  return Math.max(0, props.products.length - 1)
+  return Math.max(0, props.featuredProducts.length - 1)
 })
 
 const translateX = computed(() => {
   let baseTranslate
 
-  if (currentIndex.value === props.products.length - 1) {
+  if (currentIndex.value === props.featuredProducts.length - 1) {
     // For the last item, position it at the right edge with same padding as first item
     // Calculate total width of all cards and gaps, then position to show last card properly
     const totalWidth =
-      (cardWidth.value + props.cardGap) * (props.products.length - 1) + cardWidth.value
+      (cardWidth.value + props.cardGap) * (props.featuredProducts.length - 1) + cardWidth.value
     baseTranslate = containerWidth.value - totalWidth - props.containerPadding
   } else {
     // Regular positioning for other cards
@@ -239,6 +141,56 @@ onUnmounted(() => {
   window.removeEventListener('resize', updateDimensions)
 })
 </script>
+
+<template>
+  <div class="product-swiper">
+    <div
+      ref="containerRef"
+      class="swiper-container"
+      @touchstart="handleTouchStart"
+      @touchmove="handleTouchMove"
+      @touchend="handleTouchEnd"
+      @mousedown="handleMouseDown"
+      @mousemove="handleMouseMove"
+      @mouseup="handleMouseUp"
+      @mouseleave="handleMouseUp"
+    >
+      <div
+        class="swiper-wrapper"
+        :style="{
+          transform: `translateX(${translateX}px)`,
+          transition: isDragging ? 'none' : 'transform 0.3s ease-out',
+        }"
+      >
+        <div
+          v-for="(product, index) in featuredProducts"
+          :key="product?._id"
+          class="product-card"
+          :style="{
+            width: `${cardWidth}px`,
+            marginRight: index === featuredProducts.length - 1 ? '0px' : `${cardGap}px`,
+          }"
+        >
+          <div class="product-image-container">
+            <img
+              :src="productStore.getProductPrimaryImageById(product._id)"
+              :alt="product.name"
+              class="product-image"
+              draggable="false"
+            />
+          </div>
+
+          <div class="product-info">
+            <h3 class="product-name">{{ product.name }}</h3>
+            <div class="product-pricing">
+              <span class="price">${{ product.price }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
 
 <style scoped>
 /* Prevent horizontal scroll on the entire component */

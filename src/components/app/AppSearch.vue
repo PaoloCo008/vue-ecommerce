@@ -4,6 +4,7 @@ import { Search } from '@element-plus/icons-vue'
 import { useProductStore } from '@/stores/ProductStore'
 import { useRouter } from 'vue-router'
 import type { Product } from '@/lib/types/globals'
+import { formatProductSlug } from '@/lib/helpers'
 
 const input = ref('')
 const productStore = useProductStore()
@@ -25,7 +26,7 @@ const searchProducts = (queryString: string, callback: Function) => {
 const goToProduct = (product: Product) => {
   router.push({
     name: 'product',
-    params: { slug: `${product.slug}-${product._id}` },
+    params: { slug: formatProductSlug(product.slug, product._id) },
   })
 }
 

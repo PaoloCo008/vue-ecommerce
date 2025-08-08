@@ -49,9 +49,16 @@ export interface Product {
   name: string
   slug: string
   description: string
+  categories: string[]
+  breadcrumbs: Breadcrumbs[]
   images: Image[]
   price: number
   inventory: Inventory
+}
+
+export type Breadcrumbs = {
+  name: string
+  slug: string
 }
 
 export interface Inventory {

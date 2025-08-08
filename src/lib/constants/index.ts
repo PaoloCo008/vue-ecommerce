@@ -19,3 +19,13 @@ export const cardProviderLogos = {
     provider: 'visa',
   },
 }
+
+export const categories = [
+  'all items',
+  'hoodies',
+  'longsleeves',
+  'accesories',
+  'tees',
+  'jackets',
+  'bottoms',
+]

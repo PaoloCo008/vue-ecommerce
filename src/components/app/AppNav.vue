@@ -1,13 +1,16 @@
 <script setup lang="ts">
+import { categories } from '@/lib/constants'
 import type { CollapseModelValue } from 'element-plus'
 import { Search, ShoppingCart, X } from 'lucide-vue-next'
 import { ref, onMounted, onUnmounted } from 'vue'
+import { useRouter } from 'vue-router'
 
 const isNavHidden = ref(false)
 const hovered = ref(false)
 const open = ref(false)
 const mobileMenuOpen = ref(false)
 const activeTab = ref(0)
+const router = useRouter()
 
 let ticking = false
 let hideTimeout: number | undefined
@@ -120,82 +123,103 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="smart-navbar" :class="{ 'nav-hidden': isNavHidden }">
+  <div class="smart-navbar-wrapper" :class="{ 'nav-hidden': isNavHidden }">
     <!-- Desktop Links -->
-    <ul class="nav-links browser-links">
-      <div class="link-group">
-        <li class="link">Shop All</li>
-        <li class="link" @mouseenter="handleDropdownEnter" @mouseleave="handleDropdownLeave">
-          Categories <span v-if="!hovered">+</span><span v-else>-</span>
-        </li>
-      </div>
 
-      <li class="link">Logo</li>
+    <div class="smart-navbar">
+      <ul class="nav-links browser-links">
+        <div class="link-group">
+          <li class="link" @click="router.push({ name: 'category', params: { category: 'all' } })">
+            Shop All
+          </li>
 
-      <div class="link-group">
-        <li class="link search-link" @click="handleSeachClick">
-          <Search class="nav-icon" /><span> Search </span>
-        </li>
-        <li class="link"><ShoppingCart class="nav-icon" /></li>
-      </div>
-    </ul>
-
-    <!-- Desktop Links -->
-    <ul class="nav-links mobile-links">
-      <div class="link-group">
-        <li class="link" @click="handleMobileMenuToggle">
-          Menu <span v-if="!mobileMenuOpen">+</span><span v-else>-</span>
-        </li>
-        <li class="link search-link" @click="handleSeachClick">
-          <Search class="nav-icon" />
-        </li>
-      </div>
-
-      <li class="link logo">Logo</li>
-
-      <div class="link-group">
-        <li class="link"><ShoppingCart class="nav-icon" /></li>
-      </div>
-    </ul>
-
-    <Transition name="slide-down">
-      <div
-        class="area"
-        v-if="hovered"
-        @mouseenter="handleDropdownEnter"
-        @mouseleave="handleDropdownLeave"
-      ></div>
-    </Transition>
-
-    <Transition name="slide-down">
-      <div v-if="open" class="backdrop" @click="handleBackdropClick">
-        <div class="search">
-          <p>Search</p>
-          <div class="input-group">
-            <div class="search-wrapper">
-              <Search class="nav-icon" />
-              <input type="text" class="nav-search" placeholder="Search" />
-            </div>
-            <button class="search-button">search</button>
-          </div>
-          <X class="search-exit" @click="handleExitSearch" />
+          <li class="link" @mouseenter="handleDropdownEnter" @mouseleave="handleDropdownLeave">
+            Categories <span v-if="!hovered">+</span><span v-else>-</span>
+          </li>
         </div>
-      </div>
-    </Transition>
 
-    <Transition name="slide-down">
-      <div v-if="mobileMenuOpen" class="backdrop" @click.self="handleBackdropClick">
-        <el-collapse class="mobile-menu-collapse" v-model="activeTab" @change="handleChangeTab">
-          <el-collapse-item class="mobile-menu-collapse__item" title="Featured" name="1">
-            <div>Shop All</div>
-          </el-collapse-item>
-          <el-collapse-item class="mobile-menu-collapse__item" title="Categories" name="2">
-            <div>Title2</div>
-            <div>Container2</div>
-          </el-collapse-item>
-        </el-collapse>
-      </div>
-    </Transition>
+        <Transition name="slide-down">
+          <div
+            class="category-area"
+            v-if="hovered"
+            @mouseenter="handleDropdownEnter"
+            @mouseleave="handleDropdownLeave"
+          >
+            <ul class="category-list">
+              <li
+                v-for="category in categories"
+                :key="category"
+                @click="
+                  router.push({
+                    name: 'category',
+                    params: { category: category === 'all items' ? 'all' : category },
+                  })
+                "
+              >
+                {{ category }}
+              </li>
+            </ul>
+          </div>
+        </Transition>
+
+        <li class="link" @click="router.push({ name: 'homepage' })">Logo</li>
+
+        <div class="link-group">
+          <li class="link search-link" @click="handleSeachClick">
+            <Search class="nav-icon" /><span> Search </span>
+          </li>
+          <li class="link"><ShoppingCart class="nav-icon" /></li>
+        </div>
+      </ul>
+
+      <!-- Desktop Links -->
+      <ul class="nav-links mobile-links">
+        <div class="link-group">
+          <li class="link" @click="handleMobileMenuToggle">
+            Menu <span v-if="!mobileMenuOpen">+</span><span v-else>-</span>
+          </li>
+          <li class="link search-link" @click="handleSeachClick">
+            <Search class="nav-icon" />
+          </li>
+        </div>
+
+        <li class="link logo">Logo</li>
+
+        <div class="link-group">
+          <li class="link"><ShoppingCart class="nav-icon" /></li>
+        </div>
+      </ul>
+
+      <Transition name="slide-down">
+        <div v-if="open" class="backdrop" @click="handleBackdropClick">
+          <div class="search">
+            <p>Search</p>
+            <div class="input-group">
+              <div class="search-wrapper">
+                <Search class="nav-icon" />
+                <input type="text" class="nav-search" placeholder="Search" />
+              </div>
+              <button class="search-button">search</button>
+            </div>
+            <X class="search-exit" @click="handleExitSearch" />
+          </div>
+        </div>
+      </Transition>
+
+      <Transition name="slide-down">
+        <div v-if="mobileMenuOpen" class="backdrop" @click.self="handleBackdropClick">
+          <el-collapse class="mobile-menu-collapse" v-model="activeTab" @change="handleChangeTab">
+            <el-collapse-item class="mobile-menu-collapse__item" title="Featured" name="1">
+              <div>Shop All</div>
+            </el-collapse-item>
+            <el-collapse-item class="mobile-menu-collapse__item" title="Categories" name="2">
+              <div>Title2</div>
+              <div>Container2</div>
+            </el-collapse-item>
+          </el-collapse>
+        </div>
+      </Transition>
+    </div>
   </div>
 </template>
 
@@ -294,14 +318,28 @@ onUnmounted(() => {
   position: fixed;
 }
 
-.area {
-  background-color: blue;
+.category-area {
+  font-size: 2rem;
+  background-color: #000;
+  color: #fff;
+  text-transform: uppercase;
+  padding: 3rem;
   width: 100%;
-  height: 200px;
   position: absolute;
   top: 100%;
   left: 0;
   transform-origin: top;
+}
+
+.category-list {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  column-gap: 5rem;
+  row-gap: 1rem;
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
 }
 
 .navbar {
@@ -315,7 +353,6 @@ onUnmounted(() => {
   z-index: 2;
   cursor: pointer;
   position: relative;
-  background-color: red;
 }
 
 .browser-links {
@@ -357,16 +394,22 @@ onUnmounted(() => {
   align-items: center;
 }
 
-.smart-navbar {
+.smart-navbar-wrapper {
   position: fixed;
   top: 0;
   width: 100%;
   transition: transform 0.3s ease-in-out;
   z-index: 999;
   background-color: #fff;
+  background-color: red;
 }
 
-.smart-navbar.nav-hidden {
+.smart-navbar {
+  width: 100%;
+  margin: 0 auto;
+}
+
+.smart-navbar-wrapper.nav-hidden {
   transform: translateY(-100%);
 }
 
@@ -401,6 +444,13 @@ onUnmounted(() => {
 
   .browser-links {
     display: grid;
+  }
+}
+
+@media screen and (min-width: 1400px) {
+  .category-list {
+    display: flex;
+    flex-wrap: wrap;
   }
 }
 </style>

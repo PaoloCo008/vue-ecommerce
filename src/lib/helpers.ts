@@ -168,3 +168,7 @@ export function generateTimestampTracking() {
 
   return `TRK${timeStr}${randomLetters}${randomNumbers}`
 }
+
+export function formatProductSlug(productSlug: string, productId: string) {
+  return `${productSlug}-${productId}`
+}
